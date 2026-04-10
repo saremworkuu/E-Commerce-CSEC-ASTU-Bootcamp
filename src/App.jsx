@@ -1,7 +1,11 @@
 import Register from './Register';
 
 function App() {
-  return <Register />;
+  return (
+    <div>
+      <Register />
+    </div>
+  );
 }
 
 export default App;
