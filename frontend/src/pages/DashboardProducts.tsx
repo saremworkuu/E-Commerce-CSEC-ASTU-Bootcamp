@@ -8,6 +8,7 @@ import {
   Filter
 } from 'lucide-react';
 import { products as initialProducts, Product } from '../data/products';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Table, 
   TableBody, 
@@ -27,34 +28,11 @@ import {
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from '../components/ui/dialog';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 const DashboardProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    category: '',
-    price: '',
-    description: '',
-    image: '',
-    stock: '10'
-  });
+  const navigate = useNavigate();
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -67,48 +45,9 @@ const DashboardProducts: React.FC = () => {
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (editingProduct) {
-      setProducts(products.map(p => p.id === editingProduct.id ? {
-        ...p,
-        name: formData.name,
-        category: formData.category,
-        price: parseFloat(formData.price),
-        description: formData.description,
-        image: formData.image,
-        // In a real app we'd have a stock field in the Product type
-      } : p));
-    } else {
-      const newProduct: Product = {
-        id: Math.max(...products.map(p => p.id)) + 1,
-        name: formData.name,
-        category: formData.category,
-        price: parseFloat(formData.price),
-        description: formData.description,
-        image: formData.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
-        featured: false
-      };
-      setProducts([newProduct, ...products]);
-    }
-    
-    setIsAddDialogOpen(false);
-    setEditingProduct(null);
-    setFormData({ name: '', category: '', price: '', description: '', image: '', stock: '10' });
-  };
-
-  const openEditDialog = (product: Product) => {
-    setEditingProduct(product);
-    setFormData({
-      name: product.name,
-      category: product.category,
-      price: product.price.toString(),
-      description: product.description,
-      image: product.image,
-      stock: '10' // Mock stock
-    });
-    setIsAddDialogOpen(true);
+  const handleEdit = (product: Product) => {
+    // Placeholder: navigate to the same add page with an id param in the future
+    navigate('/dashboard/products/new');
   };
 
   return (
@@ -118,109 +57,12 @@ const DashboardProducts: React.FC = () => {
           <h1 className="text-3xl font-bold tracking-tight dark:text-white">Product Management</h1>
           <p className="text-gray-500 dark:text-gray-400">Manage your inventory and product listings.</p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
-          setIsAddDialogOpen(open);
-          if (!open) {
-            setEditingProduct(null);
-            setFormData({ name: '', category: '', price: '', description: '', image: '', stock: '10' });
-          }
-        }}>
-          <DialogTrigger>
-            <Button className="bg-black text-white dark:bg-white dark:text-black rounded-full px-6">
-              <Plus size={18} className="mr-2" />
-              Add Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px] dark:bg-neutral-900 border-none">
-            <DialogHeader>
-              <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
-              <DialogDescription>
-                Fill in the details below to {editingProduct ? 'update' : 'create'} a product listing.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSave} className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Product Name</Label>
-                  <Input 
-                    id="name" 
-                    value={formData.name} 
-                    onChange={e => setFormData({...formData, name: e.target.value})}
-                    placeholder="e.g. Leather Bag" 
-                    required 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Select 
-                    value={formData.category} 
-                    onValueChange={v => setFormData({...formData, category: v || ''})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Electronics">Electronics</SelectItem>
-                      <SelectItem value="Accessories">Accessories</SelectItem>
-                      <SelectItem value="Furniture">Furniture</SelectItem>
-                      <SelectItem value="Apparel">Apparel</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price ($)</Label>
-                  <Input 
-                    id="price" 
-                    type="number" 
-                    step="0.01"
-                    value={formData.price} 
-                    onChange={e => setFormData({...formData, price: e.target.value})}
-                    placeholder="0.00" 
-                    required 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="stock">Initial Stock</Label>
-                  <Input 
-                    id="stock" 
-                    type="number" 
-                    value={formData.stock} 
-                    onChange={e => setFormData({...formData, stock: e.target.value})}
-                    placeholder="0" 
-                    required 
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="image">Image URL</Label>
-                <Input 
-                  id="image" 
-                  value={formData.image} 
-                  onChange={e => setFormData({...formData, image: e.target.value})}
-                  placeholder="https://..." 
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea 
-                  id="description" 
-                  value={formData.description} 
-                  onChange={e => setFormData({...formData, description: e.target.value})}
-                  placeholder="Describe the product..." 
-                  className="min-h-[100px]"
-                  required
-                />
-              </div>
-              <DialogFooter>
-                <Button type="submit" className="w-full bg-black text-white dark:bg-white dark:text-black">
-                  {editingProduct ? 'Update Product' : 'Create Product'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Link to="/dashboard/products/new">
+          <Button className="bg-black text-white dark:bg-white dark:text-black rounded-full px-6">
+            <Plus size={18} className="mr-2" />
+            Add Product
+          </Button>
+        </Link>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
@@ -286,7 +128,7 @@ const DashboardProducts: React.FC = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="dark:bg-neutral-900 border-none shadow-xl">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => openEditDialog(product)}>
+                      <DropdownMenuItem onClick={() => handleEdit(product)}>
                         <Edit size={14} className="mr-2" />
                         Edit
                       </DropdownMenuItem>
