@@ -39,7 +39,6 @@ const slides = [
 const HeroSlider: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1); // 1 for right to left
-  const [isInitialMount, setIsInitialMount] = useState(true);
 
   const nextSlide = useCallback(() => {
     setDirection(1);
@@ -48,11 +47,7 @@ const HeroSlider: React.FC = () => {
 
   useEffect(() => {
     const timer = setInterval(nextSlide, SLIDE_DURATION);
-    const mountTimer = setTimeout(() => setIsInitialMount(false), 2000);
-    return () => {
-      clearInterval(timer);
-      clearTimeout(mountTimer);
-    };
+    return () => clearInterval(timer);
   }, [nextSlide]);
 
   const variants = {
@@ -91,28 +86,6 @@ const HeroSlider: React.FC = () => {
 
   return (
     <section className="relative h-[70vh] min-h-[500px] w-full overflow-hidden bg-black">
-      {/* Cinematic Initial Reveal Overlay */}
-      <AnimatePresence>
-        {isInitialMount && (
-          <motion.div 
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            className="absolute inset-0 z-[100] bg-black flex items-center justify-center"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8, letterSpacing: "1em" }}
-              animate={{ opacity: 1, scale: 1, letterSpacing: "0.5em" }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="text-white font-light text-2xl tracking-[1em]"
-            >
-              LUXE
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <AnimatePresence initial={true} custom={direction} mode="popLayout">
         <motion.div
           key={currentIndex}
@@ -126,9 +99,12 @@ const HeroSlider: React.FC = () => {
           {/* Background Image Container with Ken Burns */}
           <div className="absolute inset-0 w-full h-full overflow-hidden">
             <motion.div 
-              initial={{ scale: 1.2 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: SLIDE_DURATION / 1000, ease: "linear" }}
+              initial={{ scale: 1.3, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ 
+                scale: { duration: SLIDE_DURATION / 1000, ease: "linear" },
+                opacity: { duration: 1.5, ease: "easeOut" }
+              }}
               className="w-full h-full"
             >
               <img
@@ -150,7 +126,7 @@ const HeroSlider: React.FC = () => {
               <motion.span
                 initial={{ opacity: 0, y: 20, letterSpacing: "0.5em" }}
                 animate={{ opacity: 1, y: 0, letterSpacing: "0.3em" }}
-                transition={{ duration: 1, delay: 1.8 }}
+                transition={{ duration: 1, delay: 0.5 }}
                 className="text-xs font-bold uppercase text-gray-400 mb-4 block"
               >
                 {slides[currentIndex].label}
@@ -159,7 +135,7 @@ const HeroSlider: React.FC = () => {
               <motion.h1
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 2.1, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 1.2, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
                 className="text-3xl sm:text-4xl md:text-7xl font-bold tracking-tighter text-white leading-[0.9] mb-8"
               >
                 {slides[currentIndex].title} <br />
@@ -169,7 +145,7 @@ const HeroSlider: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 1, delay: 2.4 }}
+                transition={{ duration: 1, delay: 1.2 }}
                 className="text-sm sm:text-base md:text-lg text-gray-400 mb-10 max-w-xl mx-auto font-light leading-relaxed"
               >
                 {slides[currentIndex].description}
@@ -178,7 +154,7 @@ const HeroSlider: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 2.7 }}
+                transition={{ duration: 0.8, delay: 1.5 }}
                 className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4"
               >
                 <Link
@@ -189,7 +165,7 @@ const HeroSlider: React.FC = () => {
                   <ArrowRight className="absolute right-5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500" size={18} />
                 </Link>
                 <Link
-                  to="/about"
+                  to="/contact"
                   className="px-8 py-4 border border-white/20 text-white text-sm font-bold rounded-full hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
                 >
                   Our Story
