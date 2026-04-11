@@ -2,14 +2,20 @@ import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { products } from '../data/products';
 import ProductCard from '../components/ProductCard';
-import { Filter, ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 
 const Shop: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState('');
+  const urlSearch = searchParams.get('search') || '';
+  const [searchQuery, setSearchQuery] = useState(urlSearch);
   const [sortBy, setSortBy] = useState('newest');
 
   const activeCategory = searchParams.get('category') || 'All';
+
+  // Update local search query when URL changes
+  React.useEffect(() => {
+    setSearchQuery(urlSearch);
+  }, [urlSearch]);
 
   const categories = ['All', ...new Set(products.map(p => p.category))];
 
@@ -70,14 +76,31 @@ const Shop: React.FC = () => {
               type="text" 
               placeholder="Search products..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const val = e.target.value;
+                setSearchQuery(val);
+                // Update URL as user types for real-time sync
+                if (val) {
+                  setSearchParams(prev => {
+                    const newParams = new URLSearchParams(prev);
+                    newParams.set('search', val);
+                    return newParams;
+                  });
+                } else {
+                  setSearchParams(prev => {
+                    const newParams = new URLSearchParams(prev);
+                    newParams.delete('search');
+                    return newParams;
+                  });
+                }
+              }}
               className="w-full pl-12 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:border-black transition-colors"
             />
           </div>
           <div className="relative w-full sm:w-auto">
             <select 
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortBy(e.target.value)}
               className="w-full sm:w-auto appearance-none pl-6 pr-12 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:border-black transition-colors text-sm font-medium cursor-pointer"
             >
               <option value="newest">Newest First</option>
