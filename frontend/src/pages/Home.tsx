@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 import { products } from '../data/products';
 import ProductCard from '../components/ProductCard';
-import HeroSlider from './HeroSlider';
+import HeroSlider from '../components/HeroSlider';
 import { motion } from 'motion/react';
 
 const Home: React.FC = () => {
