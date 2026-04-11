@@ -10,24 +10,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    try {
-      if (typeof window === 'undefined') {
-        return 'light';
-      }
-
-      const savedTheme = window.localStorage.getItem('theme');
-      if (savedTheme === 'dark' || savedTheme === 'light') return savedTheme;
-
-      if (typeof window.matchMedia === 'function') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-
-      return 'light';
-    } catch {
-      return 'light';
-    }
-  });
+  const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
     try {
