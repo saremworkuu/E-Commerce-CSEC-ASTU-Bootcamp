@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -12,7 +13,7 @@ import Register from './pages/Register';
 import Contact from './pages/Contact';
 import { AnimatePresence, motion } from 'motion/react';
 
-const AnimatedRoutes = () => {
+const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
   
   return (
@@ -30,7 +31,7 @@ const AnimatedRoutes = () => {
   );
 };
 
-const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const PageWrapper: React.FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <motion.div
       initial={{ opacity: 0, filter: 'blur(10px)' }}
@@ -45,16 +46,18 @@ const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 export default function App() {
   return (
-    <CartProvider>
-      <Router>
-        <div className="min-h-screen flex flex-col bg-white selection:bg-black selection:text-white">
-          <Navbar />
-          <main className="flex-grow">
-            <AnimatedRoutes />
-          </main>
-          <Footer />
-        </div>
-      </Router>
-    </CartProvider>
+    <ThemeProvider>
+      <CartProvider>
+        <Router>
+          <div className="min-h-screen flex flex-col bg-white dark:bg-black selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors duration-300">
+            <Navbar />
+            <main className="flex-grow">
+              <AnimatedRoutes />
+            </main>
+            <Footer />
+          </div>
+        </Router>
+      </CartProvider>
+    </ThemeProvider>
   );
 }

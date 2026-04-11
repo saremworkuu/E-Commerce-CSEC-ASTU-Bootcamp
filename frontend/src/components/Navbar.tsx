@@ -1,22 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, Search } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Search, Sun, Moon } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'motion/react';
 
 const Navbar: React.FC = () => {
   const { totalItems } = useCart();
+  const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+    <nav className="sticky top-0 z-50 bg-white/70 dark:bg-black/70 backdrop-blur-xl border-b border-gray-100/50 dark:border-white/10 transition-colors duration-300">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
             <motion.span 
               whileHover={{ letterSpacing: "0.2em" }}
-              className="text-2xl font-bold tracking-tighter text-black transition-all duration-500"
+              className="text-2xl font-bold tracking-tighter text-black dark:text-white transition-all duration-500"
             >
               LUXE<span className="text-gray-400 font-light">CART</span>
             </motion.span>
@@ -28,11 +30,11 @@ const Navbar: React.FC = () => {
               <Link 
                 key={item}
                 to={item === 'Home' ? '/' : `/${item.toLowerCase()}`} 
-                className="relative text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500 hover:text-black transition-colors group"
+                className="relative text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors group"
               >
                 {item}
                 <motion.span 
-                  className="absolute -bottom-1 left-0 w-0 h-[1px] bg-black transition-all group-hover:w-full"
+                  className="absolute -bottom-1 left-0 w-0 h-[1px] bg-black dark:bg-white transition-all group-hover:w-full"
                   initial={false}
                 />
               </Link>
@@ -44,7 +46,16 @@ const Navbar: React.FC = () => {
             <motion.button 
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="p-3 text-gray-600 hover:text-black transition-colors"
+              onClick={toggleTheme}
+              className="p-3 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            </motion.button>
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="p-3 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
             >
               <Search size={18} />
             </motion.button>
@@ -52,7 +63,7 @@ const Navbar: React.FC = () => {
               <motion.div 
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="p-3 text-gray-600 hover:text-black transition-colors"
+                className="p-3 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
               >
                 <User size={18} />
               </motion.div>
@@ -61,7 +72,7 @@ const Navbar: React.FC = () => {
               <motion.div 
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="p-3 text-gray-600 hover:text-black transition-colors"
+                className="p-3 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
               >
                 <ShoppingCart size={18} />
                 <AnimatePresence>
@@ -70,7 +81,7 @@ const Navbar: React.FC = () => {
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      className="absolute top-2 right-2 bg-black text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full"
+                      className="absolute top-2 right-2 bg-black dark:bg-white text-white dark:text-black text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full"
                     >
                       {totalItems}
                     </motion.span>
@@ -79,7 +90,7 @@ const Navbar: React.FC = () => {
               </motion.div>
             </Link>
             <button 
-              className="md:hidden p-3 text-gray-600 hover:text-black transition-colors"
+              className="md:hidden p-3 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -95,26 +106,26 @@ const Navbar: React.FC = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-t border-gray-100 overflow-hidden"
+            className="md:hidden bg-white dark:bg-black border-t border-gray-100 dark:border-white/10 overflow-hidden transition-colors duration-300"
           >
             <div className="px-4 py-6 space-y-4">
               <Link 
                 to="/" 
-                className="block text-lg font-medium text-gray-900"
+                className="block text-lg font-medium text-gray-900 dark:text-white"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </Link>
               <Link 
                 to="/shop" 
-                className="block text-lg font-medium text-gray-900"
+                className="block text-lg font-medium text-gray-900 dark:text-white"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Shop
               </Link>
               <Link 
                 to="/contact" 
-                className="block text-lg font-medium text-gray-900"
+                className="block text-lg font-medium text-gray-900 dark:text-white"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact
