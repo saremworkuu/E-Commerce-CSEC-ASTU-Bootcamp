@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import CartItem from '../components/CartItem';
 import { ArrowLeft, ShoppingBag, CreditCard } from 'lucide-react';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 
 const Cart: React.FC = () => {
   const { cart, totalPrice, totalItems } = useCart();
+    const navigate = useNavigate();
 
   if (cart.length === 0) {
     return (
@@ -29,6 +30,12 @@ const Cart: React.FC = () => {
     );
   }
 
+  const orderPage =  () => {
+    return(
+     navigate("/order")
+    )
+  
+  }
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-4xl font-bold tracking-tight text-gray-900 mb-12">Shopping Cart</h1>
@@ -73,7 +80,7 @@ const Cart: React.FC = () => {
               </div>
             </div>
 
-            <Button className="w-full py-7 bg-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-colors flex items-center justify-center space-x-3">
+            <Button   onClick={orderPage} className="w-full py-7 bg-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-colors flex items-center justify-center space-x-3"  >
               <CreditCard size={20} />
               <span>Checkout Now</span>
             </Button>

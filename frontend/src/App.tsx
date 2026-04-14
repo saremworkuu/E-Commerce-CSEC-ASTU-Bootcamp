@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
+import { AuthProvider } from './context/AuthContext';   // <-- Added
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -10,6 +11,7 @@ import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Contact from './pages/Contact';
+import Order from './pages/order';
 import { AnimatePresence, motion } from 'motion/react';
 
 const AnimatedRoutes = () => {
@@ -22,6 +24,7 @@ const AnimatedRoutes = () => {
         <Route path="/shop" element={<PageWrapper><Shop /></PageWrapper>} />
         <Route path="/product/:id" element={<PageWrapper><ProductDetails /></PageWrapper>} />
         <Route path="/cart" element={<PageWrapper><Cart /></PageWrapper>} />
+         <Route path="/order" element={<PageWrapper><Order /></PageWrapper>} />
         <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
         <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
         <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
@@ -45,16 +48,18 @@ const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 export default function App() {
   return (
-    <CartProvider>
-      <Router>
-        <div className="min-h-screen flex flex-col bg-white selection:bg-black selection:text-white">
-          <Navbar />
-          <main className="flex-grow">
-            <AnimatedRoutes />
-          </main>
-          <Footer />
-        </div>
-      </Router>
-    </CartProvider>
+    <AuthProvider>                    {/* <-- Wrapped AuthProvider */}
+      <CartProvider>
+        <Router>
+          <div className="min-h-screen flex flex-col bg-white selection:bg-black selection:text-white">
+            <Navbar />
+            <main className="flex-grow">
+              <AnimatedRoutes />
+            </main>
+            <Footer />
+          </div>
+        </Router>
+      </CartProvider>
+    </AuthProvider>
   );
 }

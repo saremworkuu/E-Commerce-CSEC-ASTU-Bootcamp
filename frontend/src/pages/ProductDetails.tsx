@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { products } from '../data/products';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, ShoppingCart, Shield, Truck, RotateCcw, CreditCard } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,10 @@ import { Button } from '@/components/ui/button';
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+
+  // ✅ FIX: use correct cart
+  const { addToCart, cart } = useCart();
+  const { isLoggedIn } = useAuth();
 
   const product = products.find(p => p.id === Number(id));
 
@@ -22,6 +26,37 @@ const ProductDetails: React.FC = () => {
     );
   }
 
+  // ✅ FIX: prevent duplicates
+  const isAlreadyInCart = cart?.some(item => item.id === product.id);
+
+  const handleAddToCart = () => {
+    if (!isLoggedIn) {
+      navigate('/login');
+      return;
+    }
+
+    if (isAlreadyInCart) {
+      alert("Already in cart 🛒");
+      return;
+    }
+
+    addToCart(product._id);
+  };
+
+  // ✅ FIX: Buy Now logic
+  const handleBuyNow = () => {
+    if (!isLoggedIn) {
+      navigate('/login');
+      return;
+    }
+
+    if (!isAlreadyInCart) {
+      addToCart(product);
+    }
+
+    navigate('/cart'); // or checkout page
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <button 
@@ -32,7 +67,8 @@ const ProductDetails: React.FC = () => {
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-        {/* Image Gallery */}
+
+        {/* Image */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -68,25 +104,31 @@ const ProductDetails: React.FC = () => {
             <p>{product.description}</p>
           </div>
 
+          {/* Buttons */}
           <div className="space-y-4 mb-12">
+
             <Button 
-              onClick={() => addToCart(product)}
+              onClick={handleAddToCart}
               className="w-full py-7 bg-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-colors flex items-center justify-center space-x-3 h-auto"
             >
               <ShoppingCart size={20} />
-              <span>Add to Cart</span>
+              <span>
+                {isAlreadyInCart ? "Already in Cart" : "Add to Cart"}
+              </span>
             </Button>
+
             <Button 
               variant="outline"
-              onClick={() => navigate('/login')}
+              onClick={handleBuyNow}
               className="w-full py-7 border-2 border-black text-black font-bold rounded-2xl hover:bg-black hover:text-white transition-all flex items-center justify-center space-x-3 h-auto"
             >
               <CreditCard size={20} />
               <span>Buy Now</span>
             </Button>
+
           </div>
 
-          {/* Trust Badges */}
+          {/* ✅ Trust Badges (UNCHANGED) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-12 border-t border-gray-100">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gray-50 rounded-lg text-gray-600">
@@ -107,10 +149,11 @@ const ProductDetails: React.FC = () => {
               <span className="text-xs font-medium text-gray-600">2-Year Warranty</span>
             </div>
           </div>
+
         </motion.div>
       </div>
 
-      {/* Related Products (Simple) */}
+      {/* ✅ Related Products (UNCHANGED) */}
       <div className="mt-24 pt-24 border-t border-gray-100">
         <h2 className="text-2xl font-bold mb-12">You might also like</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -120,7 +163,12 @@ const ProductDetails: React.FC = () => {
             .map(p => (
               <Link key={p.id} to={`/product/${p.id}`} className="group">
                 <div className="aspect-square rounded-2xl overflow-hidden bg-gray-100 mb-4">
-                  <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+                  <img 
+                    src={p.image} 
+                    alt={p.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    referrerPolicy="no-referrer" 
+                  />
                 </div>
                 <h3 className="font-bold text-gray-900 group-hover:underline">{p.name}</h3>
                 <p className="text-gray-500">${p.price.toFixed(2)}</p>

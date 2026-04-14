@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { products } from '../data/products';
 import ProductCard from '../components/ProductCard';
-import { Filter, ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 
 const Shop: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,10 +16,12 @@ const Shop: React.FC = () => {
   const filteredProducts = useMemo(() => {
     let result = products;
 
+    // Filter by category
     if (activeCategory !== 'All') {
       result = result.filter(p => p.category === activeCategory);
     }
 
+    // Filter by search query
     if (searchQuery) {
       result = result.filter(p => 
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -27,25 +29,33 @@ const Shop: React.FC = () => {
       );
     }
 
+    // Sort products
     if (sortBy === 'price-low') {
       result = [...result].sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-high') {
       result = [...result].sort((a, b) => b.price - a.price);
     }
+    // 'newest' is default - no sorting needed (assuming your data is already in order)
 
     return result;
   }, [activeCategory, searchQuery, sortBy]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Header */}
       <div className="mb-12">
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900 mb-4">Shop All Products</h1>
-        <p className="text-gray-500">Discover our full range of premium products.</p>
+        <h1 className="text-4xl font-bold tracking-tight text-gray-900 mb-4">
+          Shop All Products
+        </h1>
+        <p className="text-gray-500">
+          Discover our full range of premium products.
+        </p>
       </div>
 
-      {/* Filters & Search */}
+      {/* Filters & Search Bar */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-6 lg:space-y-0 mb-12">
-        {/* Categories */}
+        
+        {/* Category Filters */}
         <div className="flex flex-wrap gap-2">
           {categories.map(cat => (
             <button
@@ -62,8 +72,10 @@ const Shop: React.FC = () => {
           ))}
         </div>
 
-        {/* Search & Sort */}
+        {/* Search and Sort */}
         <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full lg:w-auto">
+          
+          {/* Search Input */}
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
@@ -74,6 +86,8 @@ const Shop: React.FC = () => {
               className="w-full pl-12 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:border-black transition-colors"
             />
           </div>
+
+          {/* Sort Dropdown */}
           <div className="relative w-full sm:w-auto">
             <select 
               value={sortBy}
@@ -89,11 +103,14 @@ const Shop: React.FC = () => {
         </div>
       </div>
 
-      {/* Product Grid */}
+      {/* Products Grid */}
       {filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+            />
           ))}
         </div>
       ) : (
