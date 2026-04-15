@@ -1,69 +1,101 @@
+// AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
+interface User {
+  _id: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  role: 'user' | 'admin';
+}
+
 interface AuthContextType {
   isLoggedIn: boolean;
-  user: any | null;
+  isAdmin: boolean;
+  user: User | null;
+  loading: boolean;
   login: (userData: any) => void;
   logout: () => void;
-  loading: boolean;        // Added for better UX
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch user profile when token exists
-  const fetchUserProfile = async (token: string) => {
-    try {
-      const res = await axios.get('http://localhost:5000/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setUser(res.data);
-      setIsLoggedIn(true);
-    } catch (error) {
-      console.error('Failed to fetch user profile');
-      localStorage.removeItem('token');
-      setUser(null);
-      setIsLoggedIn(false);
-    }
-  };
-
+  // Check token on app start / refresh
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    
-    if (token) {
-      fetchUserProfile(token);
-    } else {
-      setIsLoggedIn(false);
-      setUser(null);
-    }
-    
-    setLoading(false);
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Verify token with backend
+        const res = await axios.get('http://localhost:5000/api/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const userData = res.data.user || res.data;
+        setUser(userData);
+
+        // Update stored user with fresh data
+        localStorage.setItem('user', JSON.stringify(userData));
+
+      } catch (error: any) {
+        console.error('Auth verification failed:', error);
+
+        // Only clear token on real auth errors (401/403)
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
+        }
+        // For network errors, keep the user logged in (better UX)
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = (userData: any) => {
-    localStorage.setItem('token', userData.token);
-    setUser(userData.user || userData);   // Handle both response formats
-    setIsLoggedIn(true);
+    const token = userData.token || userData.accessToken;
+    const userToStore = userData.user || userData;
+
+    if (token) localStorage.setItem('token', token);
+    if (userToStore) {
+      localStorage.setItem('user', JSON.stringify(userToStore));
+      setUser(userToStore);
+    }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
-    setIsLoggedIn(false);
+    // Optional: redirect to login
+    window.location.href = '/login';
   };
 
+  const isLoggedIn = !!user;
+  const isAdmin = user?.role === 'admin';
+
   return (
-    <AuthContext.Provider value={{ 
-      isLoggedIn, 
-      user, 
-      login, 
+    <AuthContext.Provider value={{
+      isLoggedIn,
+      isAdmin,
+      user,
+      loading,
+      login,
       logout,
-      loading 
     }}>
       {children}
     </AuthContext.Provider>
@@ -72,6 +104,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 };

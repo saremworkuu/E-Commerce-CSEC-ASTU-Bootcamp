@@ -21,36 +21,46 @@ const Login: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-    try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
-        email: formData.email,
-        password: formData.password
-      });
+  try {
+    const res = await axios.post('http://localhost:5000/api/auth/login', {
+      email: formData.email,
+      password: formData.password
+    });
 
-      login(res.data);        // This should update isLoggedIn and store token
-      navigate('/');          // Go to home after successful login
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid email or password');
-    } finally {
-      setLoading(false);
+  
+    const { user, token } = res.data;
+
+   
+    login({ ...user, token });
+
+    if (user.role === 'admin') {
+      navigate('/dashboard');
+    } else {
+      navigate('/');
     }
-  };
+
+  } catch (err: any) {
+    setError(err.response?.data?.message || 'Invalid email or password');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md w-full bg-white rounded-[2.5rem] p-12 border border-gray-100 shadow-xl"
+        className="max-w-md w-full bg-white dark:bg-neutral-900 rounded-[2.5rem] p-12 border border-gray-100 dark:border-neutral-800 shadow-xl"
       >
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-500">Sign in to continue shopping.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">Welcome Back</h1>
+          <p className="text-gray-500 dark:text-gray-400">Sign in to continue shopping.</p>
         </div>
 
         {error && <p className="text-red-500 text-center mb-6">{error}</p>}
@@ -65,12 +75,15 @@ const Login: React.FC = () => {
               onChange={handleChange}
               placeholder="name@example.com"
               required
-              className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus-visible:ring-black h-auto"
+              className="w-full px-6 py-4 bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-2xl focus-visible:ring-black dark:focus-visible:ring-white h-auto dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Password</label>
+            <div className="flex justify-between items-center mb-2 ml-1">
+              <label className="block text-xs font-bold uppercase tracking-widest text-gray-400">Password</label>
+              <a href="#" className="text-xs font-bold text-gray-400 hover:text-black dark:hover:text-white transition-colors">Forgot?</a>
+            </div>
             <Input
               type="password"
               name="password"
@@ -78,23 +91,23 @@ const Login: React.FC = () => {
               onChange={handleChange}
               placeholder="••••••••"
               required
-              className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus-visible:ring-black h-auto"
+              className="w-full px-6 py-4 bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-2xl focus-visible:ring-black dark:focus-visible:ring-white h-auto dark:text-white"
             />
           </div>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={loading}
-            className="w-full py-7 bg-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-colors"
+            className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
 
         <div className="mt-10 text-center">
-          <p className="text-sm text-gray-500">
-            Don't have an account? {' '}
-            <Link to="/register" className="font-bold text-black hover:underline">Create one</Link>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Don&apos;t have an account? {' '}
+            <Link to="/register" className="font-bold text-black dark:text-white hover:underline">Create one</Link>
           </p>
         </div>
       </motion.div>

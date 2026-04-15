@@ -44,9 +44,14 @@ const Cart: React.FC = () => {
         {/* Items List */}
         <div className="lg:col-span-8">
           <div className="bg-white">
-            {cart.map(item => (
-              <CartItem key={item.id} item={item} />
-            ))}
+
+     {cart.map(item => (
+         <CartItem
+         key={item.productId}
+          item={item}
+              />
+             ))}
+
           </div>
           <Link 
             to="/shop" 

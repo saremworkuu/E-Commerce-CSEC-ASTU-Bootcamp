@@ -3,102 +3,19 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 import { products } from '../data/products';
 import ProductCard from '../components/ProductCard';
+import HeroSlider from '../components/HeroSlider';
 import { motion } from 'motion/react';
 
 const Home: React.FC = () => {
   const featuredProducts = products.filter(p => p.featured).slice(0, 3);
 
   return (
-    <div className="space-y-24 pb-24">
-      {/* Cinematic Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-black">
-        {/* Background Layer with Ken Burns Effect */}
-        <motion.div 
-          initial={{ scale: 1.2, opacity: 0 }}
-          animate={{ scale: 1, opacity: 0.7 }}
-          transition={{ duration: 3, ease: "easeOut" }}
-          className="absolute inset-0 z-0"
-        >
-          <img 
-            src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1920&q=80" 
-            alt="Cinematic Background" 
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-          />
-          {/* Dramatic Lighting Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
-        </motion.div>
-
-        {/* Centered Content */}
-        <div className="relative z-10 text-center px-4 max-w-5xl">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <motion.span 
-              initial={{ opacity: 0, letterSpacing: "0.5em" }}
-              animate={{ opacity: 1, letterSpacing: "0.3em" }}
-              transition={{ duration: 1.5, delay: 0.8 }}
-              className="text-xs md:text-sm font-bold uppercase text-gray-400 mb-6 block"
-            >
-              A New Era of Luxury
-            </motion.span>
-            
-            <h1 className="text-5xl md:text-9xl font-bold tracking-tighter text-white leading-[0.9] mb-10">
-              ESSENCE <br />
-              <span className="text-gray-500 italic font-light">REDEFINED</span>
-            </h1>
-
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 1.2 }}
-              className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto font-light leading-relaxed"
-            >
-              Experience the intersection of cinematic design and premium craftsmanship. 
-              Curated for those who appreciate the finer details of life.
-            </motion.p>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.5 }}
-              className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6"
-            >
-              <Link 
-                to="/shop" 
-                className="group relative px-10 py-5 bg-white text-black font-bold rounded-full overflow-hidden transition-all duration-500 hover:pr-14"
-              >
-                <span className="relative z-10">Explore Collection</span>
-                <ArrowRight className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500" size={20} />
-              </Link>
-              <Link 
-                to="/contact" 
-                className="px-10 py-5 border border-white/20 text-white font-bold rounded-full hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
-              >
-                Our Story
-              </Link>
-            </motion.div>
-          </motion.div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2.5, duration: 1 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center"
-        >
-          <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-4">Scroll to discover</span>
-          <div className="w-[1px] h-12 bg-gradient-to-b from-gray-500 to-transparent" />
-        </motion.div>
-      </section>
+    <div className="space-y-16 pb-16">
+      {/* Cinematic Hero Slider */}
+      <HeroSlider />
 
       {/* Features */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {[
             { icon: <ShoppingBag size={24} />, title: "Premium Quality", desc: "Crafted with the finest materials" },
@@ -112,20 +29,20 @@ const Home: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: true }}
-              className="p-10 bg-gray-50 rounded-[2.5rem] text-center group hover:bg-black hover:text-white transition-all duration-500"
+              className="p-10 bg-gray-50 dark:bg-white/5 rounded-[2.5rem] text-center group hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-500"
             >
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-white rounded-2xl shadow-sm text-black mb-6 group-hover:scale-110 transition-transform duration-500">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-white dark:bg-black rounded-2xl shadow-sm text-black dark:text-white mb-6 group-hover:scale-110 transition-transform duration-500">
                 {feature.icon}
               </div>
-              <h3 className="text-lg font-bold mb-2 tracking-tight">{feature.title}</h3>
-              <p className="text-sm text-gray-500 group-hover:text-gray-400">{feature.desc}</p>
+              <h3 className="text-lg font-bold mb-2 tracking-tight text-gray-900 dark:text-white">{feature.title}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-gray-400 dark:group-hover:text-gray-500">{feature.desc}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* Featured Products */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-16">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -133,22 +50,22 @@ const Home: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-3 block">Curated Selection</span>
-            <h2 className="text-5xl font-bold tracking-tighter text-gray-900">Featured Masterpieces</h2>
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 mb-3 block">Curated Selection</span>
+            <h2 className="text-4xl font-bold tracking-tighter text-gray-900 dark:text-white">Featured Masterpieces</h2>
           </motion.div>
-          <Link to="/shop" className="hidden md:flex items-center text-xs font-bold uppercase tracking-widest text-black hover:underline group">
+          <Link to="/shop" className="hidden md:flex items-center text-xs font-bold uppercase tracking-widest text-black dark:text-white hover:underline group">
             Explore All <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
-          {featuredProducts.map((product, i) => (
+          {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </section>
 
       {/* Categories - Cinematic Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
@@ -200,7 +117,7 @@ const Home: React.FC = () => {
               className="relative rounded-[3rem] overflow-hidden group"
             >
               <img 
-                src="https://i.pinimg.com/736x/c5/27/e3/c527e3b8dd4e38682d4a034f0733f938.jpg" 
+                src="https://images.unsplash.com/photo-1505843490701-5be5d0b19d58?auto=format&fit=crop&w=800&q=80" 
                 alt="Furniture" 
                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
                 referrerPolicy="no-referrer"
@@ -217,7 +134,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Limited Time Deals Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-12">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -226,7 +143,7 @@ const Home: React.FC = () => {
             transition={{ duration: 0.8 }}
           >
             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-red-500 mb-3 block">Limited Time Offers</span>
-            <h2 className="text-5xl font-bold tracking-tighter text-gray-900">Exclusive Deals</h2>
+            <h2 className="text-4xl font-bold tracking-tighter text-gray-900">Exclusive Deals</h2>
           </motion.div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -267,7 +184,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Top Sellers Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-12">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -276,13 +193,13 @@ const Home: React.FC = () => {
             transition={{ duration: 0.8 }}
           >
             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-3 block">Best of the Month</span>
-            <h2 className="text-5xl font-bold tracking-tighter text-gray-900">Top Sellers</h2>
+            <h2 className="text-4xl font-bold tracking-tighter text-gray-900">Top Sellers</h2>
           </motion.div>
         </div>
         <div className="space-y-12">
           {products.slice(0, 2).map((product, index) => (
             <div key={product.id} className={`bg-gray-50 rounded-[3rem] overflow-hidden flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
-              <div className="p-12 md:p-24 flex flex-col justify-center flex-1">
+              <div className="p-10 md:p-16 flex flex-col justify-center flex-1">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -290,7 +207,7 @@ const Home: React.FC = () => {
                   transition={{ duration: 0.8 }}
                 >
                   <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4 block">Rank #{index + 1}</span>
-                  <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-gray-900 mb-8 leading-none">
+                  <h2 className="text-4xl md:text-6xl font-bold tracking-tighter text-gray-900 mb-6 leading-none">
                     {product.name.split(' ')[0]} <br /> <span className="text-gray-400 italic">{product.name.split(' ').slice(1).join(' ')}</span>
                   </h2>
                   <p className="text-lg text-gray-500 mb-10 max-w-md leading-relaxed">
