@@ -40,7 +40,7 @@ const ProductDetails: React.FC = () => {
       return;
     }
 
-    addToCart(product.id);
+    addToCart(product._id);
   };
 
   // ✅ FIX: Buy Now logic

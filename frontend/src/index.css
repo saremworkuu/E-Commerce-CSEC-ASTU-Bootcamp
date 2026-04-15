@@ -122,20 +122,8 @@
     }
   body {
     @apply bg-background text-foreground;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
     }
-  body::-webkit-scrollbar {
-    display: none;
-  }
   html {
     @apply font-sans;
-    font-size: 15px;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
     }
-
-  html::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
-  }
 }
