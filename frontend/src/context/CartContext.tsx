@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import axios from 'axios';
-import { products } from '../data/products';
 
 interface CartItem {
-  productId: string; // store product.id as string
+  productId: any; // backend returns populated object OR id
   quantity: number;
 }
 
@@ -22,81 +21,129 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const token = localStorage.getItem('token');
 
+  // 🔥 always get fresh token (IMPORTANT FIX)
+  const getToken = () => localStorage.getItem('token');
+
+  // ================= LOAD CART =================
   const refreshCart = async () => {
+    const token = getToken();
     if (!token) return;
 
-    const res = await axios.get('http://localhost:5000/api/cart', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+      const res = await axios.get('http://localhost:5000/api/cart', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-    setCart(res.data.items || []);
+      setCart(res.data.items || []);
+    } catch (err) {
+      console.error('Cart load error:', err);
+    }
   };
 
   useEffect(() => {
     refreshCart();
-  }, [token]);
+  }, []);
 
+  // ================= ADD TO CART =================
   const addToCart = async (productId: string) => {
-    const res = await axios.post(
-      'http://localhost:5000/api/cart/add',
-      { productId, quantity: 1 },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const token = getToken();
+    if (!token) return;
 
-    setCart(res.data.items);
+    try {
+      const res = await axios.post(
+        'http://localhost:5000/api/cart/add',
+        { productId, quantity: 1 },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setCart(res.data.items);
+    } catch (err) {
+      console.error('Add to cart error:', err);
+    }
   };
 
+  // ================= REMOVE =================
   const removeFromCart = async (productId: string) => {
-    const res = await axios.delete(
-      `http://localhost:5000/api/cart/remove/${productId}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const token = getToken();
+    if (!token) return;
 
-    setCart(res.data.items);
+    try {
+      const res = await axios.delete(
+        `http://localhost:5000/api/cart/remove/${productId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setCart(res.data.items);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
+  // ================= UPDATE QUANTITY =================
   const updateQuantity = async (productId: string, delta: number) => {
-    const item = cart.find(i => i.productId === productId);
+    const token = getToken();
+    if (!token) return;
+
+    const item = cart.find(i =>
+      (i.productId?._id || i.productId) === productId
+    );
+
     if (!item) return;
 
-    const res = await axios.post(
-      'http://localhost:5000/api/cart/add',
-      { productId, quantity: delta },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const newQty = item.quantity + delta;
+    if (newQty < 1) return;
 
-    setCart(res.data.items);
+    try {
+      const res = await axios.post(
+        'http://localhost:5000/api/cart/add',
+        { productId, quantity: delta },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setCart(res.data.items);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
+  // ================= CLEAR CART =================
   const clearCart = async () => {
-    await axios.delete('http://localhost:5000/api/cart/clear', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const token = getToken();
+    if (!token) return;
 
-    setCart([]);
+    try {
+      await axios.delete('http://localhost:5000/api/cart/clear', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setCart([]);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-
-  const totalPrice = cart.reduce((sum, item) => {
-    const product = products.find(p => String(p.id) === String(item.productId));
-    return sum + (product?.price || 0) * item.quantity;
-  }, 0);
-
+  // ================= TOTALS =================
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const totalPrice = cart.reduce((sum, item) => {
+    const price = item.productId?.price || 0;
+    return sum + price * item.quantity;
+  }, 0);
+
   return (
-    <CartContext.Provider value={{
-      cart,
-      addToCart,
-      removeFromCart,
-      updateQuantity,
-      clearCart,
-      totalItems,
-      totalPrice,
-      refreshCart
-    }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        totalItems,
+        totalPrice,
+        refreshCart
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
