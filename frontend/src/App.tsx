@@ -20,6 +20,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardOverview from './pages/DashboardOverview';
 import DashboardProducts from './pages/DashboardProducts';
+import DashboardProductNew from './pages/DashboardProductNew';
 import DashboardUsers from './pages/DashboardUsers';
 import DashboardOrders from './pages/DashboardOrders';
 import { AnimatePresence, motion } from 'motion/react';
@@ -53,6 +54,7 @@ const AnimatedRoutes: React.FC = () => {
         >
           <Route index element={<DashboardOverview />} />
           <Route path="products" element={<DashboardProducts />} />
+          <Route path="products/new" element={<DashboardProductNew />} />
           <Route path="users" element={<DashboardUsers />} />
           <Route path="orders" element={<DashboardOrders />} />
         </Route>

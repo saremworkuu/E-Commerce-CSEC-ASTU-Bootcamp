@@ -1,46 +1,34 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import axios from 'axios';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, ArrowLeft, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const ADMIN_EMAIL = 'admin@luxecart.com';
+  const ADMIN_PASS = 'admin123';
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const res = await axios.post('/api/auth/login', { email, password });
-      
-      if (res.data.user?.role !== 'admin') {
-         setError('Access denied. Administrator privileges required.');
-         return;
-      }
-
-      login(res.data);
+    if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
+      login(email, 'admin');
       navigate('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid admin credentials');
-    } finally {
-      setLoading(false);
+    } else {
+      alert('Invalid admin credentials');
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50 dark:bg-black">
-      <motion.div
+      <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full"
@@ -59,18 +47,11 @@ const AdminLogin: React.FC = () => {
             <p className="text-gray-500 dark:text-gray-400">Restricted access for platform administrators.</p>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 rounded-2xl flex items-start gap-3 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400">
-              <AlertCircle className="shrink-0 mt-0.5" size={18} />
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          )}
-
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Admin Email</label>
-              <Input
-                type="email"
+              <Input 
+                type="email" 
                 placeholder="Enter admin email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -81,8 +62,8 @@ const AdminLogin: React.FC = () => {
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Password</label>
               <div className="relative group">
-                <Input
-                  type={showPassword ? "text" : "password"}
+                <Input 
+                  type={showPassword ? "text" : "password"} 
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -99,17 +80,13 @@ const AdminLogin: React.FC = () => {
               </div>
             </div>
 
-            <Button 
-              type="submit" 
-              disabled={loading}
-              className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-xl disabled:opacity-70"
-            >
-              {loading ? 'Authorizing...' : 'Authorize Access'}
+            <Button type="submit" className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-xl">
+              Authorize Access
             </Button>
           </form>
 
           <div className="mt-8 text-center">
-            <button
+            <button 
               onClick={() => navigate('/')}
               className="inline-flex items-center text-sm font-bold text-gray-400 hover:text-black dark:hover:text-white transition-colors"
             >

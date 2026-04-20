@@ -20,7 +20,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const handleAddToCart = () => {
     setIsAdding(true);
-    addToCart(product);
+    addToCart(String(product.id || (product as any)._id));
     setTimeout(() => setIsAdding(false), 1500);
   };
 
@@ -33,7 +33,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     toggleWishlist(product);
   };
 
-  const isFavorited = isInWishlist(product.id);
+  const isFavorited = isInWishlist(product.id || (product as any)._id);
 
   return (
     <motion.div 
@@ -47,7 +47,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Image Container */}
       <div className="aspect-[4/5] overflow-hidden relative">
         <motion.img 
-          src={product.image} 
+          src={product.image || (product as any).imageUrl} 
           alt={product.name}
           whileHover={{ scale: 1.1 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -56,26 +56,26 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         />
         
         {/* Hover Actions Overlay */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center space-x-4 backdrop-blur-[2px]">
+        <div className="absolute inset-0 bg-black/20 md:bg-black/40 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-500 flex items-center justify-center space-x-2 md:space-x-4 backdrop-blur-[1px] md:backdrop-blur-[2px]">
           <Link 
-            to={`/product/${product.id}`}
-            className="p-4 bg-white dark:bg-black rounded-full text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 shadow-xl"
+            to={`/product/${product.id || (product as any)._id}`}
+            className="p-3 md:p-4 bg-white dark:bg-black rounded-full text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 shadow-xl"
           >
-            <Eye size={22} />
+            <Eye size={18} className="md:w-[22px] md:h-[22px]" />
           </Link>
           <motion.button 
             onClick={handleWishlistToggle}
             whileTap={{ scale: 0.9 }}
-            className={`p-4 rounded-full transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 shadow-xl ${
+            className={`p-3 md:p-4 rounded-full transition-all duration-300 transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 shadow-xl ${
               isFavorited ? 'bg-red-500 text-white border-red-500' : 'bg-white dark:bg-black text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black'
             }`}
           >
-            <Heart size={22} fill={isFavorited ? "currentColor" : "none"} />
+            <Heart size={18} className="md:w-[22px] md:h-[22px]" fill={isFavorited ? "currentColor" : "none"} />
           </motion.button>
           <motion.button 
             onClick={handleAddToCart}
             whileTap={{ scale: 0.9 }}
-            className={`p-4 rounded-full transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 shadow-xl ${
+            className={`p-3 md:p-4 rounded-full transition-all duration-300 transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 shadow-xl ${
               isAdding ? 'bg-green-500 text-white' : 'bg-white dark:bg-black text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black'
             }`}
           >
@@ -87,7 +87,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                 >
-                  <ShoppingCart size={22} className="text-white" />
+                  <ShoppingCart size={18} className="md:w-[22px] md:h-[22px] text-white" />
                 </motion.div>
               ) : (
                 <motion.div
@@ -96,7 +96,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                 >
-                  <ShoppingCart size={22} />
+                  <ShoppingCart size={18} className="md:w-[22px] md:h-[22px]" />
                 </motion.div>
               )}
             </AnimatePresence>

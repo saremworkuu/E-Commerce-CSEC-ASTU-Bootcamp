@@ -199,12 +199,15 @@ router.put('/:id/status', Protect, async (req, res) => {
 
     if (!order) return res.status(404).json({ message: 'Order not found' });
 
-    const customerName = `${order.userId.fullName}`;
+    const customerName = order.userId?.fullName || order.shippingInfo?.fullName || 'Customer';
+    const customerEmail = order.shippingInfo?.email || order.userId?.email;
 
-    await sendStatusEmail(order.shippingInfo.email, order._id, status, customerName);
+    if (customerEmail) {
+      await sendStatusEmail(customerEmail, order._id, status, customerName);
+    }
 
     res.json({
-      message: `Order status updated to ${status} and email sent`,
+      message: `Order status updated to ${status}`,
       order
     });
 

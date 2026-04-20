@@ -1,23 +1,37 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
-import { products } from '../data/products';
+import { products as hardcodedProducts } from '../data/products';
 import ProductCard from '../components/ProductCard';
 import { ChevronDown, Search } from 'lucide-react';
 
 const Shop: React.FC = () => {
+  const [products, setProducts] = useState(hardcodedProducts);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlSearch = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(urlSearch);
   const [sortBy, setSortBy] = useState('newest');
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/products');
+        setProducts(res.data);
+      } catch (err) {
+        console.error('Failed to fetch home products:', err);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   const activeCategory = searchParams.get('category') || 'All';
 
   // Update local search query when URL changes
-  React.useEffect(() => {
+  useEffect(() => {
     setSearchQuery(urlSearch);
   }, [urlSearch]);
 
-  const categories = ['All', ...new Set(products.map(p => p.category))];
+  const categories = ['All', ...new Set(products.map((p: any) => p.category))];
 
   const filteredProducts = useMemo(() => {
     let result = products;
@@ -50,14 +64,14 @@ const Shop: React.FC = () => {
       </div>
 
       {/* Filters & Search */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-6 lg:space-y-0 mb-12">
-        <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full lg:w-auto">
+      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center space-y-4 md:space-y-0 mb-12 gap-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 flex-grow max-w-4xl">
           {/* Categories Dropdown */}
           <div className="relative w-full sm:w-64">
             <select 
               value={activeCategory}
               onChange={(e) => setSearchParams(e.target.value === 'All' ? {} : { category: e.target.value })}
-              className="w-full appearance-none pl-6 pr-12 py-3 bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition-colors text-sm font-medium cursor-pointer dark:text-white"
+              className="w-full appearance-none pl-6 pr-12 py-3.5 bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition-colors text-sm font-medium cursor-pointer dark:text-white"
             >
               <option disabled>Select Category</option>
               {categories.map(cat => (
@@ -68,8 +82,8 @@ const Shop: React.FC = () => {
           </div>
 
           {/* Search */}
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <div className="relative w-full flex-grow">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 
               placeholder="Search products..."
@@ -91,17 +105,17 @@ const Shop: React.FC = () => {
                   });
                 }
               }}
-              className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition-colors text-sm dark:text-white"
+              className="w-full pl-14 pr-6 py-3.5 bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition-colors text-sm dark:text-white"
             />
           </div>
         </div>
 
         {/* Sort */}
-        <div className="relative w-full lg:w-auto">
+        <div className="relative w-full md:w-auto">
           <select 
             value={sortBy}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortBy(e.target.value)}
-            className="w-full lg:w-auto appearance-none pl-6 pr-12 py-3 bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition-colors text-sm font-medium cursor-pointer dark:text-white"
+            className="w-full md:w-auto appearance-none pl-6 pr-12 py-3.5 bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition-colors text-sm font-medium cursor-pointer dark:text-white"
           >
             <option value="newest">Newest First</option>
             <option value="price-low">Price: Low to High</option>
@@ -115,7 +129,7 @@ const Shop: React.FC = () => {
       {filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id || (product as any)._id} product={product} />
           ))}
         </div>
       ) : (

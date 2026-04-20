@@ -1,105 +1,44 @@
-// AuthContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { createContext, useContext, useState } from 'react';
+
+export type UserRole = 'admin' | 'user';
 
 interface User {
-  _id: string;
-  firstName?: string;
-  lastName?: string;
   email: string;
-  role: 'user' | 'admin';
+  role: UserRole;
 }
 
 interface AuthContextType {
-  isLoggedIn: boolean;
+  user: User | null;
+  login: (email: string, role: UserRole) => void;
+  logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  user: User | null;
-  loading: boolean;
-  login: (userData: any) => void;
-  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem('auth_user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-  // Check token on app start / refresh
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const token = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
-
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Verify token with backend
-        const res = await axios.get('/api/auth/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        const userData = res.data.user || res.data;
-        setUser(userData);
-
-        // Update stored user with fresh data
-        localStorage.setItem('user', JSON.stringify(userData));
-
-      } catch (error: any) {
-        console.error('Auth verification failed:', error);
-
-        // Only clear token on real auth errors (401/403)
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          setUser(null);
-        }
-        // For network errors, keep the user logged in (better UX)
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeAuth();
-  }, []);
-
-  const login = (userData: any) => {
-    const token = userData.token || userData.accessToken;
-    const userToStore = userData.user || userData;
-
-    if (token) localStorage.setItem('token', token);
-    if (userToStore) {
-      localStorage.setItem('user', JSON.stringify(userToStore));
-      setUser(userToStore);
-    }
+  const login = (email: string, role: UserRole) => {
+    const newUser = { email, role };
+    setUser(newUser);
+    localStorage.setItem('auth_user', JSON.stringify(newUser));
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
     setUser(null);
-    // Optional: redirect to login
-    window.location.href = '/login';
+    localStorage.removeItem('auth_user');
   };
 
-  const isLoggedIn = !!user;
-  const isAuthenticated = isLoggedIn;
+  const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{
-      isLoggedIn,
-      isAuthenticated,
-      isAdmin,
-      user,
-      loading,
-      login,
-      logout,
-    }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
@@ -107,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

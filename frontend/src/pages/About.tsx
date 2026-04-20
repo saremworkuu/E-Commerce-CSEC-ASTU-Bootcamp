@@ -9,8 +9,8 @@ const About: React.FC = () => {
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://picsum.photos/seed/luxury-office/1920/1080" 
-            alt="Luxury Office" 
+            src="https://picsum.photos/seed/minimalist-design/1920/1080" 
+            alt="Minimalist Design Vision" 
             className="w-full h-full object-cover opacity-40 dark:opacity-20"
             referrerPolicy="no-referrer"
           />
@@ -22,7 +22,7 @@ const About: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-5xl md:text-7xl font-bold tracking-tighter text-black dark:text-white mb-6"
+            className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tighter text-black dark:text-white mb-6 uppercase"
           >
             OUR <span className="text-gray-400 font-light">STORY</span>
           </motion.h1>
@@ -61,8 +61,8 @@ const About: React.FC = () => {
             className="relative aspect-square rounded-[3rem] overflow-hidden shadow-2xl"
           >
             <img 
-              src="https://picsum.photos/seed/craft/800/800" 
-              alt="Craftsmanship" 
+              src="https://picsum.photos/seed/premium-texture/800/800" 
+              alt="Quality Materials" 
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
             />
@@ -78,7 +78,7 @@ const About: React.FC = () => {
             <div className="w-12 h-1 bg-black dark:bg-white mx-auto" />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {[
               { icon: <Shield size={32} />, title: "Quality", desc: "Uncompromising standards in every detail." },
               { icon: <Zap size={32} />, title: "Innovation", desc: "Pushing boundaries in digital commerce." },
@@ -91,7 +91,7 @@ const About: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="p-8 bg-white dark:bg-neutral-900 rounded-[2rem] border border-gray-100 dark:border-neutral-800 text-center hover:shadow-xl transition-all duration-500 group"
+                className="p-6 sm:p-8 bg-white dark:bg-neutral-900 rounded-[2rem] border border-gray-100 dark:border-neutral-800 text-center hover:shadow-xl transition-all duration-500 group"
               >
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-50 dark:bg-neutral-800 text-black dark:text-white mb-6 group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-colors duration-500">
                   {value.icon}

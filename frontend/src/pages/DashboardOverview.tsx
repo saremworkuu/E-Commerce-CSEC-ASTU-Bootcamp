@@ -1,76 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Users,
-  Package,
-  ShoppingBag,
+import React from 'react';
+import { 
+  Users, 
+  Package, 
+  ShoppingBag, 
   TrendingUp,
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { motion } from 'motion/react';
-import axios from 'axios';
-
-interface StatsData {
-  totalUsers: number;
-  totalProducts: number;
-  totalOrders: number;
-  pendingOrders: number;
-  totalRevenue: number;
-}
 
 const DashboardOverview: React.FC = () => {
-  const [stats, setStats] = useState<StatsData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('/api/admin/stats', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setStats(response.data);
-      } catch (err) {
-        console.error('Failed to fetch stats:', err);
-        setError('Failed to load dashboard statistics');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
-
-  const statCards = [
-    {
-      label: 'Total Users',
-      value: stats ? stats.totalUsers.toString() : '0',
-      icon: <Users className="text-blue-500" />,
-      change: '+12%',
-      isPositive: true
+  const stats = [
+    { 
+      label: 'Total Users', 
+      value: '1,284', 
+      icon: <Users className="text-blue-500" />, 
+      change: '+12%', 
+      isPositive: true 
     },
-    {
-      label: 'Total Products',
-      value: stats ? stats.totalProducts.toString() : '0',
-      icon: <Package className="text-purple-500" />,
-      change: '+4',
-      isPositive: true
+    { 
+      label: 'Total Products', 
+      value: '48', 
+      icon: <Package className="text-purple-500" />, 
+      change: '+4', 
+      isPositive: true 
     },
-    {
-      label: 'Total Orders',
-      value: stats ? stats.totalOrders.toString() : '0',
-      icon: <ShoppingBag className="text-orange-500" />,
-      change: '+18%',
-      isPositive: true
+    { 
+      label: 'Total Orders', 
+      value: '856', 
+      icon: <ShoppingBag className="text-orange-500" />, 
+      change: '+18%', 
+      isPositive: true 
     },
-    {
-      label: 'Revenue',
-      value: stats ? `$${stats.totalRevenue.toFixed(2)}` : '$0.00',
-      icon: <TrendingUp className="text-green-500" />,
-      change: '-3%',
-      isPositive: false
+    { 
+      label: 'Revenue', 
+      value: '$42,500', 
+      icon: <TrendingUp className="text-green-500" />, 
+      change: '-3%', 
+      isPositive: false 
     },
   ];
 
@@ -81,14 +49,8 @@ const DashboardOverview: React.FC = () => {
         <p className="text-gray-500 dark:text-gray-400">Welcome back, here&apos;s what&apos;s happening today.</p>
       </div>
 
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat, i) => (
+        {stats.map((stat, i) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
@@ -105,13 +67,7 @@ const DashboardOverview: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold dark:text-white">
-                  {loading ? (
-                    <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-16 rounded"></div>
-                  ) : (
-                    stat.value
-                  )}
-                </div>
+                <div className="text-2xl font-bold dark:text-white">{stat.value}</div>
                 <div className="flex items-center mt-1">
                   {stat.isPositive ? (
                     <ArrowUpRight size={14} className="text-green-500 mr-1" />

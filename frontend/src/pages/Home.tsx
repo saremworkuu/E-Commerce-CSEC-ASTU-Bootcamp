@@ -1,13 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { ArrowRight, ShoppingBag, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
-import { products } from '../data/products';
+import { products as hardcodedProducts } from '../data/products';
 import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
 import { motion } from 'motion/react';
 
 const Home: React.FC = () => {
+  const [products, setProducts] = useState(hardcodedProducts);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/products');
+        setProducts(res.data);
+      } catch (err) {
+        console.error('Failed to fetch home products:', err);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   const featuredProducts = products.filter(p => p.featured).slice(0, 3);
+
+  // If we don't have enough featured, fallback to newest
+  const displayFeatured = featuredProducts.length >= 3 ? featuredProducts : products.slice(0, 3);
 
   return (
     <div className="space-y-16 pb-16">
@@ -16,7 +34,7 @@ const Home: React.FC = () => {
 
       {/* Features */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {[
             { icon: <ShoppingBag size={24} />, title: "Premium Quality", desc: "Crafted with the finest materials" },
             { icon: <Truck size={24} />, title: "Free Shipping", desc: "On all orders over $150" },
@@ -29,7 +47,7 @@ const Home: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: true }}
-              className="p-10 bg-gray-50 dark:bg-white/5 rounded-[2.5rem] text-center group hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-500"
+              className="p-8 sm:p-10 bg-gray-50 dark:bg-white/5 rounded-[2rem] sm:rounded-[2.5rem] text-center group hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-500"
             >
               <div className="inline-flex items-center justify-center w-14 h-14 bg-white dark:bg-black rounded-2xl shadow-sm text-black dark:text-white mb-6 group-hover:scale-110 transition-transform duration-500">
                 {feature.icon}
@@ -58,21 +76,21 @@ const Home: React.FC = () => {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {displayFeatured.map((product) => (
+            <ProductCard key={product.id || (product as any)._id} product={product} />
           ))}
         </div>
       </section>
 
       {/* Categories - Cinematic Grid */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1 }}
-            className="relative h-[600px] rounded-[3rem] overflow-hidden group"
+            className="relative h-[400px] sm:h-[500px] md:h-[600px] rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
           >
             <img 
               src="https://images.unsplash.com/photo-1491933382434-500287f9b54b?auto=format&fit=crop&w=800&q=80" 
@@ -80,21 +98,21 @@ const Home: React.FC = () => {
               className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
               referrerPolicy="no-referrer"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-16">
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4 block">Innovation</span>
-              <h3 className="text-5xl font-bold text-white mb-6 tracking-tighter">Electronics</h3>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 sm:p-12 md:p-16">
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-2 sm:mb-4 block">Innovation</span>
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6 tracking-tighter">Electronics</h3>
               <Link to="/shop?category=Electronics" className="inline-flex items-center text-white font-bold uppercase tracking-widest text-xs group">
                 View Collection <ArrowRight size={18} className="ml-3 group-hover:translate-x-2 transition-transform" />
               </Link>
             </div>
           </motion.div>
-          <div className="grid grid-rows-2 gap-12">
+          <div className="grid grid-rows-1 sm:grid-rows-2 gap-8 sm:gap-12">
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1 }}
-              className="relative rounded-[3rem] overflow-hidden group"
+              className="relative h-[300px] sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
             >
               <img 
                 src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80" 
@@ -114,7 +132,7 @@ const Home: React.FC = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.2 }}
-              className="relative rounded-[3rem] overflow-hidden group"
+              className="relative h-[300px] sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
             >
               <img 
                 src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80" 
@@ -146,8 +164,9 @@ const Home: React.FC = () => {
             <h2 className="text-4xl font-bold tracking-tighter text-gray-900 dark:text-white">Exclusive Deals</h2>
           </motion.div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products.filter(p => p.originalPrice).slice(0, 4).map((product, i) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          {products.slice(0, 4).map((product, i) => {
+            const hasDiscount = product.originalPrice && product.originalPrice > product.price;
             const discount = Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100);
             return (
               <Link 
@@ -159,7 +178,7 @@ const Home: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="group relative rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-900 aspect-[3/4] cursor-pointer"
+                  className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-900 aspect-[3/4] cursor-pointer"
                 >
                   <img 
                     src={product.image} 
@@ -200,33 +219,33 @@ const Home: React.FC = () => {
             <h2 className="text-4xl font-bold tracking-tighter text-gray-900 dark:text-white">Top Sellers</h2>
           </motion.div>
         </div>
-        <div className="space-y-12">
+        <div className="space-y-8 sm:space-y-12">
           {products.slice(0, 2).map((product, index) => (
-            <div key={product.id} className={`bg-gray-50 dark:bg-white/5 rounded-[3rem] overflow-hidden flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
-              <div className="p-10 md:p-16 flex flex-col justify-center flex-1">
+            <div key={product.id} className={`bg-gray-50 dark:bg-white/5 rounded-[2rem] sm:rounded-[3rem] overflow-hidden flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
+              <div className="p-8 sm:p-12 md:p-16 flex flex-col justify-center flex-1">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8 }}
                 >
-                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4 block">Rank #{index + 1}</span>
-                  <h2 className="text-4xl md:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white mb-6 leading-none">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-3 sm:mb-4 block">Rank #{index + 1}</span>
+                  <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white mb-4 sm:mb-6 leading-none">
                     {product.name.split(' ')[0]} <br /> <span className="text-gray-400 italic">{product.name.split(' ').slice(1).join(' ')}</span>
                   </h2>
-                  <p className="text-lg text-gray-500 dark:text-gray-400 mb-10 max-w-md leading-relaxed">
+                  <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-6 sm:mb-10 max-w-md leading-relaxed">
                     {product.description}
                   </p>
                   <Link 
                     to={`/product/${product.id}`}
-                    className="inline-flex items-center justify-center px-10 py-5 bg-black text-white dark:bg-white dark:text-black font-bold rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors group"
+                    className="inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 bg-black text-white dark:bg-white dark:text-black font-bold rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors group text-sm sm:text-base"
                   >
                     View Product
                     <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
                   </Link>
                 </motion.div>
               </div>
-              <div className="relative h-[400px] lg:h-auto overflow-hidden group flex-1">
+              <div className="relative h-[300px] sm:h-[400px] lg:h-auto overflow-hidden group flex-1">
                 <motion.img 
                   initial={{ scale: 1.1 }}
                   whileInView={{ scale: 1 }}

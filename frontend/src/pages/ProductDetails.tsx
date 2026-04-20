@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { products } from '../data/products';
+import { products as hardcodedProducts } from '../data/products';
 import { useCart } from '../context/CartContext';
 import { ArrowLeft, ShoppingCart, Shield, Truck, RotateCcw, CreditCard } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -10,8 +11,29 @@ const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const product = products.find(p => p.id === Number(id));
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+        setProduct(res.data);
+      } catch (err) {
+        console.error('Failed to fetch product from API:', err);
+        // Fallback to local hardcoded
+        const found = hardcodedProducts.find(p => String(p.id) === id);
+        if (found) setProduct(found);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return <div className="max-w-7xl mx-auto px-4 py-24 text-center dark:text-white">Loading...</div>;
+  }
 
   if (!product) {
     return (
@@ -31,7 +53,7 @@ const ProductDetails: React.FC = () => {
         <ArrowLeft size={16} className="mr-2" /> Back
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
         {/* Image Gallery */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
@@ -39,7 +61,7 @@ const ProductDetails: React.FC = () => {
           className="rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-800 aspect-square"
         >
           <img 
-            src={product.image} 
+            src={product.image || product.imageUrl} 
             alt={product.name} 
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
@@ -52,14 +74,14 @@ const ProductDetails: React.FC = () => {
           animate={{ opacity: 1, x: 0 }}
           className="flex flex-col"
         >
-          <div className="mb-8">
+          <div className="mb-6 md:mb-8">
             <span className="text-sm font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 block">
               {product.category}
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">
               {product.name}
             </h1>
-            <p className="text-3xl font-medium text-gray-900 dark:text-white">
+            <p className="text-2xl sm:text-3xl font-medium text-gray-900 dark:text-white">
               ${product.price.toFixed(2)}
             </p>
           </div>
@@ -70,7 +92,7 @@ const ProductDetails: React.FC = () => {
 
           <div className="space-y-4 mb-12">
             <Button 
-              onClick={() => addToCart(product)}
+              onClick={() => addToCart(String(product.id || product._id))}
               className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center space-x-3 h-auto"
             >
               <ShoppingCart size={20} />
@@ -114,8 +136,8 @@ const ProductDetails: React.FC = () => {
       <div className="mt-24 pt-24 border-t border-gray-100 dark:border-neutral-800">
         <h2 className="text-2xl font-bold mb-12 dark:text-white">You might also like</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products
-            .filter(p => p.id !== product.id && p.category === product.category)
+          {hardcodedProducts
+            .filter(p => String(p.id) !== String(product.id || product._id) && p.category === product.category)
             .slice(0, 4)
             .map(p => (
               <Link key={p.id} to={`/product/${p.id}`} className="group">
