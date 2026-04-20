@@ -78,7 +78,7 @@ const Order: React.FC = () => {
       const token = localStorage.getItem('token'); // Assuming you store JWT
 
       const res = await axios.post(
-        'http://localhost:5000/api/orders', // Change to your backend URL
+        '/api/orders', // Change to your backend URL
         orderData,
         {
           headers: {

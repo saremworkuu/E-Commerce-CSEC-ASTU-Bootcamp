@@ -28,7 +28,7 @@ const DashboardOverview: React.FC = () => {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/admin/stats', {
+        const response = await axios.get('/api/admin/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setStats(response.data);

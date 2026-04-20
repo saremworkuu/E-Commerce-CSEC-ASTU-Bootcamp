@@ -57,7 +57,7 @@ const DashboardProductNew: React.FC = () => {
       };
 
       const response = await axios.post(
-        'http://localhost:5000/api/products',   // ← Change if your route is different
+        '/api/products',   // ← Change if your route is different
         productData,
         {
           headers: {

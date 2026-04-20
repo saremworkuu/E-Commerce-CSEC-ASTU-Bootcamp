@@ -23,7 +23,7 @@ const Home: React.FC = () => {
             { icon: <RotateCcw size={24} />, title: "Easy Returns", desc: "30-day hassle-free returns" },
             { icon: <ShieldCheck size={24} />, title: "Secure Payment", desc: "100% encrypted transactions" }
           ].map((feature, i) => (
-            <motion.div 
+            <motion.div
               key={i}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -67,16 +67,16 @@ const Home: React.FC = () => {
       {/* Categories - Cinematic Grid */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1 }}
             className="relative h-[600px] rounded-[3rem] overflow-hidden group"
           >
-            <img 
-              src="https://images.unsplash.com/photo-1491933382434-500287f9b54b?auto=format&fit=crop&w=800&q=80" 
-              alt="Electronics" 
+            <img
+              src="https://images.unsplash.com/photo-1491933382434-500287f9b54b?auto=format&fit=crop&w=800&q=80"
+              alt="Electronics"
               className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
               referrerPolicy="no-referrer"
             />
@@ -89,16 +89,16 @@ const Home: React.FC = () => {
             </div>
           </motion.div>
           <div className="grid grid-rows-2 gap-12">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1 }}
               className="relative rounded-[3rem] overflow-hidden group"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80" 
-                alt="Accessories" 
+              <img
+                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80"
+                alt="Accessories"
                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
                 referrerPolicy="no-referrer"
               />
@@ -109,16 +109,16 @@ const Home: React.FC = () => {
                 </Link>
               </div>
             </motion.div>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.2 }}
               className="relative rounded-[3rem] overflow-hidden group"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1505843490701-5be5d0b19d58?auto=format&fit=crop&w=800&q=80" 
-                alt="Furniture" 
+              <img
+                src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80"
+                alt="Furniture"
                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
                 referrerPolicy="no-referrer"
               />
@@ -150,7 +150,7 @@ const Home: React.FC = () => {
           {products.filter(p => p.originalPrice).slice(0, 4).map((product, i) => {
             const discount = Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100);
             return (
-              <motion.div 
+              <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -158,9 +158,9 @@ const Home: React.FC = () => {
                 transition={{ delay: i * 0.1 }}
                 className="group relative rounded-3xl overflow-hidden bg-gray-100 aspect-[3/4]"
               >
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
+                <img
+                  src={product.image}
+                  alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   referrerPolicy="no-referrer"
                 />
@@ -213,7 +213,7 @@ const Home: React.FC = () => {
                   <p className="text-lg text-gray-500 mb-10 max-w-md leading-relaxed">
                     {product.description}
                   </p>
-                  <Link 
+                  <Link
                     to={`/product/${product.id}`}
                     className="inline-flex items-center justify-center px-10 py-5 bg-black text-white font-bold rounded-full hover:bg-gray-800 transition-colors group"
                   >
@@ -223,13 +223,13 @@ const Home: React.FC = () => {
                 </motion.div>
               </div>
               <div className="relative h-[400px] lg:h-auto overflow-hidden group flex-1">
-                <motion.img 
+                <motion.img
                   initial={{ scale: 1.1 }}
                   whileInView={{ scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 1.5 }}
-                  src={product.image} 
-                  alt={product.name} 
+                  src={product.image}
+                  alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />

@@ -1,87 +1,38 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import axios from 'axios';
-import { products as staticProducts } from '../data/products';
+import { products } from '../data/products';
 import ProductCard from '../components/ProductCard';
 import { ChevronDown, Search } from 'lucide-react';
-
-interface Product {
-  id: number | string;
-  name: string;
-  price: number;
-  image: string;
-  description: string;
-  category: string;
-  featured?: boolean;
-}
 
 const Shop: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlSearch = searchParams.get('search') || '';
-
   const [searchQuery, setSearchQuery] = useState(urlSearch);
   const [sortBy, setSortBy] = useState('newest');
 
-  const [backendProducts, setBackendProducts] = useState<Product[]>([]);
-
   const activeCategory = searchParams.get('category') || 'All';
 
-  // ================= FETCH BACKEND PRODUCTS =================
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/api/products');
-
-        const formatted = res.data.map((p: any) => ({
-          id: p._id, // string id
-          name: p.name,
-          price: p.price,
-          image: p.imageUrl,
-          description: p.description,
-          category: p.category,
-          featured: p.featured || false
-        }));
-
-        setBackendProducts(formatted);
-
-      } catch (err) {
-        console.error('Failed to fetch backend products:', err);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
-  // ================= MERGE STATIC + BACKEND =================
-  const allProducts: Product[] = [
-    ...staticProducts,     // your bootcamp products
-    ...backendProducts     // real DB products
-  ];
-
-  // ================= SYNC SEARCH =================
-  useEffect(() => {
+  // Update local search query when URL changes
+  React.useEffect(() => {
     setSearchQuery(urlSearch);
   }, [urlSearch]);
 
-  const categories = ['All', ...new Set(allProducts.map(p => p.category))];
+  const categories = ['All', ...new Set(products.map(p => p.category))];
 
   const filteredProducts = useMemo(() => {
-    let result = allProducts;
+    let result = products;
 
-    // CATEGORY FILTER
     if (activeCategory !== 'All') {
       result = result.filter(p => p.category === activeCategory);
     }
 
-    // SEARCH FILTER
     if (searchQuery) {
-      result = result.filter(p =>
+      result = result.filter(p => 
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // SORT
     if (sortBy === 'price-low') {
       result = [...result].sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-high') {
@@ -89,79 +40,96 @@ const Shop: React.FC = () => {
     }
 
     return result;
-  }, [allProducts, activeCategory, searchQuery, sortBy]);
+  }, [activeCategory, searchQuery, sortBy]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-
-      {/* HEADER */}
       <div className="mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Shop All Products
-        </h1>
+        <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">Shop All Products</h1>
+        <p className="text-gray-500 dark:text-gray-400">Discover our full range of premium products.</p>
       </div>
 
-      {/* FILTERS */}
-      <div className="flex flex-col lg:flex-row justify-between mb-12 gap-6">
-
-        {/* CATEGORY */}
-        <div className="flex flex-wrap gap-2">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setSearchParams(cat === 'All' ? {} : { category: cat })}
-              className={`px-6 py-2 rounded-full text-sm ${
-                activeCategory === cat
-                  ? 'bg-black text-white'
-                  : 'bg-gray-100 text-gray-600'
-              }`}
+      {/* Filters & Search */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-6 lg:space-y-0 mb-12">
+        <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full lg:w-auto">
+          {/* Categories Dropdown */}
+          <div className="relative w-full sm:w-64">
+            <select 
+              value={activeCategory}
+              onChange={(e) => setSearchParams(e.target.value === 'All' ? {} : { category: e.target.value })}
+              className="w-full appearance-none pl-6 pr-12 py-3 bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition-colors text-sm font-medium cursor-pointer dark:text-white"
             >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* SEARCH + SORT */}
-        <div className="flex gap-4">
-
-          {/* SEARCH */}
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
-            <input
-              type="text"
-              value={searchQuery}
-              placeholder="Search..."
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 border rounded-full"
-            />
+              <option disabled>Select Category</option>
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
           </div>
 
-          {/* SORT */}
-          <select
+          {/* Search */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const val = e.target.value;
+                setSearchQuery(val);
+                if (val) {
+                  setSearchParams(prev => {
+                    const newParams = new URLSearchParams(prev);
+                    newParams.set('search', val);
+                    return newParams;
+                  });
+                } else {
+                  setSearchParams(prev => {
+                    const newParams = new URLSearchParams(prev);
+                    newParams.delete('search');
+                    return newParams;
+                  });
+                }
+              }}
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition-colors text-sm dark:text-white"
+            />
+          </div>
+        </div>
+
+        {/* Sort */}
+        <div className="relative w-full lg:w-auto">
+          <select 
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-4 py-2 border rounded-full"
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortBy(e.target.value)}
+            className="w-full lg:w-auto appearance-none pl-6 pr-12 py-3 bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition-colors text-sm font-medium cursor-pointer dark:text-white"
           >
-            <option value="newest">Newest</option>
-            <option value="price-low">Low → High</option>
-            <option value="price-high">High → Low</option>
+            <option value="newest">Newest First</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
           </select>
+          <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
         </div>
       </div>
 
-      {/* PRODUCTS */}
+      {/* Product Grid */}
       {filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredProducts.map(product => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (
-        <div className="text-center py-20">
-          No products found
+        <div className="text-center py-24 bg-gray-50 dark:bg-neutral-900/50 rounded-3xl">
+          <p className="text-gray-500 dark:text-gray-400 text-lg">No products found matching your criteria.</p>
+          <button 
+            onClick={() => {
+              setSearchQuery('');
+              setSearchParams({});
+            }}
+            className="mt-4 text-black dark:text-white font-bold hover:underline"
+          >
+            Clear all filters
+          </button>
         </div>
       )}
     </div>

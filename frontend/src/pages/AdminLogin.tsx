@@ -1,40 +1,46 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import axios from 'axios';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Copy, Check } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [copied, setCopied] = useState<'email' | 'pass' | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const ADMIN_EMAIL = 'admin@luxecart.com';
-  const ADMIN_PASS = 'admin123';
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
-      login(email, 'admin');
-      navigate('/dashboard');
-    } else {
-      alert('Invalid admin credentials');
-    }
-  };
+    setError('');
+    setLoading(true);
 
-  const copyToClipboard = (text: string, type: 'email' | 'pass') => {
-    navigator.clipboard.writeText(text);
-    setCopied(type);
-    setTimeout(() => setCopied(null), 2000);
+    try {
+      const res = await axios.post('/api/auth/login', { email, password });
+      
+      if (res.data.user?.role !== 'admin') {
+         setError('Access denied. Administrator privileges required.');
+         return;
+      }
+
+      login(res.data);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Invalid admin credentials');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50 dark:bg-black">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full"
@@ -50,39 +56,21 @@ const AdminLogin: React.FC = () => {
               <ShieldCheck size={32} />
             </div>
             <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">Admin Portal</h1>
-            <p className="text-gray-500 dark:text-gray-400">Secure access for platform administrators.</p>
+            <p className="text-gray-500 dark:text-gray-400">Restricted access for platform administrators.</p>
           </div>
 
-          {/* Credentials Box */}
-          <div className="mb-8 p-6 bg-gray-50 dark:bg-neutral-800/50 rounded-3xl border border-gray-100 dark:border-neutral-800">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">Master Credentials</p>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between group">
-                <code className="text-sm font-mono text-black dark:text-white">{ADMIN_EMAIL}</code>
-                <button 
-                  onClick={() => copyToClipboard(ADMIN_EMAIL, 'email')}
-                  className="p-2 hover:bg-gray-200 dark:hover:bg-neutral-700 rounded-lg transition-colors"
-                >
-                  {copied === 'email' ? <Check size={14} className="text-green-500" /> : <Copy size={14} className="text-gray-400" />}
-                </button>
-              </div>
-              <div className="flex items-center justify-between group">
-                <code className="text-sm font-mono text-black dark:text-white">{ADMIN_PASS}</code>
-                <button 
-                  onClick={() => copyToClipboard(ADMIN_PASS, 'pass')}
-                  className="p-2 hover:bg-gray-200 dark:hover:bg-neutral-700 rounded-lg transition-colors"
-                >
-                  {copied === 'pass' ? <Check size={14} className="text-green-500" /> : <Copy size={14} className="text-gray-400" />}
-                </button>
-              </div>
+          {error && (
+            <div className="mb-6 p-4 rounded-2xl flex items-start gap-3 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400">
+              <AlertCircle className="shrink-0 mt-0.5" size={18} />
+              <p className="text-sm font-medium">{error}</p>
             </div>
-          </div>
+          )}
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Admin Email</label>
-              <Input 
-                type="email" 
+              <Input
+                type="email"
                 placeholder="Enter admin email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -92,27 +80,40 @@ const AdminLogin: React.FC = () => {
             </div>
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Password</label>
-              <Input 
-                type="password" 
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-6 py-4 bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-2xl focus-visible:ring-black dark:focus-visible:ring-white h-auto dark:text-white"
-                required
-              />
+              <div className="relative group">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-2xl focus-visible:ring-black dark:focus-visible:ring-white h-auto dark:text-white"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
-            <Button type="submit" className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-xl hover:shadow-black/20 dark:hover:shadow-white/10">
-              Authorize Access
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-xl disabled:opacity-70"
+            >
+              {loading ? 'Authorizing...' : 'Authorize Access'}
             </Button>
           </form>
 
           <div className="mt-8 text-center">
-            <button 
-              onClick={() => navigate('/login')}
-              className="text-sm font-bold text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+            <button
+              onClick={() => navigate('/')}
+              className="inline-flex items-center text-sm font-bold text-gray-400 hover:text-black dark:hover:text-white transition-colors"
             >
-              Return to User Login
+              <ArrowLeft size={16} className="mr-2" /> Return to Website
             </button>
           </div>
         </div>

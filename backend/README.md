@@ -27,4 +27,5 @@ MONGO_URI=mongodb+srv://feyselfeyyu_db_user:lrMWO2w5s05hN7o5@cluster0.hcdewwb.mo
 JWT_SECRET="unsmkaoeu><dslnonensስፍስጋጋግጅነክልሳኮፍጆኢጃkljflskfnlk"
 EMAIL_USER=yassinmamud53@gmail.com
 EMAIL_PASS=mhbbyavnjnmxnpeg
+FRONTEND_URL=http://localhost:3000
 ```

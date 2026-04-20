@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import axios from 'axios';
+import { products } from '../data/products';
 
 interface CartItem {
-  productId: any; // backend returns populated object OR id
+  productId: any; // backend may return populated object OR primitive id
   quantity: number;
 }
 
@@ -19,8 +20,69 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const LOCAL_CART_KEY = 'cart';
+
+const resolveProductId = (productId: any) => {
+  if (productId && typeof productId === 'object') {
+    return productId._id ?? productId.id ?? productId.productId ?? productId;
+  }
+
+  return productId;
+};
+
+const normalizeCart = (items: CartItem[] = []) =>
+  items.map((item) => ({
+    productId: resolveProductId(item.productId),
+    quantity: item.quantity,
+  }));
+
+const buildCheckoutCart = (items: CartItem[] = []) =>
+  items.map((item) => {
+    const normalizedProductId = Number(resolveProductId(item.productId));
+    const product = products.find((entry) => Number(entry.id) === normalizedProductId);
+
+    return {
+      productId: normalizedProductId,
+      quantity: item.quantity,
+      name: product?.name ?? item.productId?.name ?? 'Product',
+      price: product?.price ?? item.productId?.price ?? 0,
+      imageUrl: product?.image ?? item.productId?.imageUrl ?? '',
+    };
+  });
+
+const readLocalCart = (): CartItem[] => {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const raw = window.localStorage.getItem(LOCAL_CART_KEY);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    return normalizeCart(
+      parsed.map((item) => ({
+        productId: item.productId,
+        quantity: Number(item.quantity) || 1,
+      }))
+    );
+  } catch {
+    return [];
+  }
+};
+
+const persistLocalCart = (items: CartItem[]) => {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.setItem(LOCAL_CART_KEY, JSON.stringify(buildCheckoutCart(items)));
+  } catch {
+    // Ignore storage failures in non-browser environments
+  }
+};
+
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(() => readLocalCart());
 
   // 🔥 always get fresh token (IMPORTANT FIX)
   const getToken = () => localStorage.getItem('token');
@@ -28,14 +90,21 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ================= LOAD CART =================
   const refreshCart = async () => {
     const token = getToken();
-    if (!token) return;
+
+    if (!token) {
+      const localCart = readLocalCart();
+      setCart(localCart);
+      return;
+    }
 
     try {
-      const res = await axios.get('http://localhost:5000/api/cart', {
+      const res = await axios.get('/api/cart', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setCart(res.data.items || []);
+      const nextCart = normalizeCart(res.data.items || []);
+      setCart(nextCart);
+      persistLocalCart(nextCart);
     } catch (err) {
       console.error('Cart load error:', err);
     }
@@ -48,16 +117,44 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ================= ADD TO CART =================
   const addToCart = async (productId: string) => {
     const token = getToken();
-    if (!token) return;
+
+    if (!token) {
+      const normalizedProductId = Number(productId);
+
+      setCart((prev) => {
+        const existing = prev.find(
+          (item) => Number(resolveProductId(item.productId)) === normalizedProductId
+        );
+
+        let nextCart: CartItem[];
+
+        if (existing) {
+          nextCart = prev.map((item) =>
+            Number(resolveProductId(item.productId)) === normalizedProductId
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        } else {
+          nextCart = [...prev, { productId: normalizedProductId, quantity: 1 }];
+        }
+
+        persistLocalCart(nextCart);
+        return nextCart;
+      });
+
+      return;
+    }
 
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/cart/add',
+        '/api/cart/add',
         { productId, quantity: 1 },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setCart(res.data.items);
+      const nextCart = normalizeCart(res.data.items || []);
+      setCart(nextCart);
+      persistLocalCart(nextCart);
     } catch (err) {
       console.error('Add to cart error:', err);
     }
@@ -66,15 +163,25 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ================= REMOVE =================
   const removeFromCart = async (productId: string) => {
     const token = getToken();
-    if (!token) return;
+
+    if (!token) {
+      const nextCart = cart.filter(
+        (item) => Number(resolveProductId(item.productId)) !== Number(productId)
+      );
+      setCart(nextCart);
+      persistLocalCart(nextCart);
+      return;
+    }
 
     try {
       const res = await axios.delete(
-        `http://localhost:5000/api/cart/remove/${productId}`,
+        `/api/cart/remove/${productId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setCart(res.data.items);
+      const nextCart = normalizeCart(res.data.items || []);
+      setCart(nextCart);
+      persistLocalCart(nextCart);
     } catch (err) {
       console.error(err);
     }
@@ -83,10 +190,24 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ================= UPDATE QUANTITY =================
   const updateQuantity = async (productId: string, delta: number) => {
     const token = getToken();
-    if (!token) return;
+    if (!token) {
+      const nextCart = cart
+        .map((item) => {
+          if (Number(resolveProductId(item.productId)) !== Number(productId)) {
+            return item;
+          }
+
+          return { ...item, quantity: item.quantity + delta };
+        })
+        .filter((item) => item.quantity > 0);
+
+      setCart(nextCart);
+      persistLocalCart(nextCart);
+      return;
+    }
 
     const item = cart.find(i =>
-      (i.productId?._id || i.productId) === productId
+      Number(resolveProductId(i.productId)) === Number(productId)
     );
 
     if (!item) return;
@@ -96,12 +217,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/cart/add',
+        '/api/cart/add',
         { productId, quantity: delta },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setCart(res.data.items);
+      const nextCart = normalizeCart(res.data.items || []);
+      setCart(nextCart);
+      persistLocalCart(nextCart);
     } catch (err) {
       console.error(err);
     }
@@ -110,14 +233,20 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ================= CLEAR CART =================
   const clearCart = async () => {
     const token = getToken();
-    if (!token) return;
+
+    if (!token) {
+      setCart([]);
+      persistLocalCart([]);
+      return;
+    }
 
     try {
-      await axios.delete('http://localhost:5000/api/cart/clear', {
+      await axios.delete('/api/cart/clear', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       setCart([]);
+      persistLocalCart([]);
     } catch (err) {
       console.error(err);
     }
@@ -127,7 +256,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const totalPrice = cart.reduce((sum, item) => {
-    const price = item.productId?.price || 0;
+    const price = item.productId?.price || products.find((entry) => Number(entry.id) === Number(resolveProductId(item.productId)))?.price || 0;
     return sum + price * item.quantity;
   }, 0);
 

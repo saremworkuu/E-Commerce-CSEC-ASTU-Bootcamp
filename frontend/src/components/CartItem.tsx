@@ -5,7 +5,7 @@ import { products } from '../data/products';
 
 interface CartItemProps {
   item: {
-    productId: string;
+    productId: any;
     quantity: number;
   };
 }
@@ -13,16 +13,18 @@ interface CartItemProps {
 const CartItem: React.FC<CartItemProps> = ({ item }) => {
   const { updateQuantity, removeFromCart } = useCart();
 
+  const resolvedProductId = item.productId?._id ?? item.productId?.id ?? item.productId;
+
   // ✅ FIX: convert BOTH to number before comparing
   const product = products.find(
-    p => Number(p.id) === Number(item.productId)
+    p => Number(p.id) === Number(resolvedProductId)
   );
 
   // ✅ SAFE fallback
   if (!product) {
     return (
       <div className="p-4 text-red-500">
-        Product not found (ID: {item.productId})
+        Product not found (ID: {resolvedProductId})
       </div>
     );
   }
@@ -33,7 +35,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
     <div className="flex items-center py-6 border-b border-gray-100 last:border-0">
       
       {/* IMAGE */}
-      <div className="w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100">
+      <div className="w-24 h-24 shrink-0 rounded-xl overflow-hidden bg-gray-100">
         <img
           src={image}
           alt={name}
@@ -54,7 +56,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           </div>
 
           <button
-            onClick={() => removeFromCart(item.productId)}
+            onClick={() => removeFromCart(String(resolvedProductId))}
             className="text-gray-400 hover:text-red-500 transition-colors"
           >
             <Trash2 size={18} />
@@ -66,7 +68,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           
           <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
             <button
-              onClick={() => updateQuantity(item.productId, -1)}
+              onClick={() => updateQuantity(String(resolvedProductId), -1)}
               className="p-2 hover:bg-gray-50"
             >
               <Minus size={14} />
@@ -77,7 +79,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
             </span>
 
             <button
-              onClick={() => updateQuantity(item.productId, 1)}
+              onClick={() => updateQuantity(String(resolvedProductId), 1)}
               className="p-2 hover:bg-gray-50"
             >
               <Plus size={14} />

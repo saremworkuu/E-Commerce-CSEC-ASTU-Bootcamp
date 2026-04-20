@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 
-const SLIDE_DURATION = 6000; // 6 seconds
+const SLIDE_DURATION = 5000; // 5 seconds
 
 const slides = [
   {
@@ -39,6 +39,8 @@ const slides = [
 const HeroSlider: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1); // 1 for right to left
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
     setDirection(1);
@@ -64,10 +66,10 @@ const HeroSlider: React.FC = () => {
       scale: 1,
       filter: 'blur(0px)',
       transition: {
-        x: { duration: 2.5, ease: [0.16, 1, 0.3, 1] },
-        opacity: { duration: 2, ease: "easeInOut" },
-        scale: { duration: 2.5, ease: [0.16, 1, 0.3, 1] },
-        filter: { duration: 2 }
+        x: { duration: 1.6, ease: [0.16, 1, 0.3, 1] },
+        opacity: { duration: 1.2, ease: "easeInOut" },
+        scale: { duration: 1.6, ease: [0.16, 1, 0.3, 1] },
+        filter: { duration: 1.2 }
       }
     } as const,
     exit: (direction: number) => ({
@@ -77,11 +79,23 @@ const HeroSlider: React.FC = () => {
       scale: 1.05,
       filter: 'blur(10px)',
       transition: {
-        x: { duration: 2.5, ease: [0.16, 1, 0.3, 1] },
-        opacity: { duration: 2, ease: "easeInOut" },
-        filter: { duration: 2 }
+        x: { duration: 1.6, ease: [0.16, 1, 0.3, 1] },
+        opacity: { duration: 1.2, ease: "easeInOut" },
+        filter: { duration: 1.2 }
       }
     } as const)
+  };
+
+  const handleHeroSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const query = searchQuery.trim();
+
+    if (query) {
+      navigate(`/shop?search=${encodeURIComponent(query)}`);
+      return;
+    }
+
+    navigate('/shop');
   };
 
   return (
@@ -98,10 +112,10 @@ const HeroSlider: React.FC = () => {
         >
           {/* Background Image Container with Ken Burns */}
           <div className="absolute inset-0 w-full h-full overflow-hidden">
-            <motion.div 
+            <motion.div
               initial={{ scale: 1.3, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ 
+              transition={{
                 scale: { duration: SLIDE_DURATION / 1000, ease: "linear" },
                 opacity: { duration: 1.5, ease: "easeOut" }
               }}
@@ -126,7 +140,7 @@ const HeroSlider: React.FC = () => {
               <motion.span
                 initial={{ opacity: 0, y: 20, letterSpacing: "0.5em" }}
                 animate={{ opacity: 1, y: 0, letterSpacing: "0.3em" }}
-                transition={{ duration: 1, delay: 0.5 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
                 className="text-xs font-bold uppercase text-gray-400 mb-4 block"
               >
                 {slides[currentIndex].label}
@@ -135,7 +149,7 @@ const HeroSlider: React.FC = () => {
               <motion.h1
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1.2, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="text-3xl sm:text-4xl md:text-7xl font-bold tracking-tighter text-white leading-[0.9] mb-8"
               >
                 {slides[currentIndex].title} <br />
@@ -145,7 +159,7 @@ const HeroSlider: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 1, delay: 1.2 }}
+                transition={{ duration: 0.8, delay: 0.8 }}
                 className="text-sm sm:text-base md:text-lg text-gray-400 mb-10 max-w-xl mx-auto font-light leading-relaxed"
               >
                 {slides[currentIndex].description}
@@ -154,7 +168,7 @@ const HeroSlider: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.5 }}
+                transition={{ duration: 0.8, delay: 1.1 }}
                 className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4"
               >
                 <Link
@@ -171,6 +185,31 @@ const HeroSlider: React.FC = () => {
                   Our Story
                 </Link>
               </motion.div>
+
+              <motion.form
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 1.25 }}
+                onSubmit={handleHeroSearch}
+                className="mt-6 flex w-full max-w-xl mx-auto"
+              >
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search products, styles, collections..."
+                    className="w-full h-12 pl-11 pr-3 rounded-l-full border border-white/20 bg-black/35 text-white placeholder:text-gray-400 focus:outline-none focus:border-white/40"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="h-12 px-6 rounded-r-full bg-white text-black text-sm font-bold hover:bg-gray-200 transition-colors"
+                >
+                  Search
+                </button>
+              </motion.form>
             </div>
           </div>
         </motion.div>
@@ -185,9 +224,8 @@ const HeroSlider: React.FC = () => {
               setDirection(index > currentIndex ? 1 : -1);
               setCurrentIndex(index);
             }}
-            className={`h-1 transition-all duration-500 rounded-full ${
-              currentIndex === index ? 'w-12 bg-white' : 'w-4 bg-white/30 hover:bg-white/50'
-            }`}
+            className={`h-1 transition-all duration-500 rounded-full ${currentIndex === index ? 'w-12 bg-white' : 'w-4 bg-white/30 hover:bg-white/50'
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}

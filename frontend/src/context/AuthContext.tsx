@@ -12,6 +12,7 @@ interface User {
 
 interface AuthContextType {
   isLoggedIn: boolean;
+  isAuthenticated: boolean;
   isAdmin: boolean;
   user: User | null;
   loading: boolean;
@@ -38,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       try {
         // Verify token with backend
-        const res = await axios.get('http://localhost:5000/api/auth/me', {
+        const res = await axios.get('/api/auth/me', {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -86,11 +87,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isLoggedIn = !!user;
+  const isAuthenticated = isLoggedIn;
   const isAdmin = user?.role === 'admin';
 
   return (
     <AuthContext.Provider value={{
       isLoggedIn,
+      isAuthenticated,
       isAdmin,
       user,
       loading,

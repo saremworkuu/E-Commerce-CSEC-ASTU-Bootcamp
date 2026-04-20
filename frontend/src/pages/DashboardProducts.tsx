@@ -54,7 +54,7 @@ const DashboardProducts: React.FC = () => {
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/products', {
+      const response = await axios.get('/api/products', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProducts(response.data);
@@ -76,7 +76,7 @@ const DashboardProducts: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/products/${id}`, {
+      await axios.delete(`/api/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProducts(products.filter(p => p._id !== id));

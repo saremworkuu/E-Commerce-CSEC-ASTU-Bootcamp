@@ -61,7 +61,7 @@ const DashboardOrders: React.FC = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/orders/admin', {
+      const response = await axios.get('/api/orders/admin', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setOrders(response.data);
@@ -78,7 +78,7 @@ const DashboardOrders: React.FC = () => {
     const token = localStorage.getItem('token');
     
     await axios.put(
-      `http://localhost:5000/api/orders/${orderId}/status`,   // ← Corrected
+      `/api/orders/${orderId}/status`,   // ← Corrected
       { status: newStatus },
       { 
         headers: { 
