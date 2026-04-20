@@ -2,6 +2,7 @@
 import jwt from 'jsonwebtoken';
 
 const Protect = (req, res, next) => {
+
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
@@ -18,3 +19,4 @@ const Protect = (req, res, next) => {
 };
 
 export { Protect };
+

@@ -3,8 +3,10 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 import { Protect } from '../middleware/auth.js';
+import { Router } from 'express';
 
 const router = express.Router();
+
 
 // ==================== REGISTER ====================
 router.post('/register', async (req, res) => {
@@ -101,5 +103,6 @@ router.get('/me', Protect, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 export default router;
