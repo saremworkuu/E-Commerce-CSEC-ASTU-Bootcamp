@@ -46,6 +46,7 @@ router.post('/register', async (req, res) => {
 });
 
 // ==================== LOGIN ====================
+console.log("LOGIN REQUEST RECEIVED");
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
