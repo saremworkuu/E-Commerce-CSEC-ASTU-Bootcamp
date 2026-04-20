@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import axios from 'axios';
 import { products } from '../data/products';
+import { useAuth } from './AuthContext';
 
 interface CartItem {
   productId: any; // backend may return populated object OR primitive id
@@ -19,8 +20,6 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
-
-const LOCAL_CART_KEY = 'cart';
 
 const resolveProductId = (productId: any) => {
   if (productId && typeof productId === 'object') {
@@ -50,11 +49,16 @@ const buildCheckoutCart = (items: CartItem[] = []) =>
     };
   });
 
-const readLocalCart = (): CartItem[] => {
+const getCartStorageKey = (email?: string | null) => (email ? `cart_${email}` : null);
+
+const readLocalCart = (email?: string | null): CartItem[] => {
   if (typeof window === 'undefined') return [];
 
+  const storageKey = getCartStorageKey(email);
+  if (!storageKey) return [];
+
   try {
-    const raw = window.localStorage.getItem(LOCAL_CART_KEY);
+    const raw = window.localStorage.getItem(storageKey);
     if (!raw) return [];
 
     const parsed = JSON.parse(raw);
@@ -71,18 +75,22 @@ const readLocalCart = (): CartItem[] => {
   }
 };
 
-const persistLocalCart = (items: CartItem[]) => {
+const persistLocalCart = (email: string | null | undefined, items: CartItem[]) => {
   if (typeof window === 'undefined') return;
 
+  const storageKey = getCartStorageKey(email);
+  if (!storageKey) return;
+
   try {
-    window.localStorage.setItem(LOCAL_CART_KEY, JSON.stringify(buildCheckoutCart(items)));
+    window.localStorage.setItem(storageKey, JSON.stringify(buildCheckoutCart(items)));
   } catch {
     // Ignore storage failures in non-browser environments
   }
 };
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [cart, setCart] = useState<CartItem[]>(() => readLocalCart());
+  const { user } = useAuth();
+  const [cart, setCart] = useState<CartItem[]>(() => readLocalCart(user?.email));
 
   // 🔥 always get fresh token (IMPORTANT FIX)
   const getToken = () => localStorage.getItem('token');
@@ -92,7 +100,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const token = getToken();
 
     if (!token) {
-      const localCart = readLocalCart();
+      const localCart = readLocalCart(user?.email);
       setCart(localCart);
       return;
     }
@@ -104,7 +112,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const nextCart = normalizeCart(res.data.items || []);
       setCart(nextCart);
-      persistLocalCart(nextCart);
+      persistLocalCart(user?.email, nextCart);
     } catch (err) {
       console.error('Cart load error:', err);
     }
@@ -112,7 +120,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     refreshCart();
-  }, []);
+  }, [user?.email]);
 
   // ================= ADD TO CART =================
   const addToCart = async (productId: string) => {
@@ -138,7 +146,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           nextCart = [...prev, { productId: normalizedProductId, quantity: 1 }];
         }
 
-        persistLocalCart(nextCart);
+        persistLocalCart(user?.email, nextCart);
         return nextCart;
       });
 
@@ -154,7 +162,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const nextCart = normalizeCart(res.data.items || []);
       setCart(nextCart);
-      persistLocalCart(nextCart);
+      persistLocalCart(user?.email, nextCart);
     } catch (err) {
       console.error('Add to cart error:', err);
     }
@@ -169,7 +177,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         (item) => Number(resolveProductId(item.productId)) !== Number(productId)
       );
       setCart(nextCart);
-      persistLocalCart(nextCart);
+      persistLocalCart(user?.email, nextCart);
       return;
     }
 
@@ -181,7 +189,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const nextCart = normalizeCart(res.data.items || []);
       setCart(nextCart);
-      persistLocalCart(nextCart);
+      persistLocalCart(user?.email, nextCart);
     } catch (err) {
       console.error(err);
     }
@@ -202,7 +210,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .filter((item) => item.quantity > 0);
 
       setCart(nextCart);
-      persistLocalCart(nextCart);
+      persistLocalCart(user?.email, nextCart);
       return;
     }
 
@@ -224,7 +232,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const nextCart = normalizeCart(res.data.items || []);
       setCart(nextCart);
-      persistLocalCart(nextCart);
+      persistLocalCart(user?.email, nextCart);
     } catch (err) {
       console.error(err);
     }
@@ -236,7 +244,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (!token) {
       setCart([]);
-      persistLocalCart([]);
+      persistLocalCart(user?.email, []);
       return;
     }
 
@@ -246,7 +254,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
 
       setCart([]);
-      persistLocalCart([]);
+      persistLocalCart(user?.email, []);
     } catch (err) {
       console.error(err);
     }

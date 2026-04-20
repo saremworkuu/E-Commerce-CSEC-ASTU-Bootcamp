@@ -14,19 +14,19 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const { isLoggedIn } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [isAdding, setIsAdding] = React.useState(false);
 
   const handleAddToCart = () => {
     setIsAdding(true);
-    addToCart(String(product.id));
+    addToCart(product);
     setTimeout(() => setIsAdding(false), 1500);
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       navigate('/login');
       return;
     }
@@ -103,11 +103,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </motion.button>
         </div>
 
-        {product.featured && (
-          <span className="absolute top-6 left-6 bg-black/80 dark:bg-white/80 backdrop-blur-md text-white dark:text-black text-[10px] font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border border-white/10 dark:border-black/10">
-            Limited Edition
-          </span>
-        )}
       </div>
 
       {/* Content */}

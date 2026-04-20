@@ -1,28 +1,52 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { User, Mail, Lock, LogOut, Settings, Package, Heart, CreditCard, Eye, EyeOff } from 'lucide-react';
 
 const Profile: React.FC = () => {
   const { user, login, logout, isAuthenticated } = useAuth();
+  const { addToCart } = useCart();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const resolvedEmail = email || 'user@example.com';
-    const resolvedRole = email === 'admin@luxecart.com' && password === 'admin123' ? 'admin' : 'user';
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
 
-    login({
-      _id: resolvedEmail,
-      email: resolvedEmail,
-      role: resolvedRole,
-    });
+    const pendingProductId = localStorage.getItem('pending_add_to_cart');
+    if (!pendingProductId) return;
+
+    const redirectTo = localStorage.getItem('pending_add_redirect') || '/cart';
+
+    localStorage.removeItem('pending_add_to_cart');
+    localStorage.removeItem('pending_add_redirect');
+
+    addToCart(pendingProductId);
+    navigate(redirectTo);
+  }, [isAuthenticated, addToCart, navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const res = await axios.post('/api/auth/login', { email, password });
+      
+      login(res.data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Invalid credentials');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isAuthenticated) {
@@ -40,6 +64,12 @@ const Profile: React.FC = () => {
             <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">Account</h1>
             <p className="text-gray-500 dark:text-gray-400">Sign in to manage your orders and preferences.</p>
           </div>
+
+          {error && (
+            <div className="mb-6 p-4 rounded-2xl flex items-start gap-3 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400">
+              <p className="text-sm font-medium">{error}</p>
+            </div>
+          )}
 
           <form className="space-y-6" onSubmit={handleLogin}>
             <div className="space-y-2">
@@ -82,8 +112,12 @@ const Profile: React.FC = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl active:scale-[0.98]">
-              Sign In
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-70"
+            >
+              {loading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
 

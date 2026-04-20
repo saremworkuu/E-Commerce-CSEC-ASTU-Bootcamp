@@ -116,9 +116,8 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    if (!user.isEmailVerified) {
-      return res.status(401).json({ message: 'Please verify your email before logging in.' });
-    }
+    // ** Email Verification Block Removed **
+    // The user can now log in without being blocked by unverified email.
 
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 

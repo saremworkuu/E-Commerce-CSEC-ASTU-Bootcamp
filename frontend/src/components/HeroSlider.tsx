@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight, Search } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const SLIDE_DURATION = 5000; // 5 seconds
 
@@ -39,8 +39,6 @@ const slides = [
 const HeroSlider: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1); // 1 for right to left
-  const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
     setDirection(1);
@@ -86,18 +84,6 @@ const HeroSlider: React.FC = () => {
     } as const)
   };
 
-  const handleHeroSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const query = searchQuery.trim();
-
-    if (query) {
-      navigate(`/shop?search=${encodeURIComponent(query)}`);
-      return;
-    }
-
-    navigate('/shop');
-  };
-
   return (
     <section className="relative h-[70vh] min-h-[500px] w-full overflow-hidden bg-black">
       <AnimatePresence initial={true} custom={direction} mode="popLayout">
@@ -112,10 +98,10 @@ const HeroSlider: React.FC = () => {
         >
           {/* Background Image Container with Ken Burns */}
           <div className="absolute inset-0 w-full h-full overflow-hidden">
-            <motion.div
+            <motion.div 
               initial={{ scale: 1.3, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{
+              transition={{ 
                 scale: { duration: SLIDE_DURATION / 1000, ease: "linear" },
                 opacity: { duration: 1.5, ease: "easeOut" }
               }}
@@ -185,31 +171,6 @@ const HeroSlider: React.FC = () => {
                   Our Story
                 </Link>
               </motion.div>
-
-              <motion.form
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.25 }}
-                onSubmit={handleHeroSearch}
-                className="mt-6 flex w-full max-w-xl mx-auto"
-              >
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products, styles, collections..."
-                    className="w-full h-12 pl-11 pr-3 rounded-l-full border border-white/20 bg-black/35 text-white placeholder:text-gray-400 focus:outline-none focus:border-white/40"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="h-12 px-6 rounded-r-full bg-white text-black text-sm font-bold hover:bg-gray-200 transition-colors"
-                >
-                  Search
-                </button>
-              </motion.form>
             </div>
           </div>
         </motion.div>
@@ -224,8 +185,9 @@ const HeroSlider: React.FC = () => {
               setDirection(index > currentIndex ? 1 : -1);
               setCurrentIndex(index);
             }}
-            className={`h-1 transition-all duration-500 rounded-full ${currentIndex === index ? 'w-12 bg-white' : 'w-4 bg-white/30 hover:bg-white/50'
-              }`}
+            className={`h-1 transition-all duration-500 rounded-full ${
+              currentIndex === index ? 'w-12 bg-white' : 'w-4 bg-white/30 hover:bg-white/50'
+            }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}

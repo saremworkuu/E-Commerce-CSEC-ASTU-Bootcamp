@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, User, Menu, X, Search, Sun, Moon, LogOut, Heart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -13,6 +13,7 @@ const Navbar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -58,19 +59,28 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-10">
-            {navItems.map((item) => (
-              <Link 
-                key={item.label}
-                to={item.path} 
-                className="relative text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors group"
-              >
-                {item.label}
-                <motion.span 
-                  className="absolute -bottom-1 left-0 w-0 h-[1px] bg-black dark:bg-white transition-all group-hover:w-full"
-                  initial={false}
-                />
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link 
+                  key={item.label}
+                  to={item.path} 
+                  className={`relative text-[11px] font-bold uppercase tracking-[0.2em] transition-colors group ${
+                    isActive 
+                      ? 'text-black dark:text-white' 
+                      : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                  <motion.span 
+                    className={`absolute -bottom-1 left-0 h-[1px] bg-black dark:bg-white transition-all ${
+                      isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                    }`}
+                    initial={false}
+                  />
+                </Link>
+              );
+            })}
           </div>
 
           {/* Icons */}
@@ -173,17 +183,32 @@ const Navbar: React.FC = () => {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden bg-white dark:bg-black border-t border-gray-100 dark:border-white/10 overflow-hidden transition-colors duration-300"
           >
-            <div className="px-4 py-6 space-y-4">
-              {navItems.map((item) => (
-                <Link 
-                  key={item.label}
-                  to={item.path} 
-                  className="block text-lg font-medium text-gray-900 dark:text-white"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
+            <div className="px-4 py-8 space-y-6">
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link 
+                    key={item.label}
+                    to={item.path} 
+                    className={`block text-2xl font-bold tracking-tighter transition-colors ${
+                      isActive 
+                        ? 'text-black dark:text-white' 
+                        : 'text-gray-400 dark:text-gray-600'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>{item.label}</span>
+                      {isActive && (
+                        <motion.div 
+                          layoutId="activeIndicator"
+                          className="w-12 h-[1px] bg-black dark:bg-white"
+                        />
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
               {user && (
                 <button 
                   onClick={() => {
