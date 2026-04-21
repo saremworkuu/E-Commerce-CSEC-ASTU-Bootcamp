@@ -40,6 +40,7 @@ import {
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { apiUrl } from '../lib/api';
 
 const DashboardProducts: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -59,7 +60,7 @@ const DashboardProducts: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/products');
+      const res = await axios.get(apiUrl('/products'));
       setProducts(res.data);
     } catch (err) {
       console.error('Failed to fetch products', err);
@@ -78,7 +79,7 @@ const DashboardProducts: React.FC = () => {
   const handleDelete = async (id: string | number) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/products/${id}`, {
+        await axios.delete(apiUrl(`/products/${id}`), {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         setProducts(products.filter(p => (p._id || p.id) !== id));
@@ -111,12 +112,12 @@ const DashboardProducts: React.FC = () => {
     try {
       if (editingProduct) {
         const id = editingProduct._id || editingProduct.id;
-        const res = await axios.put(`http://localhost:5000/api/products/${id}`, payload, {
+        const res = await axios.put(apiUrl(`/products/${id}`), payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProducts(products.map(p => (p._id || p.id) === id ? res.data.product : p));
       } else {
-        const res = await axios.post('http://localhost:5000/api/products', payload, {
+        const res = await axios.post(apiUrl('/products'), payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProducts([res.data.product, ...products]);

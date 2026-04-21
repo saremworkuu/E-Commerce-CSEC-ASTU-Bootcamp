@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { ChevronDown, Search } from 'lucide-react';
+import { apiUrl } from '../lib/api';
 
 const Shop: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -14,7 +15,7 @@ const Shop: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/products');
+        const res = await axios.get(apiUrl('/products'));
         setProducts(res.data);
       } catch (err) {
         console.error('Failed to fetch home products:', err);

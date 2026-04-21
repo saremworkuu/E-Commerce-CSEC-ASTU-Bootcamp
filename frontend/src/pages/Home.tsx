@@ -4,6 +4,7 @@ import axios from 'axios';
 import { ArrowRight, ShoppingBag, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
+import { apiUrl } from '../lib/api';
 import { motion } from 'motion/react';
 
 const Home: React.FC = () => {
@@ -12,7 +13,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/products');
+        const res = await axios.get(apiUrl('/products'));
         setProducts(res.data);
       } catch (err) {
         console.error('Failed to fetch home products:', err);

@@ -6,6 +6,7 @@ import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import axios from 'axios';
+import { apiUrl } from '../lib/api';
 
 const DashboardProductNew: React.FC = () => {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ const DashboardProductNew: React.FC = () => {
       };
 
       const response = await axios.post(
-        'http://localhost:5000/api/products',
+        apiUrl('/products'),
         productData,
         {
           headers: {
@@ -150,7 +151,7 @@ const DashboardProductNew: React.FC = () => {
                 <SelectItem value="Jewelry">Jewelry</SelectItem>
                 <SelectItem value="Home Goods">Home Goods</SelectItem>
                 <SelectItem value="Clothing">Clothing</SelectItem>
-                <SelectItem value="Footwear">Footwear</SelectItem>
+                <SelectItem value="Clothing">Footwear</SelectItem>
                 <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>

@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { ArrowLeft, ShoppingCart, Shield, Truck, RotateCcw, CreditCard } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
+import { apiUrl } from '../lib/api';
 
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,7 +17,7 @@ const ProductDetails: React.FC = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+        const res = await axios.get(apiUrl(`/products/${id}`));
         setProduct(res.data);
       } catch (err) {
         console.error('Failed to fetch product from API:', err);

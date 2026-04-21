@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { User, Mail, Lock, LogOut, Settings, Package, Heart, CreditCard, Eye, EyeOff } from 'lucide-react';
+import { apiUrl } from '../lib/api';
 
 const Profile: React.FC = () => {
   const { user, login, logout, isAuthenticated } = useAuth();
@@ -39,7 +40,7 @@ const Profile: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post('/api/auth/login', { email, password });
+      const res = await axios.post(apiUrl('/auth/login'), { email, password });
       
       login(res.data);
     } catch (err: any) {

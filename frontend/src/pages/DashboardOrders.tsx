@@ -28,6 +28,7 @@ import {
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
+import { apiUrl } from '../lib/api';
 
 interface OrderData {
   _id: string;
@@ -46,7 +47,7 @@ const DashboardOrders: React.FC = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/orders/admin', {
+      const res = await axios.get(apiUrl('/orders/admin'), {
         headers: { Authorization: `Bearer ${token}` }
       });
       setOrders(res.data);
@@ -87,7 +88,7 @@ const DashboardOrders: React.FC = () => {
   const updateStatus = async (id: string, newStatus: OrderData['status']) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5000/api/orders/${id}/status`, 
+      await axios.put(apiUrl(`/orders/${id}/status`), 
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );

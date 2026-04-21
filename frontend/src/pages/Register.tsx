@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
+import { apiUrl } from '../lib/api';
 
 const Register: React.FC = () => {
   const [fullName, setFullName] = useState('');
@@ -28,7 +29,7 @@ const Register: React.FC = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post('/api/auth/register', {
+      const res = await axios.post(apiUrl('/auth/register'), {
         fullName,
         email,
         password

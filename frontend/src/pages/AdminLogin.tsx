@@ -7,6 +7,7 @@ import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ShieldCheck, ArrowLeft, Eye, EyeOff, Moon, Sun } from 'lucide-react';
+import { apiUrl } from '../lib/api';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -21,7 +22,7 @@ const AdminLogin: React.FC = () => {
     e.preventDefault();
     setError('');
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      const res = await axios.post(apiUrl('/auth/login'), { email, password });
       
       if (res.data.user.role === 'admin') {
         login(res.data.user.email, 'admin', res.data.token);

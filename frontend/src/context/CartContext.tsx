@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import axios from 'axios';
 import { products } from '../data/products';
 import { useAuth } from './AuthContext';
+import { apiUrl } from '../lib/api';
 
 interface CartItem {
   productId: any; // backend may return populated object OR primitive id
@@ -106,7 +107,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      const res = await axios.get('/api/cart', {
+      const res = await axios.get(apiUrl('/cart'), {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -155,7 +156,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const res = await axios.post(
-        '/api/cart/add',
+        apiUrl('/cart/add'),
         { productId, quantity: 1 },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -183,7 +184,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const res = await axios.delete(
-        `/api/cart/remove/${productId}`,
+        apiUrl(`/cart/remove/${productId}`),
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -225,7 +226,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const res = await axios.post(
-        '/api/cart/add',
+        apiUrl('/cart/add'),
         { productId, quantity: delta },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -249,7 +250,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      await axios.delete('/api/cart/clear', {
+      await axios.delete(apiUrl('/cart/clear'), {
         headers: { Authorization: `Bearer ${token}` }
       });
 

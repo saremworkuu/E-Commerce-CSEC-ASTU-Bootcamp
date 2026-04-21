@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { apiUrl } from '../lib/api';
 
 const ConfirmEmail = () => {
   const [searchParams] = useSearchParams();
@@ -17,10 +18,7 @@ const ConfirmEmail = () => {
       }
 
       try {
-        const apiBase = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
-        const verificationEndpoint = apiBase.endsWith('/api') ? apiBase : `${apiBase}/api`;
-
-        const response = await fetch(`${verificationEndpoint}/auth/verify-email`, {
+        const response = await fetch(apiUrl('/auth/verify-email'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
