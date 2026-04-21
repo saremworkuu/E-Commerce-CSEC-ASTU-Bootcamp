@@ -15,6 +15,8 @@ const ProductDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
     const fetchProduct = async () => {
       try {
         const res = await axios.get(apiUrl(`/products/${id}`));
@@ -42,6 +44,10 @@ const ProductDetails: React.FC = () => {
   }
 
   const getProductImage = (p: any) => {
+    const name = (p?.name || '').toLowerCase();
+    if (name.includes('brown suede casual loafers')) {
+      return 'https://i.pinimg.com/736x/99/1b/0f/991b0fdeb6f941aa3f907a7252ae5234.jpg';
+    }
     return p?.image || p?.imageUrl || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80';
   };
 

@@ -108,7 +108,7 @@ const DashboardOrders: React.FC = () => {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-grow">
+        <div className="relative grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <Input 
             placeholder="Search orders by ID or customer name..." 

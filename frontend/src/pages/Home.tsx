@@ -45,6 +45,10 @@ const Home: React.FC = () => {
   };
 
   const getProductImage = (product: any) => {
+    const name = getProductName(product).toLowerCase();
+    if (name.includes('brown suede casual loafers')) {
+      return 'https://i.pinimg.com/736x/99/1b/0f/991b0fdeb6f941aa3f907a7252ae5234.jpg';
+    }
     return product.image ||
            product.imageUrl ||
       'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80';
@@ -136,7 +140,7 @@ const Home: React.FC = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1 }}
-            className="relative h-[400px] sm:h-[500px] md:h-[600px] rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
+            className="relative h-100 sm:h-125 md:h-150 rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
           >
             <img 
               src="https://images.unsplash.com/photo-1491933382434-500287f9b54b?auto=format&fit=crop&w=800&q=80" 
@@ -144,7 +148,7 @@ const Home: React.FC = () => {
               className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
               referrerPolicy="no-referrer"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 sm:p-12 md:p-16">
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 sm:p-12 md:p-16">
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-2 sm:mb-4 block">Innovation</span>
               <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6 tracking-tighter">Electronics</h3>
               <Link to="/shop?category=Electronics" className="inline-flex items-center text-white font-bold uppercase tracking-widest text-xs group">
@@ -158,7 +162,7 @@ const Home: React.FC = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1 }}
-              className="relative h-[300px] sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
+              className="relative h-75 sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
             >
               <img 
                 src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80" 
@@ -166,7 +170,7 @@ const Home: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
                 <h3 className="text-3xl font-bold text-white mb-4 tracking-tighter">Accessories</h3>
                 <Link to="/shop?category=Accessories" className="inline-flex items-center text-white font-bold uppercase tracking-widest text-xs group">
                   Explore <ArrowRight size={16} className="ml-3 group-hover:translate-x-2 transition-transform" />
@@ -178,7 +182,7 @@ const Home: React.FC = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.2 }}
-              className="relative h-[300px] sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
+              className="relative h-75 sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
             >
               <img 
                 src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80" 
@@ -186,7 +190,7 @@ const Home: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
                 <h3 className="text-3xl font-bold text-white mb-4 tracking-tighter">Furniture</h3>
                 <Link to="/shop?category=Furniture" className="inline-flex items-center text-white font-bold uppercase tracking-widest text-xs group">
                   Explore <ArrowRight size={16} className="ml-3 group-hover:translate-x-2 transition-transform" />
@@ -226,7 +230,7 @@ const Home: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-900 aspect-[3/4] cursor-pointer"
+                  className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-900 aspect-3/4 cursor-pointer"
                 >
                   <img 
                     src={getProductImage(product)} 
@@ -234,7 +238,7 @@ const Home: React.FC = () => {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
                     {hasDiscount && (
                       <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
                         -{discount}% OFF
@@ -301,7 +305,7 @@ const Home: React.FC = () => {
                   </Link>
                 </motion.div>
               </div>
-              <div className="relative h-[300px] sm:h-[400px] lg:h-auto overflow-hidden group flex-1">
+              <div className="relative h-75 sm:h-100 lg:h-auto overflow-hidden group flex-1">
                 <Link to={`/product/${getProductId(product)}`} className="block w-full h-full">
                   <motion.img 
                     initial={{ scale: 1.1 }}

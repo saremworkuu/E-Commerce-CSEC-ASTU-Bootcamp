@@ -49,7 +49,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     >
       {/* Image Container */}
       <div 
-        className="aspect-[4/5] overflow-hidden relative cursor-pointer"
+        className="aspect-4/5 overflow-hidden relative cursor-pointer"
         onClick={() => navigate(`/product/${(product as any)._id || product.id}`)}
       >
         <motion.img 
@@ -68,7 +68,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             onClick={(e) => e.stopPropagation()}
             className="p-3 md:p-4 bg-white dark:bg-black rounded-full text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 shadow-xl"
           >
-            <Eye size={18} className="md:w-[22px] md:h-[22px]" />
+            <Eye size={18} className="md:w-5.5 md:h-5.5" />
           </Link>
           <motion.button 
             onClick={handleWishlistToggle}
@@ -77,7 +77,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               isFavorited ? 'bg-red-500 text-white border-red-500' : 'bg-white dark:bg-black text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black'
             }`}
           >
-            <Heart size={18} className="md:w-[22px] md:h-[22px]" fill={isFavorited ? "currentColor" : "none"} />
+            <Heart size={18} className="md:w-5.5 md:h-5.5" fill={isFavorited ? "currentColor" : "none"} />
           </motion.button>
           <motion.button 
             onClick={handleAddToCart}
@@ -94,7 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                 >
-                  <ShoppingCart size={18} className="md:w-[22px] md:h-[22px] text-white" />
+                  <ShoppingCart size={18} className="md:w-5.5 md:h-5.5 text-white" />
                 </motion.div>
               ) : (
                 <motion.div
@@ -103,7 +103,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                 >
-                  <ShoppingCart size={18} className="md:w-[22px] md:h-[22px]" />
+                  <ShoppingCart size={18} className="md:w-5.5 md:h-5.5" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -131,7 +131,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <motion.div 
             initial={{ width: 0 }}
             whileHover={{ width: "1.5rem" }}
-            className="h-[1px] bg-black dark:bg-white transition-all"
+            className="h-px bg-black dark:bg-white transition-all"
           />
         </div>
       </div>

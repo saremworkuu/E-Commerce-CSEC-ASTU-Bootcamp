@@ -12,7 +12,7 @@ const Cart: React.FC = () => {
   // Map raw cart items to fully hydrated product items from local data
   const populatedCart = cart.map(item => {
     const backendId = typeof item.productId === 'object' ? item.productId?._id || item.productId?.id || item.productId : item.productId;
-    const normalizedId = Number(backendId || item.id);
+    const normalizedId = Number(backendId);
     const matchedProduct = products.find(p => Number(p.id) === normalizedId);
     
     return {

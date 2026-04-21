@@ -67,7 +67,7 @@ const Shop: React.FC = () => {
 
       {/* Filters & Search */}
       <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center space-y-4 md:space-y-0 mb-12 gap-6">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 flex-grow max-w-4xl">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 grow max-w-4xl">
           {/* Categories Dropdown */}
           <div className="relative w-full sm:w-64">
             <select 
@@ -84,7 +84,7 @@ const Shop: React.FC = () => {
           </div>
 
           {/* Search */}
-          <div className="relative w-full flex-grow">
+          <div className="relative w-full grow">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 

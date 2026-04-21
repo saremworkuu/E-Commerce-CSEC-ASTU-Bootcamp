@@ -201,7 +201,7 @@ const DashboardProductNew: React.FC = () => {
             value={formData.description}
             onChange={handleChange}
             placeholder="Describe the product features, specifications, etc..."
-            className="min-h-[140px]"
+              className="min-h-35"
             required
           />
         </div>
@@ -219,7 +219,7 @@ const DashboardProductNew: React.FC = () => {
           <Button 
             type="submit" 
             disabled={loading}
-            className="bg-black text-white dark:bg-white dark:text-black min-w-[140px]"
+            className="bg-black text-white dark:bg-white dark:text-black min-w-35"
           >
             {loading ? 'Saving...' : 'Save Product'}
           </Button>

@@ -73,7 +73,7 @@ const Navbar: React.FC = () => {
                 >
                   {item.label}
                   <motion.span 
-                    className={`absolute -bottom-1 left-0 h-[1px] bg-black dark:bg-white transition-all ${
+                    className={`absolute -bottom-1 left-0 h-px bg-black dark:bg-white transition-all ${
                       isActive ? 'w-full' : 'w-0 group-hover:w-full'
                     }`}
                     initial={false}
@@ -202,7 +202,7 @@ const Navbar: React.FC = () => {
                       {isActive && (
                         <motion.div 
                           layoutId="activeIndicator"
-                          className="w-12 h-[1px] bg-black dark:bg-white"
+                          className="w-12 h-px bg-black dark:bg-white"
                         />
                       )}
                     </div>
@@ -231,10 +231,10 @@ const Navbar: React.FC = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-0 left-0 right-0 z-[100] bg-white/95 dark:bg-black/95 backdrop-blur-xl border-b border-gray-100 dark:border-neutral-800 p-4 shadow-2xl"
+            className="fixed top-0 left-0 right-0 z-100 bg-white/95 dark:bg-black/95 backdrop-blur-xl border-b border-gray-100 dark:border-neutral-800 p-4 shadow-2xl"
           >
             <div className="max-w-3xl mx-auto flex items-center space-x-4">
-              <form onSubmit={handleSearch} className="relative flex-grow">
+              <form onSubmit={handleSearch} className="relative grow">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
                   autoFocus

@@ -4,7 +4,12 @@ import { useCart } from '../context/CartContext';
 import { Product } from '../data/products';
 
 interface CartItemProps {
-  item: Product & { quantity: number };
+  item: Product & {
+    quantity: number;
+    productId?: any;
+    imageUrl?: string;
+    id?: string | number;
+  };
 }
 
 const CartItem: React.FC<CartItemProps> = ({ item }) => {
@@ -13,7 +18,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
   return (
     <div className="flex items-center py-6 border-b border-gray-100 dark:border-neutral-800 last:border-0">
       {/* Image */}
-      <div className="w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 dark:bg-neutral-800">
+      <div className="w-24 h-24 shrink-0 rounded-xl overflow-hidden bg-gray-100 dark:bg-neutral-800">
         <img 
           src={item.imageUrl || item.image} 
           alt={item.name}

@@ -14,7 +14,7 @@ const About: React.FC = () => {
             className="w-full h-full object-cover opacity-40 dark:opacity-20"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-black" />
+          <div className="absolute inset-0 bg-linear-to-b from-transparent to-white dark:to-black" />
         </div>
         
         <div className="relative z-10 text-center px-4">

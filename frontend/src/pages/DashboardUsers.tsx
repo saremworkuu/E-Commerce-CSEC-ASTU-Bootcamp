@@ -61,7 +61,7 @@ const DashboardUsers: React.FC = () => {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-grow">
+        <div className="relative grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <Input 
             placeholder="Search users by name or email..." 
@@ -99,7 +99,6 @@ const DashboardUsers: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   <Badge 
-                    variant={user.role === 'admin' ? 'default' : 'secondary'}
                     className={user.role === 'admin' ? 'bg-black text-white dark:bg-white dark:text-black' : 'bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400 border-none'}
                   >
                     {user.role === 'admin' && <Shield size={12} className="mr-1" />}
