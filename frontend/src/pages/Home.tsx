@@ -30,6 +30,19 @@ const Home: React.FC = () => {
   const getProductId = (product: any) => product.id || product._id;
   const getProductName = (product: any) =>
     typeof product?.name === 'string' ? product.name : '';
+  const getProductTitleParts = (product: any) => {
+    const fullName = getProductName(product).trim();
+    const firstSpaceIndex = fullName.indexOf(' ');
+
+    if (firstSpaceIndex === -1) {
+      return { main: fullName, rest: '' };
+    }
+
+    return {
+      main: fullName.slice(0, firstSpaceIndex),
+      rest: fullName.slice(firstSpaceIndex + 1),
+    };
+  };
 
   const getProductImage = (product: any) => {
     const name = getProductName(product).toLowerCase();
@@ -277,7 +290,7 @@ const Home: React.FC = () => {
                 >
                   <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-3 sm:mb-4 block">Rank #{index + 1}</span>
                   <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white mb-4 sm:mb-6 leading-none">
-                    {getProductName(product).split(' ')[0]} <br /> <span className="text-gray-400 italic">{getProductName(product).split(' ').slice(1).join(' ')}</span>
+                    {getProductTitleParts(product).main} <br /> <span className="text-gray-400 italic">{getProductTitleParts(product).rest}</span>
                   </h2>
                   <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-6 sm:mb-10 max-w-md leading-relaxed">
                     {getProductName(product).toLowerCase().includes('brown suede casual loafers') 
