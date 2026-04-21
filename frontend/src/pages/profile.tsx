@@ -161,9 +161,9 @@ const Profile: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                  {user?.email?.split('@')[0] ?? 'Account'}
+                  {typeof user?.email === 'string' ? user.email.split('@')[0] : 'Account'}
                 </h2>
-                <p className="text-gray-500 font-medium">{user?.email ?? 'No email available'}</p>
+                <p className="text-gray-500 font-medium">{typeof user?.email === 'string' ? user.email : 'No email available'}</p>
                 <div className="mt-2 inline-flex items-center px-3 py-1 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-bold uppercase tracking-widest rounded-full">
                   {user?.role ?? 'User'} Account
                 </div>
