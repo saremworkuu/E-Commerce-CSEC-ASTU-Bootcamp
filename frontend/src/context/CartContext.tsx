@@ -161,7 +161,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const nextCart = normalizeCart(res.data.items || []);
+      const nextCart = normalizeCart(res.data.items || res.data.cart?.items || res.data || []);
       setCart(nextCart);
       persistLocalCart(user?.email, nextCart);
     } catch (err) {

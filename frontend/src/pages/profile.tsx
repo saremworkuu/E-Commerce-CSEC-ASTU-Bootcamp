@@ -42,7 +42,7 @@ const Profile: React.FC = () => {
     try {
       const res = await axios.post(apiUrl('/auth/login'), { email, password });
       
-      login(res.data);
+      login(res.data.user.email, res.data.user.role, res.data.token);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid credentials');
     } finally {
