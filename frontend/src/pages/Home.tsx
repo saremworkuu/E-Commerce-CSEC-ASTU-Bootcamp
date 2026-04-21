@@ -28,8 +28,11 @@ const Home: React.FC = () => {
   const displayFeatured = featuredProducts.length >= 3 ? featuredProducts : products.slice(0, 3);
 
   const getProductId = (product: any) => product.id || product._id;
+  const getProductName = (product: any) =>
+    typeof product?.name === 'string' ? product.name : '';
+
   const getProductImage = (product: any) => {
-    const name = (product.name || '').toLowerCase();
+    const name = getProductName(product).toLowerCase();
     if (name.includes('brown suede casual loafers')) {
       return 'https://i.pinimg.com/736x/85/c0/28/85c028f0e6c4b2793900b0a40ef06dc8.jpg';
     }
@@ -54,13 +57,13 @@ const Home: React.FC = () => {
   };
 
   const prioritizedTopSellers = topSellerPriorityNames
-    .map((name) => products.find((product) => (product.name || '').toLowerCase().includes(name)))
+    .map((name) => products.find((product) => getProductName(product).toLowerCase().includes(name)))
     .filter(Boolean);
 
   const topSellers = [
     ...prioritizedTopSellers,
     ...products.filter(
-      (product) => !isPriorityTopSeller(product.name || '')
+      (product) => !isPriorityTopSeller(getProductName(product))
     ),
   ].slice(0, 2);
 
@@ -274,12 +277,12 @@ const Home: React.FC = () => {
                 >
                   <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-3 sm:mb-4 block">Rank #{index + 1}</span>
                   <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white mb-4 sm:mb-6 leading-none">
-                    {(product.name || '').split(' ')[0]} <br /> <span className="text-gray-400 italic">{(product.name || '').split(' ').slice(1).join(' ')}</span>
+                    {getProductName(product).split(' ')[0]} <br /> <span className="text-gray-400 italic">{getProductName(product).split(' ').slice(1).join(' ')}</span>
                   </h2>
                   <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-6 sm:mb-10 max-w-md leading-relaxed">
-                    {(product.name || '').toLowerCase().includes('brown suede casual loafers') 
+                    {getProductName(product).toLowerCase().includes('brown suede casual loafers') 
                       ? "Step into effortless style with our premium Brown Suede Casual Loafers. Designed for comfort and durability, these versatile shoes feature slip-on convenience and hand-stitched detailing, perfect for elevating your everyday casual look." 
-                      : (product.name || '').toLowerCase().includes('glossy shine lip gloss')
+                      : getProductName(product).toLowerCase().includes('glossy shine lip gloss')
                       ? "Get that irresistible luminous finish with our Glossy Shine Lip Gloss. Enriched with hydrating oils, this non-sticky formula delivers long-lasting moisture and an ultra-glamorous, mirror-like shine to enhance your natural beauty."
                       : product.description}
                   </p>
@@ -299,7 +302,7 @@ const Home: React.FC = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 1.5 }}
                   src={getProductImage(product)} 
-                  alt={product.name} 
+                  alt={getProductName(product)} 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />

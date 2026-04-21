@@ -20,7 +20,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('auth_user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    if (!savedUser) return null;
+
+    try {
+      const parsedUser = JSON.parse(savedUser);
+      const isValidEmail = typeof parsedUser?.email === 'string';
+      const isValidRole = parsedUser?.role === 'admin' || parsedUser?.role === 'user';
+
+      if (isValidEmail && isValidRole) {
+        return parsedUser as User;
+      }
+    } catch (error) {
+      // Ignore invalid JSON and clear stale auth below.
+    }
+
+    localStorage.removeItem('auth_user');
+    localStorage.removeItem('token');
+    return null;
   });
 
   const login = (email: string, role: UserRole, token?: string) => {
