@@ -45,13 +45,6 @@ const Home: React.FC = () => {
   };
 
   const getProductImage = (product: any) => {
-    const name = getProductName(product).toLowerCase();
-    if (name.includes('brown suede casual loafers')) {
-      return 'https://i.pinimg.com/736x/85/c0/28/85c028f0e6c4b2793900b0a40ef06dc8.jpg';
-    }
-    if (name.includes('glossy shine lip gloss')) {
-      return 'https://i.pinimg.com/736x/99/1b/0f/991b0fdeb6f941aa3f907a7252ae5234.jpg';
-    }
     return product.image ||
            product.imageUrl ||
       'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80';
