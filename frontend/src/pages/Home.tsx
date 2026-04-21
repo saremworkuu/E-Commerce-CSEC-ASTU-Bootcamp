@@ -33,6 +33,29 @@ const Home: React.FC = () => {
     product.imageUrl ||
     'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80';
 
+  const topSellerPriorityNames = [
+    'brown suede casual loafers',
+    'glossy shine lip gloss',
+  ];
+
+  const isPriorityTopSeller = (productName: string = '') => {
+    const normalizedName = productName.toLowerCase();
+    return topSellerPriorityNames.some(
+      (targetName) => normalizedName === targetName || normalizedName.includes(targetName)
+    );
+  };
+
+  const prioritizedTopSellers = topSellerPriorityNames
+    .map((name) => products.find((product) => (product.name || '').toLowerCase().includes(name)))
+    .filter(Boolean);
+
+  const topSellers = [
+    ...prioritizedTopSellers,
+    ...products.filter(
+      (product) => !isPriorityTopSeller(product.name || '')
+    ),
+  ].slice(0, 2);
+
   return (
     <div className="space-y-16 pb-16">
       {/* Cinematic Hero Slider */}
@@ -232,7 +255,7 @@ const Home: React.FC = () => {
           </motion.div>
         </div>
         <div className="space-y-8 sm:space-y-12">
-          {products.slice(0, 2).map((product, index) => (
+          {topSellers.map((product, index) => (
             <div key={getProductId(product)} className={`bg-gray-50 dark:bg-white/5 rounded-[2rem] sm:rounded-[3rem] overflow-hidden flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
               <div className="p-8 sm:p-12 md:p-16 flex flex-col justify-center flex-1">
                 <motion.div
