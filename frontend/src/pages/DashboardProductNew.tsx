@@ -147,6 +147,10 @@ const DashboardProductNew: React.FC = () => {
                 <SelectItem value="Accessories">Accessories</SelectItem>
                 <SelectItem value="Furniture">Furniture</SelectItem>
                 <SelectItem value="Apparel">Apparel</SelectItem>
+                <SelectItem value="Jewelry">Jewelry</SelectItem>
+                <SelectItem value="Home Goods">Home Goods</SelectItem>
+                <SelectItem value="Clothing">Clothing</SelectItem>
+                <SelectItem value="Footwear">Footwear</SelectItem>
                 <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>

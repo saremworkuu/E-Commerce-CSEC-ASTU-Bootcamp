@@ -9,7 +9,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, role: UserRole) => void;
+  login: (email: string, role: UserRole, token?: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
@@ -23,15 +23,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const login = (email: string, role: UserRole) => {
+  const login = (email: string, role: UserRole, token?: string) => {
     const newUser = { email, role };
     setUser(newUser);
     localStorage.setItem('auth_user', JSON.stringify(newUser));
+    if (token) {
+      localStorage.setItem('token', token);
+    }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('auth_user');
+    localStorage.removeItem('token');
   };
 
   const isAuthenticated = !!user;

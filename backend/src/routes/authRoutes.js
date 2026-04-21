@@ -108,6 +108,22 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
+    // Special case for hardcoded admin login
+    if (email === 'admin@luxecart.com' && password === 'admin123') {
+      const token = jwt.sign({ id: 'admin_static_id', role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+      return res.json({
+        message: 'Admin login successful',
+        token,
+        user: {
+          id: 'admin_static_id',
+          fullName: 'System Admin',
+          email: 'admin@luxecart.com',
+          role: 'admin',
+          createdAt: new Date()
+        }
+      });
+    }
+
     // Important: Search with lowercase
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
@@ -145,6 +161,16 @@ router.post('/logout', (req, res) => {
 // In your auth router file (routes/auth.js)
 router.get('/me', Protect, async (req, res) => {
   try {
+    if (req.user.role === 'admin' && req.user.id === 'admin_static_id') {
+      return res.json({
+        id: 'admin_static_id',
+        fullName: 'System Admin',
+        email: 'admin@luxecart.com',
+        role: 'admin',
+        createdAt: new Date()
+      });
+    }
+
     const user = await User.findById(req.user.id).select('-passwordHash');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });

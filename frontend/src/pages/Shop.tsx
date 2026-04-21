@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
-import { products as hardcodedProducts } from '../data/products';
 import ProductCard from '../components/ProductCard';
 import { ChevronDown, Search } from 'lucide-react';
 
 const Shop: React.FC = () => {
-  const [products, setProducts] = useState(hardcodedProducts);
+  const [products, setProducts] = useState<any[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlSearch = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(urlSearch);
@@ -37,7 +36,9 @@ const Shop: React.FC = () => {
     let result = products;
 
     if (activeCategory !== 'All') {
-      result = result.filter(p => p.category === activeCategory);
+      result = result.filter(
+        (p) => (p.category || '').trim().toLowerCase() === activeCategory.trim().toLowerCase()
+      );
     }
 
     if (searchQuery) {
@@ -54,7 +55,7 @@ const Shop: React.FC = () => {
     }
 
     return result;
-  }, [activeCategory, searchQuery, sortBy]);
+  }, [products, activeCategory, searchQuery, sortBy]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

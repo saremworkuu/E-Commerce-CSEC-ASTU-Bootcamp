@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowRight, ShoppingBag, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
-import { products as hardcodedProducts } from '../data/products';
 import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
 import { motion } from 'motion/react';
 
 const Home: React.FC = () => {
-  const [products, setProducts] = useState(hardcodedProducts);
+  const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -26,6 +25,12 @@ const Home: React.FC = () => {
 
   // If we don't have enough featured, fallback to newest
   const displayFeatured = featuredProducts.length >= 3 ? featuredProducts : products.slice(0, 3);
+
+  const getProductId = (product: any) => product.id || product._id;
+  const getProductImage = (product: any) =>
+    product.image ||
+    product.imageUrl ||
+    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80';
 
   return (
     <div className="space-y-16 pb-16">
@@ -167,11 +172,13 @@ const Home: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {products.slice(0, 4).map((product, i) => {
             const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-            const discount = Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100);
+            const discount = hasDiscount
+              ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+              : 0;
             return (
               <Link 
-                to={`/product/${product.id}`}
-                key={product.id}
+                to={`/product/${getProductId(product)}`}
+                key={getProductId(product)}
               >
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
@@ -181,19 +188,23 @@ const Home: React.FC = () => {
                   className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-900 aspect-[3/4] cursor-pointer"
                 >
                   <img 
-                    src={product.image} 
+                    src={getProductImage(product)} 
                     alt={product.name} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
-                    <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                      -{discount}% OFF
-                    </div>
+                    {hasDiscount && (
+                      <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                        -{discount}% OFF
+                      </div>
+                    )}
                     <h3 className="text-white font-bold text-lg mb-1">{product.name}</h3>
                     <div className="flex items-center space-x-2">
                       <span className="text-white font-bold">${product.price.toFixed(2)}</span>
-                      <span className="text-gray-300 text-sm line-through">${product.originalPrice?.toFixed(2)}</span>
+                      {hasDiscount && (
+                        <span className="text-gray-300 text-sm line-through">${product.originalPrice.toFixed(2)}</span>
+                      )}
                     </div>
                     <span className="mt-4 text-white text-xs font-bold uppercase tracking-widest group-hover:underline">
                       View Deal
@@ -221,7 +232,7 @@ const Home: React.FC = () => {
         </div>
         <div className="space-y-8 sm:space-y-12">
           {products.slice(0, 2).map((product, index) => (
-            <div key={product.id} className={`bg-gray-50 dark:bg-white/5 rounded-[2rem] sm:rounded-[3rem] overflow-hidden flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
+            <div key={getProductId(product)} className={`bg-gray-50 dark:bg-white/5 rounded-[2rem] sm:rounded-[3rem] overflow-hidden flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
               <div className="p-8 sm:p-12 md:p-16 flex flex-col justify-center flex-1">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -237,7 +248,7 @@ const Home: React.FC = () => {
                     {product.description}
                   </p>
                   <Link 
-                    to={`/product/${product.id}`}
+                    to={`/product/${getProductId(product)}`}
                     className="inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 bg-black text-white dark:bg-white dark:text-black font-bold rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors group text-sm sm:text-base"
                   >
                     View Product
@@ -251,7 +262,7 @@ const Home: React.FC = () => {
                   whileInView={{ scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 1.5 }}
-                  src={product.image} 
+                  src={getProductImage(product)} 
                   alt={product.name} 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"

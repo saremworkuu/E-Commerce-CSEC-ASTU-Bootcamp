@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { products as hardcodedProducts } from '../data/products';
 import { useCart } from '../context/CartContext';
 import { ArrowLeft, ShoppingCart, Shield, Truck, RotateCcw, CreditCard } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -21,9 +20,6 @@ const ProductDetails: React.FC = () => {
         setProduct(res.data);
       } catch (err) {
         console.error('Failed to fetch product from API:', err);
-        // Fallback to local hardcoded
-        const found = hardcodedProducts.find(p => String(p.id) === id);
-        if (found) setProduct(found);
       } finally {
         setLoading(false);
       }
@@ -136,18 +132,7 @@ const ProductDetails: React.FC = () => {
       <div className="mt-24 pt-24 border-t border-gray-100 dark:border-neutral-800">
         <h2 className="text-2xl font-bold mb-12 dark:text-white">You might also like</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {hardcodedProducts
-            .filter(p => String(p.id) !== String(product.id || product._id) && p.category === product.category)
-            .slice(0, 4)
-            .map(p => (
-              <Link key={p.id} to={`/product/${p.id}`} className="group">
-                <div className="aspect-square rounded-2xl overflow-hidden bg-gray-100 dark:bg-neutral-800 mb-4">
-                  <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
-                </div>
-                <h3 className="font-bold text-gray-900 dark:text-white group-hover:underline">{p.name}</h3>
-                <p className="text-gray-500 dark:text-gray-400">${p.price.toFixed(2)}</p>
-              </Link>
-            ))}
+          {[]}
         </div>
       </div>
     </div>

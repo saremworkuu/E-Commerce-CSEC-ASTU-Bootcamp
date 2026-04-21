@@ -45,8 +45,10 @@ const Footer: React.FC = () => {
             <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-black dark:text-white mb-8">Shop</h4>
             <ul className="space-y-4">
               <li><Link to="/shop" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors text-sm">All Products</Link></li>
+              <li><Link to="/shop?category=Clothing" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors text-sm">Clothing</Link></li>
+              <li><Link to="/shop?category=Jewelry" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors text-sm">Jewelry</Link></li>
+              <li><Link to="/shop?category=Home%20Goods" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors text-sm">Home Goods</Link></li>
               <li><Link to="/shop?category=Electronics" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors text-sm">Electronics</Link></li>
-              <li><Link to="/shop?category=Accessories" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors text-sm">Accessories</Link></li>
               <li><Link to="/shop?category=Furniture" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors text-sm">Furniture</Link></li>
             </ul>
           </div>

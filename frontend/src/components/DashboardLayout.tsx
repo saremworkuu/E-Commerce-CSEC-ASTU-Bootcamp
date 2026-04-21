@@ -8,13 +8,17 @@ import {
   LogOut,
   ChevronRight,
   Menu,
-  X
+  X,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'motion/react';
 
 const DashboardLayout: React.FC = () => {
   const { logout, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
@@ -39,6 +43,17 @@ const DashboardLayout: React.FC = () => {
           onClick={() => setIsSidebarOpen(false)}
         >
           <X size={20} />
+        </button>
+      </div>
+
+      <div className="px-4 pt-4">
+        <button
+          onClick={toggleTheme}
+          className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
+          aria-label="Toggle admin theme"
+          title="Toggle dark mode"
+        >
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
         </button>
       </div>
 
@@ -127,12 +142,21 @@ const DashboardLayout: React.FC = () => {
               LUXE<span className="text-gray-400 font-light">CART</span>
             </span>
           </Link>
-          <button 
-            onClick={() => setIsSidebarOpen(true)}
-            className="p-2 text-gray-500 hover:text-black dark:hover:text-white"
-          >
-            <Menu size={24} />
-          </button>
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-gray-500 hover:text-black dark:hover:text-white"
+              aria-label="Toggle admin theme"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 text-gray-500 hover:text-black dark:hover:text-white"
+            >
+              <Menu size={24} />
+            </button>
+          </div>
         </header>
 
         <main className="flex-grow p-4 md:p-8">

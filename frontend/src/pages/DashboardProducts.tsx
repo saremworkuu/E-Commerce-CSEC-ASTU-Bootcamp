@@ -93,6 +93,11 @@ const DashboardProducts: React.FC = () => {
     const token = localStorage.getItem('token');
     
     // Normalize body to match backend expectations (imageUrl, stock)
+    if (!formData.name || !formData.category || !formData.price || !formData.description) {
+      alert("Please fill in all required fields (Name, Category, Price, Description).");
+      return;
+    }
+
     const payload = {
       name: formData.name,
       category: formData.category,
@@ -116,13 +121,15 @@ const DashboardProducts: React.FC = () => {
         });
         setProducts([res.data.product, ...products]);
       }
-    } catch (err) {
-      console.error('Save failed', err);
+      
+      setShowForm(false);
+      setEditingProduct(null);
+      setFormData({ name: '', category: '', price: '', description: '', image: '', stock: '10' });
+    } catch (err: any) {
+      console.error('Save failed', err.response?.data || err);
+      alert(`Save failed: ${err.response?.data?.message || err.message}`);
+      return; // prevent clearing the form so user can fix the issue
     }
-    
-    setShowForm(false);
-    setEditingProduct(null);
-    setFormData({ name: '', category: '', price: '', description: '', image: '', stock: '10' });
   };
 
   const openEditDialog = (product: any) => {
@@ -198,6 +205,11 @@ const DashboardProducts: React.FC = () => {
                     <SelectItem value="Accessories">Accessories</SelectItem>
                     <SelectItem value="Furniture">Furniture</SelectItem>
                     <SelectItem value="Apparel">Apparel</SelectItem>
+                    <SelectItem value="Jewelry">Jewelry</SelectItem>
+                    <SelectItem value="Home Goods">Home Goods</SelectItem>
+                    <SelectItem value="Clothing">Clothing</SelectItem>
+                    <SelectItem value="Footwear">Footwear</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

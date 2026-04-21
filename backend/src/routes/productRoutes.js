@@ -1,6 +1,6 @@
 // routes/productRoutes.js
 import express from "express";
-import Product from "../models/Product.js";
+import Product from "../models/product.js";
 import { Protect } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -46,7 +46,7 @@ router.post("/", Protect, async (req, res) => {
     const { name, category, price, description, imageUrl, stock, featured } = req.body;
 
     // Basic validation
-    if (!name || !category || !price || !description || !imageUrl) {
+    if (!name || !category || price === undefined || !description || !imageUrl) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
