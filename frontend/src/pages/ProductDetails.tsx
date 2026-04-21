@@ -41,6 +41,28 @@ const ProductDetails: React.FC = () => {
     );
   }
 
+  const getProductImage = (p: any) => {
+    const name = (p?.name || '').toLowerCase();
+    if (name.includes('brown suede casual loafers')) {
+      return 'https://i.pinimg.com/736x/85/c0/28/85c028f0e6c4b2793900b0a40ef06dc8.jpg';
+    }
+    if (name.includes('glossy shine lip gloss')) {
+      return 'https://i.pinimg.com/736x/99/1b/0f/991b0fdeb6f941aa3f907a7252ae5234.jpg';
+    }
+    return p?.image || p?.imageUrl || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80';
+  };
+
+  const getProductDescription = (p: any) => {
+    const name = (p?.name || '').toLowerCase();
+    if (name.includes('brown suede casual loafers')) {
+      return "Step into effortless style with our premium Brown Suede Casual Loafers. Designed for comfort and durability, these versatile shoes feature slip-on convenience and hand-stitched detailing, perfect for elevating your everyday casual look.";
+    }
+    if (name.includes('glossy shine lip gloss')) {
+      return "Get that irresistible luminous finish with our Glossy Shine Lip Gloss. Enriched with hydrating oils, this non-sticky formula delivers long-lasting moisture and an ultra-glamorous, mirror-like shine to enhance your natural beauty.";
+    }
+    return p?.description;
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <button 
@@ -58,7 +80,7 @@ const ProductDetails: React.FC = () => {
           className="rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-800 aspect-square"
         >
           <img 
-            src={product.image || product.imageUrl} 
+            src={getProductImage(product)} 
             alt={product.name} 
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
@@ -84,7 +106,7 @@ const ProductDetails: React.FC = () => {
           </div>
 
           <div className="prose prose-sm text-gray-500 dark:text-gray-400 mb-10 leading-relaxed">
-            <p>{product.description}</p>
+            <p>{getProductDescription(product)}</p>
           </div>
 
           <div className="space-y-4 mb-12">
