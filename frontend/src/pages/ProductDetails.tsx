@@ -111,7 +111,7 @@ const ProductDetails: React.FC = () => {
 
           <div className="space-y-4 mb-12">
             <Button 
-              onClick={() => addToCart(String(product.id || product._id))}
+              onClick={() => addToCart(String(product._id || product.id))}
               className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center space-x-3 h-auto"
             >
               <ShoppingCart size={20} />

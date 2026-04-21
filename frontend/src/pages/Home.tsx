@@ -27,7 +27,7 @@ const Home: React.FC = () => {
   // If we don't have enough featured, fallback to newest
   const displayFeatured = featuredProducts.length >= 3 ? featuredProducts : products.slice(0, 3);
 
-  const getProductId = (product: any) => product.id || product._id;
+  const getProductId = (product: any) => product._id || product.id;
   const getProductName = (product: any) =>
     typeof product?.name === 'string' ? product.name : '';
   const getProductTitleParts = (product: any) => {
@@ -309,19 +309,21 @@ const Home: React.FC = () => {
                 </motion.div>
               </div>
               <div className="relative h-[300px] sm:h-[400px] lg:h-auto overflow-hidden group flex-1">
-                <motion.img 
-                  initial={{ scale: 1.1 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.5 }}
-                  src={getProductImage(product)} 
-                  alt={getProductName(product)} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute top-8 right-8 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl">
-                  <span className="text-xs font-bold uppercase tracking-widest text-black">Top Seller</span>
-                </div>
+                <Link to={`/product/${getProductId(product)}`} className="block w-full h-full">
+                  <motion.img 
+                    initial={{ scale: 1.1 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.5 }}
+                    src={getProductImage(product)} 
+                    alt={getProductName(product)} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute top-8 right-8 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl">
+                    <span className="text-xs font-bold uppercase tracking-widest text-black">Top Seller</span>
+                  </div>
+                </Link>
               </div>
             </div>
           ))}

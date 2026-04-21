@@ -18,14 +18,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const navigate = useNavigate();
   const [isAdding, setIsAdding] = React.useState(false);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsAdding(true);
-    addToCart(String(product.id || (product as any)._id));
+    addToCart(String((product as any)._id || product.id));
     setTimeout(() => setIsAdding(false), 1500);
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -45,7 +48,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       className="group relative bg-white dark:bg-white/5 rounded-2xl overflow-hidden border border-gray-100 dark:border-white/10 hover:shadow-2xl transition-all duration-500"
     >
       {/* Image Container */}
-      <div className="aspect-[4/5] overflow-hidden relative">
+      <div 
+        className="aspect-[4/5] overflow-hidden relative cursor-pointer"
+        onClick={() => navigate(`/product/${(product as any)._id || product.id}`)}
+      >
         <motion.img 
           src={product.image || (product as any).imageUrl} 
           alt={product.name}
@@ -58,7 +64,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Hover Actions Overlay */}
         <div className="absolute inset-0 bg-black/20 md:bg-black/40 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-500 flex items-center justify-center space-x-2 md:space-x-4 backdrop-blur-[1px] md:backdrop-blur-[2px]">
           <Link 
-            to={`/product/${product.id || (product as any)._id}`}
+            to={`/product/${(product as any)._id || product.id}`}
+            onClick={(e) => e.stopPropagation()}
             className="p-3 md:p-4 bg-white dark:bg-black rounded-full text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 shadow-xl"
           >
             <Eye size={18} className="md:w-[22px] md:h-[22px]" />
@@ -112,7 +119,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {product.category}
           </span>
         </div>
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/product/${(product as any)._id || product.id}`}>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight">
             {product.name}
           </h3>
