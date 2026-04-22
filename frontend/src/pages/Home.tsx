@@ -223,6 +223,7 @@ const Home: React.FC = () => {
             return (
               <Link 
                 to={`/product/${getProductId(product)}`}
+                state={{ product }}
                 key={getProductId(product)}
               >
                 <motion.div 
@@ -298,6 +299,7 @@ const Home: React.FC = () => {
                   </p>
                   <Link 
                     to={`/product/${getProductId(product)}`}
+                    state={{ product }}
                     className="inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 bg-black text-white dark:bg-white dark:text-black font-bold rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors group text-sm sm:text-base"
                   >
                     View Product
@@ -306,7 +308,7 @@ const Home: React.FC = () => {
                 </motion.div>
               </div>
               <div className="relative h-75 sm:h-100 lg:h-auto overflow-hidden group flex-1">
-                <Link to={`/product/${getProductId(product)}`} className="block w-full h-full">
+                <Link to={`/product/${getProductId(product)}`} state={{ product }} className="block w-full h-full">
                   <motion.img 
                     initial={{ scale: 1.1 }}
                     whileInView={{ scale: 1 }}

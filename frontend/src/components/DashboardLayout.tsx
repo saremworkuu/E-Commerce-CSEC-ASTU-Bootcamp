@@ -5,6 +5,7 @@ import {
   Package, 
   Users, 
   ShoppingBag, 
+  Mail,
   LogOut,
   ChevronRight,
   Menu,
@@ -27,6 +28,7 @@ const DashboardLayout: React.FC = () => {
     { icon: <Package size={20} />, label: 'Products', path: '/dashboard/products' },
     { icon: <Users size={20} />, label: 'Users', path: '/dashboard/users' },
     { icon: <ShoppingBag size={20} />, label: 'Orders', path: '/dashboard/orders' },
+    { icon: <Mail size={20} />, label: 'Messages', path: '/dashboard/messages' },
   ];
 
   const SidebarContent = () => (

@@ -50,7 +50,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Image Container */}
       <div 
         className="aspect-4/5 overflow-hidden relative cursor-pointer"
-        onClick={() => navigate(`/product/${(product as any)._id || product.id}`)}
+        onClick={() => navigate(`/product/${(product as any)._id || product.id}`, { state: { product } })}
       >
         <motion.img 
           src={product.image || (product as any).imageUrl} 
@@ -65,6 +65,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="absolute inset-0 bg-black/20 md:bg-black/40 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-500 flex items-center justify-center space-x-2 md:space-x-4 backdrop-blur-[1px] md:backdrop-blur-[2px]">
           <Link 
             to={`/product/${(product as any)._id || product.id}`}
+            state={{ product }}
             onClick={(e) => e.stopPropagation()}
             className="p-3 md:p-4 bg-white dark:bg-black rounded-full text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 shadow-xl"
           >
@@ -119,7 +120,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {product.category}
           </span>
         </div>
-        <Link to={`/product/${(product as any)._id || product.id}`}>
+        <Link to={`/product/${(product as any)._id || product.id}`} state={{ product }}>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight">
             {product.name}
           </h3>

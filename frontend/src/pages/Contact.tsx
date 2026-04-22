@@ -1,11 +1,62 @@
 import React from 'react';
+import axios from 'axios';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { apiUrl } from '../lib/api';
 
 const Contact: React.FC = () => {
+  const [formData, setFormData] = React.useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [success, setSuccess] = React.useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    const firstName = formData.firstName.trim();
+    const lastName = formData.lastName.trim();
+    const email = formData.email.trim();
+    const message = formData.message.trim();
+
+    if (!firstName || !lastName || !email || !message) {
+      setError('Please fill in all fields.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await axios.post(apiUrl('/contact'), {
+        firstName,
+        lastName,
+        email,
+        message,
+      });
+
+      setSuccess('Message sent successfully. We will get back to you soon.');
+      setFormData({ firstName: '', lastName: '', email: '', message: '' });
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to send message. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24 transition-colors duration-300">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-24">
@@ -59,19 +110,37 @@ const Contact: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-gray-50 dark:bg-neutral-900 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-12 md:p-16"
         >
-          <form className="space-y-6 md:space-y-8" onSubmit={(e: React.FormEvent) => e.preventDefault()}>
+          <form className="space-y-6 md:space-y-8" onSubmit={handleSubmit}>
+            {error ? (
+              <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+                {error}
+              </p>
+            ) : null}
+
+            {success ? (
+              <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
+                {success}
+              </p>
+            ) : null}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 ml-1">First Name</label>
                 <Input 
+                  name="firstName"
                   type="text" 
+                  value={formData.firstName}
+                  onChange={handleChange}
                   className="w-full px-6 py-4 bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-2xl focus-visible:ring-black dark:focus-visible:ring-white h-auto dark:text-white"
                 />
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 ml-1">Last Name</label>
                 <Input 
+                  name="lastName"
                   type="text" 
+                  value={formData.lastName}
+                  onChange={handleChange}
                   className="w-full px-6 py-4 bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-2xl focus-visible:ring-black dark:focus-visible:ring-white h-auto dark:text-white"
                 />
               </div>
@@ -79,21 +148,27 @@ const Contact: React.FC = () => {
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 ml-1">Email Address</label>
               <Input 
+                name="email"
                 type="email" 
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full px-6 py-4 bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-2xl focus-visible:ring-black dark:focus-visible:ring-white h-auto dark:text-white"
               />
             </div>
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 ml-1">Message</label>
               <Textarea 
+                name="message"
                 rows={5}
+                value={formData.message}
+                onChange={handleChange}
                 className="w-full px-6 py-4 bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-2xl focus-visible:ring-black dark:focus-visible:ring-white resize-none h-auto dark:text-white"
               />
             </div>
 
-            <Button className="w-full py-6 md:py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center space-x-3 h-auto">
+            <Button disabled={loading} className="w-full py-6 md:py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center space-x-3 h-auto">
               <Send size={20} />
-              <span>Send Message</span>
+              <span>{loading ? 'Sending...' : 'Send Message'}</span>
             </Button>
           </form>
         </motion.div>

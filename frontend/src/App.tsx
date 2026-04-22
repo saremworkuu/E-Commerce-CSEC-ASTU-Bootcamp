@@ -23,6 +23,7 @@ import DashboardProducts from './pages/DashboardProducts';
 import DashboardProductNew from './pages/DashboardProductNew';
 import DashboardUsers from './pages/DashboardUsers';
 import DashboardOrders from './pages/DashboardOrders';
+import DashboardMessages from './pages/DashboardMessages';
 import { AnimatePresence, motion } from 'motion/react';
 
 const AnimatedRoutes: React.FC = () => {
@@ -57,6 +58,7 @@ const AnimatedRoutes: React.FC = () => {
           <Route path="products/new" element={<DashboardProductNew />} />
           <Route path="users" element={<DashboardUsers />} />
           <Route path="orders" element={<DashboardOrders />} />
+          <Route path="messages" element={<DashboardMessages />} />
         </Route>
       </Routes>
     </AnimatePresence>

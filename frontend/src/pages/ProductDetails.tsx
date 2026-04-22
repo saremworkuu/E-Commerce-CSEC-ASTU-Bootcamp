@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { ArrowLeft, ShoppingCart, Shield, Truck, RotateCcw, CreditCard } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -10,12 +10,19 @@ import { apiUrl } from '../lib/api';
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { addToCart } = useCart();
-  const [product, setProduct] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const initialProduct = (location.state as any)?.product ?? null;
+  const [product, setProduct] = useState<any>(initialProduct);
+  const [loading, setLoading] = useState(!initialProduct);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
+    if (initialProduct) {
+      setProduct(initialProduct);
+      setLoading(false);
+    }
 
     const fetchProduct = async () => {
       try {
@@ -27,8 +34,10 @@ const ProductDetails: React.FC = () => {
         setLoading(false);
       }
     };
-    fetchProduct();
-  }, [id]);
+    if (!initialProduct || String(initialProduct._id || initialProduct.id) !== String(id)) {
+      fetchProduct();
+    }
+  }, [id, initialProduct]);
 
   if (loading) {
     return <div className="max-w-7xl mx-auto px-4 py-24 text-center dark:text-white">Loading...</div>;

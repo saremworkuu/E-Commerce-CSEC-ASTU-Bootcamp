@@ -21,7 +21,17 @@ router.get("/", async (req, res) => {
 // Get single product by ID
 router.get("/:id", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    // Check if ID is a valid MongoDB ObjectId first
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(req.params.id);
+    let product;
+
+    if (isObjectId) {
+      product = await Product.findById(req.params.id);
+    } 
+    // If not found by _id or not an ObjectId, try to find by numeric 'id' field
+    if (!product && !isNaN(req.params.id)) {
+      product = await Product.findOne({ id: Number(req.params.id) });
+    }
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
