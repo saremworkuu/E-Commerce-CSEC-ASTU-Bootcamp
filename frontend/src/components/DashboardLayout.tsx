@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
+import axios from 'axios';
 import { 
   LayoutDashboard, 
   Package, 
@@ -16,12 +17,33 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'motion/react';
+import { apiUrl } from '../lib/api';
 
 const DashboardLayout: React.FC = () => {
   const { logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+
+  // Validate token against local backend on mount — clears stale Render tokens
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      localStorage.removeItem('auth_user');
+      window.location.href = '/admin';
+      return;
+    }
+    axios.get(apiUrl('/auth/me'), {
+      headers: { Authorization: `Bearer ${token}` }
+    }).catch((err) => {
+      const status = err.response?.status;
+      if (status === 401 || status === 403) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('auth_user');
+        window.location.href = '/admin';
+      }
+    });
+  }, []);
 
   const menuItems = [
     { icon: <LayoutDashboard size={20} />, label: 'Overview', path: '/dashboard' },

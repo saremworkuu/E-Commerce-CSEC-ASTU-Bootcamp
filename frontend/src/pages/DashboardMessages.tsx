@@ -55,6 +55,14 @@ const DashboardMessages: React.FC = () => {
         setSelectedMessage(latestSelected);
       }
     } catch (err: any) {
+      const status = err.response?.status;
+      if (status === 401 || status === 403) {
+        // Token is stale or invalid — clear it and redirect to admin login
+        localStorage.removeItem('token');
+        localStorage.removeItem('auth_user');
+        window.location.href = '/admin';
+        return;
+      }
       setError(err.response?.data?.message || 'Failed to load messages.');
     } finally {
       setLoading(false);

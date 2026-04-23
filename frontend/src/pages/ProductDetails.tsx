@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, ShoppingCart, Shield, Truck, RotateCcw, CreditCard } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
@@ -12,9 +13,23 @@ const ProductDetails: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
+
   const initialProduct = (location.state as any)?.product ?? null;
   const [product, setProduct] = useState<any>(initialProduct);
   const [loading, setLoading] = useState(!initialProduct);
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    if (!isAuthenticated) {
+      localStorage.setItem('pending_add_to_cart', String(product._id || product.id));
+      localStorage.setItem('pending_add_redirect', window.location.pathname);
+      navigate('/login');
+      return;
+    }
+    addToCart(String(product._id || product.id));
+  };
+
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -119,7 +134,7 @@ const ProductDetails: React.FC = () => {
 
           <div className="space-y-4 mb-12">
             <Button 
-              onClick={() => addToCart(String(product._id || product.id))}
+              onClick={handleAddToCart}
               className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center space-x-3 h-auto"
             >
               <ShoppingCart size={20} />

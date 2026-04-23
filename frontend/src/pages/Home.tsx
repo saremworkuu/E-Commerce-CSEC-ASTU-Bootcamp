@@ -238,6 +238,8 @@ const Home: React.FC = () => {
                     alt={product.name} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     referrerPolicy="no-referrer"
+                    loading="eager"
+                    fetchPriority="high"
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
                     {hasDiscount && (
@@ -318,6 +320,8 @@ const Home: React.FC = () => {
                     alt={getProductName(product)} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     referrerPolicy="no-referrer"
+                    loading="eager"
+                    fetchPriority="high"
                   />
                   <div className="absolute top-8 right-8 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl">
                     <span className="text-xs font-bold uppercase tracking-widest text-black">Top Seller</span>

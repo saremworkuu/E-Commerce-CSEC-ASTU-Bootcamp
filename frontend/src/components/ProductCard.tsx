@@ -21,6 +21,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isAuthenticated) {
+      localStorage.setItem('pending_add_to_cart', String((product as any)._id || product.id));
+      localStorage.setItem('pending_add_redirect', window.location.pathname);
+      navigate('/login');
+      return;
+    }
     setIsAdding(true);
     addToCart(String((product as any)._id || product.id));
     setTimeout(() => setIsAdding(false), 1500);
