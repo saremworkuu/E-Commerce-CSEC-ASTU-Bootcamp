@@ -32,7 +32,7 @@ router.post('/add', Protect, async (req, res) => {
     }
 
     const existing = cart.items.find(
-      item => Number(item.productId) === Number(productId)
+      item => String(item.productId) === String(productId)
     );
 
     if (existing) {

@@ -23,18 +23,27 @@ const Profile: React.FC = () => {
   const userDisplayName = atIndex > 0 ? userEmail.slice(0, atIndex) : 'Account';
 
   React.useEffect(() => {
-    if (!isAuthenticated) return;
+    const handlePendingCart = async () => {
+      if (!isAuthenticated) return;
 
-    const pendingProductId = localStorage.getItem('pending_add_to_cart');
-    if (!pendingProductId) return;
+      const pendingProductId = localStorage.getItem('pending_add_to_cart');
+      if (!pendingProductId) return;
 
-    const redirectTo = localStorage.getItem('pending_add_redirect') || '/cart';
+      const redirectTo = localStorage.getItem('pending_add_redirect') || '/cart';
 
-    localStorage.removeItem('pending_add_to_cart');
-    localStorage.removeItem('pending_add_redirect');
+      localStorage.removeItem('pending_add_to_cart');
+      localStorage.removeItem('pending_add_redirect');
 
-    addToCart(pendingProductId);
-    navigate(redirectTo);
+      try {
+        await addToCart(pendingProductId);
+      } catch (err) {
+        console.error('Failed to add pending item:', err);
+      }
+      
+      navigate(redirectTo);
+    };
+
+    handlePendingCart();
   }, [isAuthenticated, addToCart, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -94,7 +103,13 @@ const Profile: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
                 <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Password</label>
-                <button type="button" className="text-xs font-bold text-gray-400 hover:text-black dark:hover:text-white transition-colors">Forgot?</button>
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-xs font-bold text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+                >
+                  Forgot?
+                </button>
               </div>
               <div className="relative group">
                 <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" size={18} />

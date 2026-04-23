@@ -9,7 +9,8 @@ import { motion } from 'motion/react';
 import { products as initialProducts } from '../data/products';
 
 const Home: React.FC = () => {
-  const [products, setProducts] = useState<any[]>(initialProducts);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -18,6 +19,8 @@ const Home: React.FC = () => {
         setProducts(res.data);
       } catch (err) {
         console.error('Failed to fetch home products:', err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchProducts();
@@ -127,9 +130,19 @@ const Home: React.FC = () => {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
-          {displayFeatured.map((product) => (
-            <ProductCard key={product.id || (product as any)._id} product={product} />
-          ))}
+          {loading ? (
+            [1, 2, 3].map((i) => (
+              <div key={i} className="space-y-4">
+                <div className="aspect-[4/5] bg-gray-100 dark:bg-neutral-800 rounded-3xl animate-pulse" />
+                <div className="h-4 bg-gray-100 dark:bg-neutral-800 rounded w-2/3 animate-pulse" />
+                <div className="h-4 bg-gray-100 dark:bg-neutral-800 rounded w-1/2 animate-pulse" />
+              </div>
+            ))
+          ) : (
+            displayFeatured.map((product) => (
+              <ProductCard key={product.id || (product as any)._id} product={product} />
+            ))
+          )}
         </div>
       </section>
 

@@ -23,11 +23,11 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const resolveProductId = (productId: any) => {
-  if (productId && typeof productId === 'object') {
-    return productId._id ?? productId.id ?? productId.productId ?? productId;
+  if (!productId) return null;
+  if (typeof productId === 'object') {
+    return String(productId._id ?? productId.id ?? productId.productId ?? productId);
   }
-
-  return productId;
+  return String(productId);
 };
 
 const normalizeCart = (items: CartItem[] = []) =>
@@ -38,11 +38,11 @@ const normalizeCart = (items: CartItem[] = []) =>
 
 const buildCheckoutCart = (items: CartItem[] = []) =>
   items.map((item) => {
-    const normalizedProductId = Number(resolveProductId(item.productId));
-    const product = products.find((entry) => Number(entry.id) === normalizedProductId);
+    const idStr = resolveProductId(item.productId);
+    const product = products.find((entry) => String(entry.id) === idStr);
 
     return {
-      productId: normalizedProductId,
+      productId: idStr,
       quantity: item.quantity,
       name: product?.name ?? item.productId?.name ?? 'Product',
       price: product?.price ?? item.productId?.price ?? 0,
@@ -128,23 +128,23 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const token = getToken();
 
     if (!token) {
-      const normalizedProductId = Number(productId);
+      const idStr = String(productId);
 
       setCart((prev) => {
         const existing = prev.find(
-          (item) => Number(resolveProductId(item.productId)) === normalizedProductId
+          (item) => resolveProductId(item.productId) === idStr
         );
 
         let nextCart: CartItem[];
 
         if (existing) {
           nextCart = prev.map((item) =>
-            Number(resolveProductId(item.productId)) === normalizedProductId
+            resolveProductId(item.productId) === idStr
               ? { ...item, quantity: item.quantity + 1 }
               : item
           );
         } else {
-          nextCart = [...prev, { productId: normalizedProductId, quantity: 1 }];
+          nextCart = [...prev, { productId: idStr, quantity: 1 }];
         }
 
         persistLocalCart(user?.email, nextCart);
@@ -174,8 +174,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const token = getToken();
 
     if (!token) {
+      const idStr = String(productId);
       const nextCart = cart.filter(
-        (item) => Number(resolveProductId(item.productId)) !== Number(productId)
+        (item) => resolveProductId(item.productId) !== idStr
       );
       setCart(nextCart);
       persistLocalCart(user?.email, nextCart);
@@ -199,10 +200,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ================= UPDATE QUANTITY =================
   const updateQuantity = async (productId: string, delta: number) => {
     const token = getToken();
+    const idStr = String(productId);
     if (!token) {
       const nextCart = cart
         .map((item) => {
-          if (Number(resolveProductId(item.productId)) !== Number(productId)) {
+          if (resolveProductId(item.productId) !== idStr) {
             return item;
           }
 
@@ -216,7 +218,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     const item = cart.find(i =>
-      Number(resolveProductId(i.productId)) === Number(productId)
+      resolveProductId(i.productId) === idStr
     );
 
     if (!item) return;
@@ -265,7 +267,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const totalPrice = cart.reduce((sum, item) => {
-    const price = item.productId?.price || products.find((entry) => Number(entry.id) === Number(resolveProductId(item.productId)))?.price || 0;
+    const idStr = resolveProductId(item.productId);
+    const product = products.find((entry) => String(entry.id) === idStr);
+    const price = item.productId?.price || product?.price || 0;
     return sum + price * item.quantity;
   }, 0);
 
