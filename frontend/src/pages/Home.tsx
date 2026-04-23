@@ -6,9 +6,10 @@ import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
 import { apiUrl } from '../lib/api';
 import { motion } from 'motion/react';
+import { products as initialProducts } from '../data/products';
 
 const Home: React.FC = () => {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>(initialProducts);
 
   useEffect(() => {
     const fetchProducts = async () => {

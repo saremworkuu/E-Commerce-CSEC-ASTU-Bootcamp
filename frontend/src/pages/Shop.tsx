@@ -4,9 +4,10 @@ import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { ChevronDown, Search } from 'lucide-react';
 import { apiUrl } from '../lib/api';
+import { products as initialProducts } from '../data/products';
 
 const Shop: React.FC = () => {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>(initialProducts);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlSearch = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(urlSearch);

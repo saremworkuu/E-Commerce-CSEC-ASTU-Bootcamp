@@ -112,6 +112,8 @@ const HeroSlider: React.FC = () => {
                 alt={slides[currentIndex].title}
                 className="w-full h-full object-cover object-center"
                 referrerPolicy="no-referrer"
+                loading={currentIndex === 0 ? "eager" : "lazy"}
+                fetchPriority={currentIndex === 0 ? "high" : "auto"}
               />
             </motion.div>
             {/* Cinematic Overlays */}
