@@ -16,6 +16,7 @@ import Contact from './pages/Contact';
 import About from './pages/About';
 import Wishlist from './pages/Wishlist';
 import AdminLogin from './pages/AdminLogin';
+import ConfirmEmail from './pages/ConfirmEmail';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardOverview from './pages/DashboardOverview';
@@ -41,6 +42,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/profile" element={<PageWrapper><Profile /></PageWrapper>} />
         <Route path="/admin" element={<PageWrapper><AdminLogin /></PageWrapper>} />
         <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
+        <Route path="/confirm-email" element={<PageWrapper><ConfirmEmail /></PageWrapper>} />
         <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
         <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
         
