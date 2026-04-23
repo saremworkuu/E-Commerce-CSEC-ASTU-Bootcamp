@@ -5,9 +5,52 @@ import CartItem from '../components/CartItem';
 import { ArrowLeft, ShoppingBag, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { products } from '../data/products';
+import { useAuth } from '../context/AuthContext';
+import { apiUrl } from '../lib/api';
+import axios from 'axios';
 
 const Cart: React.FC = () => {
   const { cart, totalPrice, totalItems } = useCart();
+  const { user, isAuthenticated } = useAuth();
+  const [isProcessing, setIsProcessing] = React.useState(false);
+
+  const handleCheckout = async () => {
+    if (!isAuthenticated) {
+      alert('Please sign in to complete your purchase.');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Calculate total with tax and shipping (same logic as UI)
+      const tax = totalPrice * 0.08;
+      const shipping = totalPrice > 150 ? 0 : 15;
+      const totalAmount = totalPrice + tax + shipping;
+
+      // Extract names (fallback to email if full name is missing)
+      const fullName = (user as any)?.fullName || user?.email || 'Customer';
+      const names = fullName.split(' ');
+      const first_name = names[0];
+      const last_name = names.slice(1).join(' ') || 'Customer';
+
+      const res = await axios.post(apiUrl('/payment/initialize'), {
+        amount: totalAmount.toFixed(2),
+        email: user?.email,
+        first_name,
+        last_name
+      });
+
+      if (res.data.checkout_url) {
+        // Redirect to Chapa checkout page
+        window.location.href = res.data.checkout_url;
+      }
+    } catch (err: any) {
+      console.error('Checkout error:', err);
+      alert(err.response?.data?.message || 'Payment initialization failed. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   // Map raw cart items to fully hydrated product items from local data
   const populatedCart = cart.map(item => {
@@ -88,15 +131,19 @@ const Cart: React.FC = () => {
               </div>
             </div>
 
-            <Button className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center space-x-3 h-auto">
+            <Button 
+              onClick={handleCheckout}
+              disabled={isProcessing}
+              className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center space-x-3 h-auto disabled:opacity-50"
+            >
               <CreditCard size={20} />
-              <span>Checkout Now</span>
+              <span>{isProcessing ? 'Processing...' : 'Checkout Now'}</span>
             </Button>
 
 
             <div className="mt-8 space-y-4">
               <p className="text-[10px] text-gray-400 text-center uppercase tracking-widest">
-                Secure Checkout Powered by Stripe
+                Secure Checkout Powered by Chapa
               </p>
             </div>
           </div>
