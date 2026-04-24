@@ -71,7 +71,7 @@ const Cart: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Checkout error:', err);
-      alert(err.response?.data?.message || 'Payment initialization failed. Please try again.');
+      alert(err.response?.data?.error || err.response?.data?.message || 'Payment initialization failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }
