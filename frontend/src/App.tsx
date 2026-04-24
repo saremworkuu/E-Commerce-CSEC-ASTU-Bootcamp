@@ -24,6 +24,7 @@ import DashboardProductNew from './pages/DashboardProductNew';
 import DashboardUsers from './pages/DashboardUsers';
 import DashboardOrders from './pages/DashboardOrders';
 import { AnimatePresence, motion } from 'motion/react';
+import AiAssistant from './components/ai';
 
 const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -101,6 +102,7 @@ export default function App() {
           <CartProvider>
             <Router>
               <AppContent />
+              <AiAssistant />
             </Router>
           </CartProvider>
         </WishlistProvider>

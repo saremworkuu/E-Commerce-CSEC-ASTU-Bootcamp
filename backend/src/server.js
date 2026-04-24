@@ -9,6 +9,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import userRoutes from "./routes/userRoutes.js";
 import wishlistRoutes from './routes/wishlistRoutes.js';
 import connectDB from './config/db.js';
+import aiChat from './routes/ai-chat.js';
 import dns from "node:dns";
 
 dns.setServers(['1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4']);
@@ -30,6 +31,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wishlist', wishlistRoutes);
+app.post('/api/ai-chat', aiChat);
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

@@ -21,6 +21,10 @@ const productSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
+  shortDescription: {   // Added for better embedding context
+    type: String,
+    trim: true
+  },
   imageUrl: { 
     type: String, 
     required: true 
@@ -38,6 +42,9 @@ const productSchema = new mongoose.Schema({
 }, { 
   timestamps: true 
 });
+
+// Optional: Text index for fallback keyword search
+productSchema.index({ name: 'text', description: 'text', category: 'text' });
 
 const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
 
