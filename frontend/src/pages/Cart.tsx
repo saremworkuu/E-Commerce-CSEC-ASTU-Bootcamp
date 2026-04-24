@@ -77,18 +77,25 @@ const Cart: React.FC = () => {
     }
   };
 
-  // Map raw cart items to fully hydrated product items from local data
+  // Map raw cart items to fully hydrated product items
   const populatedCart = cart.map(item => {
-    const backendId = typeof item.productId === 'object' ? item.productId?._id || item.productId?.id || item.productId : item.productId;
-    const normalizedId = Number(backendId);
-    const matchedProduct = products.find(p => Number(p.id) === normalizedId);
+    // Extract ID safely from string or object
+    const productId = typeof item.productId === 'object' 
+      ? (item.productId._id || item.productId.id) 
+      : item.productId;
     
+    // 1. Try to find in local dummy products first
+    const matchedDummy = products.find(p => String(p.id) === String(productId));
+    
+    // 2. If it's a real database product, it might have data nested in the cart item
+    const productData = item.productId && typeof item.productId === 'object' ? item.productId : null;
+
     return {
       ...item,
-      name: matchedProduct?.name || item.productId?.name || 'Unknown Product',
-      price: matchedProduct?.price || item.productId?.price || 0,
-      image: matchedProduct?.image || item.productId?.imageUrl || '',
-      id: String(normalizedId),
+      name: matchedDummy?.name || productData?.name || 'Product',
+      price: matchedDummy?.price || productData?.price || 0,
+      image: matchedDummy?.image || productData?.imageUrl || productData?.image || '',
+      id: String(productId),
     };
   });
 

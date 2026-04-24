@@ -69,8 +69,8 @@ router.post('/', Protect, async (req, res) => {
       return res.status(400).json({ message: 'Order must contain at least one item' });
     }
 
-    if (!shippingInfo || !shippingInfo.fullName || !shippingInfo.phone || !shippingInfo.email) {
-      return res.status(400).json({ message: 'Shipping information is required' });
+    if (!shippingInfo || !shippingInfo.fullName || !shippingInfo.email) {
+      return res.status(400).json({ message: 'Shipping information is required (Full Name and Email)' });
     }
 
     const lastFourDigits = paymentInfo?.cardNumber ? paymentInfo.cardNumber.slice(-4) : '';
