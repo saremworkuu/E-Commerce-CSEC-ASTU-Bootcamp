@@ -41,6 +41,8 @@ import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { apiUrl } from '../lib/api';
+import { toast } from 'react-toastify';
+
 
 const DashboardProducts: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -83,9 +85,12 @@ const DashboardProducts: React.FC = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         setProducts(products.filter(p => (p._id || p.id) !== id));
+        toast.success('Product deleted successfully');
       } catch (err) {
         console.error('Delete failed:', err);
+        toast.error('Failed to delete product');
       }
+
     }
   };
 
@@ -95,9 +100,10 @@ const DashboardProducts: React.FC = () => {
     
     // Normalize body to match backend expectations (imageUrl, stock)
     if (!formData.name || !formData.category || !formData.price || !formData.description) {
-      alert("Please fill in all required fields (Name, Category, Price, Description).");
+      toast.warning("Please fill in all required fields.");
       return;
     }
+
 
     const payload = {
       name: formData.name,
@@ -116,20 +122,25 @@ const DashboardProducts: React.FC = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProducts(products.map(p => (p._id || p.id) === id ? res.data.product : p));
+        toast.success('Product updated successfully');
       } else {
+
         const res = await axios.post(apiUrl('/products'), payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProducts([res.data.product, ...products]);
+        toast.success('Product created successfully');
       }
+
       
       setShowForm(false);
       setEditingProduct(null);
       setFormData({ name: '', category: '', price: '', description: '', image: '', stock: '10' });
     } catch (err: any) {
       console.error('Save failed', err.response?.data || err);
-      alert(`Save failed: ${err.response?.data?.message || err.message}`);
+      toast.error(`Save failed: ${err.response?.data?.message || err.message}`);
       return; // prevent clearing the form so user can fix the issue
+
     }
   };
 

@@ -8,6 +8,8 @@ import { products } from '../data/products';
 import { useAuth } from '../context/AuthContext';
 import { apiUrl } from '../lib/api';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+
 
 const Cart: React.FC = () => {
   const { cart, totalPrice, totalItems } = useCart();
@@ -16,9 +18,10 @@ const Cart: React.FC = () => {
 
   const handleCheckout = async () => {
     if (!isAuthenticated) {
-      alert('Please sign in to complete your purchase.');
+      toast.info('Please sign in to complete your purchase.');
       return;
     }
+
 
     setIsProcessing(true);
     try {
@@ -71,8 +74,9 @@ const Cart: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Checkout error:', err);
-      alert(err.response?.data?.error || err.response?.data?.message || 'Payment initialization failed. Please try again.');
+      toast.error(err.response?.data?.error || err.response?.data?.message || 'Payment initialization failed. Please try again.');
     } finally {
+
       setIsProcessing(false);
     }
   };

@@ -28,6 +28,9 @@ import DashboardUsers from './pages/DashboardUsers';
 import DashboardOrders from './pages/DashboardOrders';
 import DashboardMessages from './pages/DashboardMessages';
 import { AnimatePresence, motion } from 'motion/react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -110,9 +113,22 @@ export default function App() {
             <Router>
               <AppContent />
             </Router>
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
           </CartProvider>
         </WishlistProvider>
       </AuthProvider>
     </ThemeProvider>
+
   );
 }
