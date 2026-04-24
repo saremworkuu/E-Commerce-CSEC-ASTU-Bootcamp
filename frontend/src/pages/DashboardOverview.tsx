@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Package, 
-  ShoppingBag, 
-  TrendingUp,
-  ArrowUpRight,
-  ArrowDownRight
-} from 'lucide-react';
+import { Users, Package, ShoppingBag, TrendingUp, ArrowUpRight, ArrowDownRight, Mail } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { motion } from 'motion/react';
 import axios from 'axios';
 import { apiUrl } from '../lib/api';
+import { Button } from '../components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardStats {
   totalUsers: number;
@@ -18,24 +13,33 @@ interface DashboardStats {
   totalOrders: number;
   pendingOrders: number;
   totalRevenue: number;
+  totalMessages: number;
 }
+
+
 
 const DashboardOverview: React.FC = () => {
   const [statsData, setStatsData] = useState<DashboardStats | null>(null);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [recentMessages, setRecentMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const [statsRes, ordersRes] = await Promise.all([
+        const [statsRes, ordersRes, messagesRes] = await Promise.all([
           axios.get(apiUrl('/admin/stats'), { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get(apiUrl('/orders/admin'), { headers: { Authorization: `Bearer ${token}` } })
+          axios.get(apiUrl('/orders/admin?limit=5'), { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(apiUrl('/admin/messages?limit=3'), { headers: { Authorization: `Bearer ${token}` } })
         ]);
+
         
         setStatsData(statsRes.data);
         setRecentOrders(ordersRes.data.slice(0, 5));
+        setRecentMessages(messagesRes.data.slice(0, 3));
+
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -75,7 +79,15 @@ const DashboardOverview: React.FC = () => {
       change: '+8%', 
       isPositive: true 
     },
+    { 
+      label: 'Messages', 
+      value: statsData?.totalMessages?.toString() || '0', 
+      icon: <Mail className="text-blue-400" />, 
+      change: statsData?.totalMessages ? 'New' : 'None', 
+      isPositive: !!statsData?.totalMessages 
+    },
   ];
+
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-[400px] dark:text-white">Loading dashboard...</div>;
@@ -175,16 +187,35 @@ const DashboardOverview: React.FC = () => {
               </div>
               
               <div className="p-6 bg-gray-50 dark:bg-neutral-800/50 rounded-[2rem]">
-                <p className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">Product Status</p>
-                <h3 className="text-3xl font-bold dark:text-white">{statsData?.totalProducts || 0} Total</h3>
-                <p className="text-sm text-gray-500 mt-2">
-                  Your store currently lists {statsData?.totalProducts || 0} unique products across all categories.
-                </p>
+                <p className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">Recent Messages</p>
+                <div className="space-y-3 mt-4">
+                  {recentMessages.length === 0 ? (
+                    <p className="text-xs text-gray-400">No recent messages.</p>
+                  ) : (
+                    recentMessages.map(msg => (
+                      <div key={msg._id} className="p-3 bg-white dark:bg-neutral-800 rounded-xl border border-gray-100 dark:border-neutral-700">
+                        <div className="flex justify-between items-start mb-1">
+                          <p className="text-xs font-bold dark:text-white truncate">{msg.firstName} {msg.lastName}</p>
+                          <span className="text-[8px] text-gray-400 uppercase">{msg.status}</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 line-clamp-1">{msg.message}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <Button 
+                  onClick={() => navigate('/dashboard/messages')} 
+                  variant="ghost" 
+                  className="w-full mt-4 text-xs font-bold text-gray-400 hover:text-black dark:hover:text-white h-auto py-2"
+                >
+                  View All Messages
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
     </div>
   );
 };

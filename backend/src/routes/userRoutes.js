@@ -34,4 +34,42 @@ router.get('/me', Protect, async (req, res) => {
   }
 });
 
+// Update current user profile
+router.put('/profile', Protect, async (req, res) => {
+  try {
+    const { fullName, email } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (fullName) user.fullName = fullName;
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: 'Invalid email format' });
+      }
+
+      const existingUser = await User.findOne({ email: email.toLowerCase() });
+      if (existingUser && String(existingUser._id) !== String(user._id)) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+      user.email = email.toLowerCase();
+    }
+
+
+    await user.save();
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+
 export default router;

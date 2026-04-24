@@ -137,6 +137,7 @@ router.get('/admin', Protect, async (req, res) => {
       return res.status(403).json({ message: 'Access denied. Admin only.' });
     }
 
+    const limit = parseInt(req.query.limit) || 0;
     const orders = await Order.find()
       .populate({
         path: 'userId',
@@ -145,7 +146,9 @@ router.get('/admin', Protect, async (req, res) => {
       })
       .populate('items.productId', 'name price imageUrl')
       .sort({ createdAt: -1 })
+      .limit(limit)
       .lean();
+
 
     const safeOrders = orders.map(order => ({
       ...order,

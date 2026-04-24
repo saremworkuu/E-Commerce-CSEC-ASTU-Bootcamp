@@ -22,8 +22,12 @@ router.get('/users', async (req, res) => {
   try {
     if (!ensureAdmin(req, res)) return;
     
-    const users = await User.find({}, '-password').sort({ createdAt: -1 });
+    const limit = parseInt(req.query.limit) || 0;
+    const users = await User.find({}, '-password')
+      .sort({ createdAt: -1 })
+      .limit(limit);
     res.json(users);
+
   } catch (error) {
     console.error('Fetch users error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -36,7 +40,7 @@ router.get('/stats', async (req, res) => {
       return;
     }
 
-    const [totalUsers, totalProducts, totalOrders, pendingOrders, revenueResult] = await Promise.all([
+    const [totalUsers, totalProducts, totalOrders, pendingOrders, revenueResult, totalMessages] = await Promise.all([
       User.countDocuments(),
       Product.countDocuments(),
       Order.countDocuments(),
@@ -44,16 +48,21 @@ router.get('/stats', async (req, res) => {
       Order.aggregate([
         { $match: { status: { $in: ['shipped', 'delivered'] } } },
         { $group: { _id: null, revenue: { $sum: '$totalPrice' } } }
-      ])
+      ]),
+      Message.countDocuments()
     ]);
+
+
 
     res.json({
       totalUsers,
       totalProducts,
       totalOrders,
       pendingOrders,
+      totalMessages,
       totalRevenue: revenueResult[0]?.revenue || 0
     });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -66,8 +75,12 @@ router.get('/messages', async (req, res) => {
       return;
     }
 
-    const messages = await Message.find().sort({ createdAt: -1 });
+    const limit = parseInt(req.query.limit) || 0;
+    const messages = await Message.find()
+      .sort({ createdAt: -1 })
+      .limit(limit);
     res.json(messages);
+
   } catch (error) {
     console.error('Failed to fetch messages:', error);
     res.status(500).json({ message: 'Server error' });
