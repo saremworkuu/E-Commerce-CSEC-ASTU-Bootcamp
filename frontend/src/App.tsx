@@ -27,6 +27,8 @@ import DashboardProductNew from './pages/DashboardProductNew';
 import DashboardUsers from './pages/DashboardUsers';
 import DashboardOrders from './pages/DashboardOrders';
 import DashboardMessages from './pages/DashboardMessages';
+import DashboardUserEdit from './pages/DashboardUserEdit';
+
 import { AnimatePresence, motion } from 'motion/react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -68,7 +70,9 @@ const AnimatedRoutes: React.FC = () => {
           <Route path="users" element={<DashboardUsers />} />
           <Route path="orders" element={<DashboardOrders />} />
           <Route path="messages" element={<DashboardMessages />} />
+          <Route path="users/edit/:id" element={<DashboardUserEdit />} />
         </Route>
+
       </Routes>
     </AnimatePresence>
   );

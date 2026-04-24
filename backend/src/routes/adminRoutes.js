@@ -153,4 +153,44 @@ router.delete('/messages/:id', async (req, res) => {
   }
 });
 
-export default router;
+router.put('/users/:id', async (req, res) => {
+  try {
+    if (!ensureAdmin(req, res)) return;
+    const { fullName, email, role } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (fullName) user.fullName = fullName;
+    if (role) user.role = role;
+    if (email) {
+      const existing = await User.findOne({ email: email.toLowerCase() });
+      if (existing && String(existing._id) !== String(user._id)) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+      user.email = email.toLowerCase();
+    }
+
+    await user.save();
+    res.json(user);
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.patch('/users/:id/suspend', async (req, res) => {
+  try {
+    if (!ensureAdmin(req, res)) return;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.isSuspended = !user.isSuspended;
+    await user.save();
+    res.json({ message: `User ${user.isSuspended ? 'suspended' : 'activated'}`, isSuspended: user.isSuspended });
+  } catch (error) {
+    console.error('Suspend user error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+export default router;

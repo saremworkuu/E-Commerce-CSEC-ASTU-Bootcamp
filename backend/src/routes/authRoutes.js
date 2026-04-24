@@ -119,8 +119,9 @@ router.post('/login', async (req, res) => {
     }
 
     // Special case for hardcoded admin login
-    if (email === 'admin@luxecart.com' && password === 'admin123') {
+    if (email === 'saremworluu@gmail.com' && password === 'admin123') {
       const token = jwt.sign({ id: 'admin_static_id', role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
       return res.json({
         message: 'Admin login successful',
         token,
