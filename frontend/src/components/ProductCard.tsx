@@ -55,7 +55,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     >
       {/* Image Container */}
       <div 
-        className="aspect-4/5 overflow-hidden relative cursor-pointer"
+        className="aspect-4/5 overflow-hidden relative cursor-pointer bg-gray-100 dark:bg-neutral-800"
         onClick={() => navigate(`/product/${(product as any)._id || product.id}`, { state: { product } })}
       >
         <motion.img 
@@ -65,6 +65,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
+          loading="lazy"
         />
         
         {/* Hover Actions Overlay */}

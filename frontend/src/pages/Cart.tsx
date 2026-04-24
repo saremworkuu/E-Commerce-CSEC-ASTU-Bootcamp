@@ -36,10 +36,10 @@ const Cart: React.FC = () => {
       // 1. Create the Order in the database first
       const token = localStorage.getItem('token');
       await axios.post(apiUrl('/orders'), {
-        items: cart.map(item => ({
+        items: populatedCart.map(item => ({
           productId: item.productId?._id || item.productId?.id || item.productId,
           quantity: item.quantity,
-          price: item.productId?.price || 0
+          price: item.price || 0
         })),
         totalPrice: totalAmount,
         shippingInfo: {
