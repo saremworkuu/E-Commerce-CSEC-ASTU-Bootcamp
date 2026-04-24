@@ -50,7 +50,7 @@ const Cart: React.FC = () => {
           country: 'Ethiopia'
         },
         paymentInfo: {
-          cardType: 'chapa',
+          paymentMethod: 'chapa',
           cardHolder: fullName
         }
       }, {

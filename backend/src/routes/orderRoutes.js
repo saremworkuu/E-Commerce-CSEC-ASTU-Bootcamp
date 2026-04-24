@@ -88,7 +88,7 @@ router.post('/', Protect, async (req, res) => {
       totalPrice,
       shippingInfo,
       paymentInfo: {
-        cardType: paymentInfo?.cardType || 'chapa',
+        paymentMethod: paymentInfo?.paymentMethod || 'chapa',
         cardHolder: paymentInfo?.cardHolder || '',
         lastFourDigits,
       },

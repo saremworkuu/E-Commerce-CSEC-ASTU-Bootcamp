@@ -54,9 +54,9 @@ const orderSchema = new mongoose.Schema({
 
   // Payment Info (We store only for record - never store full card details in production!)
   paymentInfo: {
-    cardType: { 
+    paymentMethod: { 
       type: String, 
-      enum: ['visa', 'mastercard', 'amex', 'chapa'], 
+      enum: ['card', 'chapa', 'paypal'], 
       required: false 
     },
     cardHolder: { 
