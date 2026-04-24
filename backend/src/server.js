@@ -12,6 +12,7 @@ import contactRoutes from './routes/contactRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import connectDB from './config/db.js';
 import dns from "node:dns";
+import aiChat from './routes/ai-chat.js';
 
 dns.setServers(['1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4']);
 const app = express();
@@ -34,6 +35,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/payment', paymentRoutes);
+app.post('/api/chat', aiChat);
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
