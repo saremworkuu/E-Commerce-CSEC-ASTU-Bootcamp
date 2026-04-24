@@ -32,7 +32,7 @@ const resolveProductId = (productId: any) => {
 
 const normalizeCart = (items: CartItem[] = []) =>
   items.map((item) => ({
-    productId: resolveProductId(item.productId),
+    productId: item.productId, // Keep as-is (might be object or ID)
     quantity: item.quantity,
   }));
 
@@ -268,8 +268,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const totalPrice = cart.reduce((sum, item) => {
     const idStr = resolveProductId(item.productId);
-    const product = products.find((entry) => String(entry.id) === idStr);
-    const price = item.productId?.price || product?.price || 0;
+    const dummyProduct = products.find((entry) => String(entry.id) === idStr);
+    const dbProduct = item.productId && typeof item.productId === 'object' ? item.productId : null;
+    const price = dummyProduct?.price || dbProduct?.price || 0;
     return sum + price * item.quantity;
   }, 0);
 
