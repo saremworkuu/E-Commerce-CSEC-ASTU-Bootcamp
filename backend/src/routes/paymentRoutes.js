@@ -12,6 +12,14 @@ router.post('/initialize', async (req, res) => {
   try {
     const { amount, email, first_name, last_name } = req.body;
 
+    // 0. Check if Secret Key is configured (CRITICAL for Deployment)
+    if (!process.env.CHAPA_SECRET_KEY) {
+      console.error('CRITICAL: CHAPA_SECRET_KEY is missing from environment variables.');
+      return res.status(500).json({ 
+        message: 'Payment system not configured. Please add CHAPA_SECRET_KEY to your server environment variables.' 
+      });
+    }
+
     // 1. Basic Validation
     if (!amount || !email || !first_name || !last_name) {
       return res.status(400).json({ 

@@ -88,7 +88,7 @@ const ProductDetails: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <button 
+      <button
         onClick={() => navigate(-1)}
         className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors mb-12"
       >
@@ -97,14 +97,14 @@ const ProductDetails: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
         {/* Image Gallery */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-800 aspect-square"
         >
-          <img 
-            src={getProductImage(product)} 
-            alt={product.name} 
+          <img
+            src={getProductImage(product)}
+            alt={product.name}
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
@@ -133,14 +133,14 @@ const ProductDetails: React.FC = () => {
           </div>
 
           <div className="space-y-4 mb-12">
-            <Button 
+            <Button
               onClick={handleAddToCart}
               className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center space-x-3 h-auto"
             >
               <ShoppingCart size={20} />
               <span>Add to Cart</span>
             </Button>
-            <Button 
+            <Button
               variant="outline"
               onClick={() => navigate('/profile')}
               className="w-full py-7 border-2 border-black dark:border-white text-black dark:text-white font-bold rounded-2xl hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all flex items-center justify-center space-x-3 h-auto"

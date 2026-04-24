@@ -7,6 +7,7 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import axios from 'axios';
 import { apiUrl } from '../lib/api';
+import ImageUpload from '../components/ImageUpload';
 
 const DashboardProductNew: React.FC = () => {
   const navigate = useNavigate();
@@ -184,14 +185,24 @@ const DashboardProductNew: React.FC = () => {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="image">Image URL</Label>
-          <Input
-            id="image"
-            value={formData.image}
-            onChange={handleChange}
-            placeholder="https://example.com/image.jpg"
-          />
+        <div className="space-y-4">
+          <Label htmlFor="image">Product Image</Label>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex-1 w-full">
+              <Input
+                id="image"
+                value={formData.image}
+                onChange={handleChange}
+                placeholder="https://example.com/image.jpg"
+              />
+              <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest">Paste a URL or upload a file</p>
+            </div>
+            <div className="flex-shrink-0">
+              <ImageUpload 
+                onUploadSuccess={(url) => setFormData(prev => ({ ...prev, image: url }))} 
+              />
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">
