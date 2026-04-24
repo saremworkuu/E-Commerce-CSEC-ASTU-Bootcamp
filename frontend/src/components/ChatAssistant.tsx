@@ -41,7 +41,7 @@ const ChatAssistant: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/chat", {
+      const res = await fetch("/api/chat", {
         // 🔁 replace with your backend URL
         method: "POST",
         headers: {
