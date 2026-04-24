@@ -28,6 +28,8 @@ import DashboardUsers from './pages/DashboardUsers';
 import DashboardOrders from './pages/DashboardOrders';
 import DashboardMessages from './pages/DashboardMessages';
 import { AnimatePresence, motion } from 'motion/react';
+import ChatAssistant from "./components/ChatAssistant";
+
 
 const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -67,6 +69,7 @@ const AnimatedRoutes: React.FC = () => {
           <Route path="messages" element={<DashboardMessages />} />
         </Route>
       </Routes>
+      <ChatAssistant />
     </AnimatePresence>
   );
 };
