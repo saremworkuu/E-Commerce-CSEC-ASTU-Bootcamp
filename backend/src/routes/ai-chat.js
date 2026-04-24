@@ -1,23 +1,15 @@
+// routes/ai-chat.js
 import Groq from "groq-sdk";
 import "dotenv/config";
 import Product from "../models/product.js";
 import About from "../models/about.js";
 
+// Initialize Groq
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-// 🔥 Clean & normalize user message
-const cleanText = (text) => {
-  return text.toLowerCase().replace(/[^\w\s]/gi, "");
-};
-
-// 🔥 Extract keywords (basic NLP)
-const extractKeywords = (text) => {
-  const words = cleanText(text).split(" ");
-  return words.filter((w) => w.length > 2); // remove small words like "do", "is"
-};
-
+// ====================== MAIN AI CHAT ROUTE ======================
 const aiChat = async (req, res) => {
   try {
     const { messages } = req.body;
@@ -28,8 +20,6 @@ const aiChat = async (req, res) => {
 
     const lastUserMessage =
       messages.filter((m) => m.role === "user").pop()?.content || "";
-
-    const keywords = extractKeywords(lastUserMessage);
 
     // ==================== FETCH ABOUT ====================
     let aboutDoc = await About.findOne().lean();
@@ -42,46 +32,28 @@ const aiChat = async (req, res) => {
 
     const aboutText = aboutDoc.content || "Modern e-commerce store.";
 
-    // ==================== SMART PRODUCT SEARCH ====================
+    // ==================== SIMPLE PRODUCT SEARCH ====================
     let relevantProducts = [];
 
-    if (keywords.length > 0) {
-      const regexArray = keywords.map((word) => ({
-        $or: [
-          { name: { $regex: word, $options: "i" } },
-          { category: { $regex: word, $options: "i" } },
-          { description: { $regex: word, $options: "i" } },
-        ],
-      }));
-
-      relevantProducts = await Product.find({
-        $and: regexArray,
-      })
-        .limit(5)
-        .lean();
-    }
-
-    // 🔥 fallback: try loose search
-    if (relevantProducts.length === 0 && lastUserMessage) {
+    if (lastUserMessage) {
+      // simple keyword search (case-insensitive)
       relevantProducts = await Product.find({
         $or: [
           { name: { $regex: lastUserMessage, $options: "i" } },
           { category: { $regex: lastUserMessage, $options: "i" } },
+          { description: { $regex: lastUserMessage, $options: "i" } },
         ],
       })
         .limit(5)
         .lean();
     }
 
-    // ==================== 🚫 NO PRODUCT FOUND ====================
+    // fallback if nothing found
     if (relevantProducts.length === 0) {
-      return res.json({
-        reply:
-          "🤖 I currently support questions related to products on this website only.\n\nIf you need help or have feedback, please visit our Contact page — we’ll respond quickly!",
-      });
+      relevantProducts = await Product.find({}).limit(5).lean();
     }
 
-    // ==================== CONTEXT ====================
+    // ==================== BUILD CONTEXT ====================
     const context = `
 ABOUT THE WEBSITE:
 ${aboutText}
@@ -98,18 +70,12 @@ ${relevantProducts
     `.trim();
 
     // ==================== SYSTEM PROMPT ====================
-    const systemPrompt = `
-You are a helpful AI shopping assistant.
+    const systemPrompt = `You are a friendly, helpful, and enthusiastic AI shopping assistant.
+Use ONLY the provided context to answer accurately.
+Be concise, polite, and natural and short answer user may bored. Suggest relevant products when it makes sense.
+When the user asks "what is the role of this website" or similar, base your answer on the ABOUT THE WEBSITE section.`;
 
-Rules:
-- Answer ONLY using the provided products and website info
-- Be natural and friendly
-- Recommend products clearly
-- If multiple products match, suggest best ones
-- Keep answers short and helpful
-`;
-
-    // ==================== AI CALL ====================
+    // ==================== GROQ GENERATION ====================
     const completion = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
       messages: [
@@ -117,7 +83,10 @@ Rules:
           role: "system",
           content: `${systemPrompt}\n\nContext:\n${context}`,
         },
-        ...messages,
+        ...messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
       ],
     });
 
@@ -129,7 +98,7 @@ Rules:
     console.error("AI Chat Error:", error);
     res.status(500).json({
       reply:
-        "❌ Server error. Please try again later or contact support.",
+        "Sorry, I am having trouble responding right now. Please try again in a moment!",
     });
   }
 };
