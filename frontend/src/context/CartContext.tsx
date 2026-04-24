@@ -3,6 +3,8 @@ import axios from 'axios';
 import { products } from '../data/products';
 import { useAuth } from './AuthContext';
 import { apiUrl } from '../lib/api';
+import { toast } from 'react-toastify';
+
 
 interface CartItem {
   productId: any; // backend may return populated object OR primitive id
@@ -150,8 +152,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
 
         persistLocalCart(user?.email, nextCart);
+        toast.success('Item added to cart');
         return nextCart;
       });
+
 
       return;
     }
@@ -166,9 +170,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const nextCart = normalizeCart(res.data.items || res.data.cart?.items || res.data || []);
       setCart(nextCart);
       persistLocalCart(user?.email, nextCart);
+      toast.success('Item added to cart');
     } catch (err) {
       console.error('Add to cart error:', err);
+      toast.error('Failed to add item to cart');
     }
+
   };
 
   // ================= REMOVE =================
@@ -182,7 +189,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       );
       setCart(nextCart);
       persistLocalCart(user?.email, nextCart);
+      toast.info('Item removed from cart');
       return;
+
     }
 
     try {
@@ -194,9 +203,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const nextCart = normalizeCart(res.data.items || []);
       setCart(nextCart);
       persistLocalCart(user?.email, nextCart);
+      toast.info('Item removed from cart');
     } catch (err) {
       console.error(err);
+      toast.error('Failed to remove item from cart');
     }
+
   };
 
   // ================= UPDATE QUANTITY =================
@@ -260,9 +272,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       setCart([]);
       persistLocalCart(user?.email, []);
+      toast.success('Cart cleared');
     } catch (err) {
       console.error(err);
+      toast.error('Failed to clear cart');
     }
+
   };
 
   // ================= TOTALS =================

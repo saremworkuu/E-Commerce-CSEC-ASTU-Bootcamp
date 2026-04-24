@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
 import { apiUrl } from '../lib/api';
+import { toast } from 'react-toastify';
+
 
 const Register: React.FC = () => {
   const [fullName, setFullName] = useState('');
@@ -15,17 +17,18 @@ const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
+
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage({ type: '', text: '' });
+
 
     if (password !== confirmPassword) {
-      setMessage({ type: 'error', text: 'Passwords do not match' });
+      toast.error('Passwords do not match');
       return;
     }
+
 
     try {
       setLoading(true);
@@ -34,17 +37,15 @@ const Register: React.FC = () => {
         email,
         password
       });
-      setMessage({ type: 'success', text: res.data.message });
+      toast.success(res.data.message || 'Account created successfully!');
       // Optionally redirect after a few seconds or let the user click sign in
       setTimeout(() => {
         navigate('/profile');
       }, 3000);
     } catch (error: any) {
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.message || 'Failed to register' 
-      });
+      toast.error(error.response?.data?.message || 'Failed to register');
     } finally {
+
       setLoading(false);
     }
   };
@@ -133,22 +134,9 @@ const Register: React.FC = () => {
             {loading ? 'Creating Account...' : 'Create Account'}
           </Button>
 
-          {message.text && (
-            <div
-              className={`p-4 rounded-2xl flex items-start gap-3 ${
-                message.type === 'success'
-                  ? 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400'
-                  : 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400'
-              }`}
-            >
-              {message.type === 'success' ? (
-                <CheckCircle2 className="shrink-0 mt-0.5" size={18} />
-              ) : (
-                <AlertCircle className="shrink-0 mt-0.5" size={18} />
-              )}
-              <p className="text-sm font-medium">{message.text}</p>
-            </div>
-          )}
+
+
+
         </form>
 
         <div className="mt-10 text-center">

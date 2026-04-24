@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { apiUrl } from '../lib/api';
+import { toast } from 'react-toastify';
+
 
 interface CartItem {
   productId: string;
@@ -39,7 +41,7 @@ const Order: React.FC = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+
 
   const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -52,13 +54,14 @@ const Order: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+
 
     if (cart.length === 0) {
-      setError('Your cart is empty');
+      toast.error('Your cart is empty');
       setLoading(false);
       return;
     }
+
 
     try {
       const orderData = {
@@ -91,13 +94,15 @@ const Order: React.FC = () => {
 
       // Clear cart after successful order
       localStorage.removeItem('cart');
-
-      alert('Order placed successfully! 🎉');
+ 
+      toast.success('Order placed successfully! 🎉');
       navigate('/orders'); // or wherever you want to redirect
 
+
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to place order. Please try again.');
+      toast.error(err.response?.data?.message || 'Failed to place order. Please try again.');
     } finally {
+
       setLoading(false);
     }
   };
@@ -290,7 +295,7 @@ const Order: React.FC = () => {
                   </div>
                 </div>
 
-                {error && <p className="text-red-500 text-center">{error}</p>}
+
 
                 <button
                   type="submit"

@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { apiUrl } from '../lib/api';
+import { toast } from 'react-toastify';
+
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = React.useState({
@@ -15,8 +17,9 @@ const Contact: React.FC = () => {
     message: '',
   });
   const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState('');
-  const [success, setSuccess] = React.useState('');
+
+
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -25,8 +28,9 @@ const Contact: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+
+
+
 
     const firstName = formData.firstName.trim();
     const lastName = formData.lastName.trim();
@@ -34,9 +38,10 @@ const Contact: React.FC = () => {
     const message = formData.message.trim();
 
     if (!firstName || !lastName || !email || !message) {
-      setError('Please fill in all fields.');
+      toast.warning('Please fill in all fields.');
       return;
     }
+
 
     setLoading(true);
 
@@ -50,12 +55,14 @@ const Contact: React.FC = () => {
       });
 
       console.log('Message sent response:', res.data);
-      setSuccess('Message sent successfully. We will get back to you soon.');
+      toast.success('Message sent successfully. We will get back to you soon.');
       setFormData({ firstName: '', lastName: '', email: '', message: '' });
+
     } catch (err: any) {
       console.error('Contact submit error:', err.response?.data || err.message);
-      setError(err.response?.data?.message || 'Failed to send message. Please try again later.');
+      toast.error(err.response?.data?.message || 'Failed to send message. Please try again later.');
     } finally {
+
       setLoading(false);
     }
   };
@@ -114,17 +121,7 @@ const Contact: React.FC = () => {
           className="bg-gray-50 dark:bg-neutral-900 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-12 md:p-16"
         >
           <form className="space-y-6 md:space-y-8" onSubmit={handleSubmit}>
-            {error && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
-                {error}
-              </div>
-            )}
 
-            {success && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
-                {success}
-              </div>
-            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
               <div>

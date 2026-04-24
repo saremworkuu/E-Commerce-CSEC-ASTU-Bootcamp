@@ -29,6 +29,8 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { apiUrl } from '../lib/api';
+import { toast } from 'react-toastify';
+
 
 interface OrderData {
   _id: string;
@@ -94,10 +96,12 @@ const DashboardOrders: React.FC = () => {
       );
       // Optimistically update the UI
       setOrders(orders.map(o => o._id === id ? { ...o, status: newStatus } : o));
+      toast.success(`Order status updated to ${newStatus}`);
     } catch (error) {
       console.error('Failed to update status:', error);
-      alert('Failed to update order status.');
+      toast.error('Failed to update order status.');
     }
+
   };
 
   return (

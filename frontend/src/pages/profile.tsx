@@ -8,6 +8,8 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { User, Mail, Lock, LogOut, Settings, Package, Heart, CreditCard, Eye, EyeOff } from 'lucide-react';
 import { apiUrl } from '../lib/api';
+import { toast } from 'react-toastify';
+
 
 const Profile: React.FC = () => {
   const { user, login, logout, isAuthenticated } = useAuth();
@@ -16,7 +18,7 @@ const Profile: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+
   const navigate = useNavigate();
   const userEmail = typeof user?.email === 'string' ? user.email : '';
   const atIndex = userEmail.indexOf('@');
@@ -48,16 +50,18 @@ const Profile: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
+
 
     try {
       const res = await axios.post(apiUrl('/auth/login'), { email, password });
 
       login(res.data.user.email, res.data.user.role, res.data.token);
+      toast.success('Signed in successfully!');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid credentials');
+      toast.error(err.response?.data?.message || 'Invalid credentials');
     } finally {
+
       setLoading(false);
     }
   };
@@ -78,11 +82,8 @@ const Profile: React.FC = () => {
             <p className="text-gray-500 dark:text-gray-400">Sign in to manage your orders and preferences.</p>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 rounded-2xl flex items-start gap-3 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400">
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          )}
+
+
 
           <form className="space-y-6" onSubmit={handleLogin}>
             <div className="space-y-2">
@@ -208,12 +209,16 @@ const Profile: React.FC = () => {
 
             <div className="mt-10 pt-10 border-t border-gray-100 dark:border-neutral-800">
               <button
-                onClick={logout}
+                onClick={() => {
+                  logout();
+                  toast.info('Signed out');
+                }}
                 className="w-full flex items-center space-x-4 px-6 py-4 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all"
               >
                 <LogOut size={18} />
                 <span>Logout Session</span>
               </button>
+
             </div>
           </div>
         </motion.div>
