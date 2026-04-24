@@ -41,16 +41,19 @@ const Contact: React.FC = () => {
     setLoading(true);
 
     try {
-      await axios.post(apiUrl('/contact'), {
+      console.log('Sending message...', { firstName, lastName, email, message });
+      const res = await axios.post(apiUrl('/contact'), {
         firstName,
         lastName,
         email,
         message,
       });
 
+      console.log('Message sent response:', res.data);
       setSuccess('Message sent successfully. We will get back to you soon.');
       setFormData({ firstName: '', lastName: '', email: '', message: '' });
     } catch (err: any) {
+      console.error('Contact submit error:', err.response?.data || err.message);
       setError(err.response?.data?.message || 'Failed to send message. Please try again later.');
     } finally {
       setLoading(false);
@@ -111,17 +114,17 @@ const Contact: React.FC = () => {
           className="bg-gray-50 dark:bg-neutral-900 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-12 md:p-16"
         >
           <form className="space-y-6 md:space-y-8" onSubmit={handleSubmit}>
-            {error ? (
-              <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+            {error && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
                 {error}
-              </p>
-            ) : null}
+              </div>
+            )}
 
-            {success ? (
-              <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
+            {success && (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
                 {success}
-              </p>
-            ) : null}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
               <div>
@@ -166,7 +169,11 @@ const Contact: React.FC = () => {
               />
             </div>
 
-            <Button disabled={loading} className="w-full py-6 md:py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center space-x-3 h-auto">
+            <Button 
+              type="submit"
+              disabled={loading} 
+              className="w-full py-6 md:py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center space-x-3 h-auto"
+            >
               <Send size={20} />
               <span>{loading ? 'Sending...' : 'Send Message'}</span>
             </Button>

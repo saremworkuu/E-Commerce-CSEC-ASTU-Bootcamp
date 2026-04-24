@@ -18,6 +18,18 @@ const ensureAdmin = (req, res) => {
   return true;
 };
 
+router.get('/users', async (req, res) => {
+  try {
+    if (!ensureAdmin(req, res)) return;
+    
+    const users = await User.find({}, '-password').sort({ createdAt: -1 });
+    res.json(users);
+  } catch (error) {
+    console.error('Fetch users error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 router.get('/stats', async (req, res) => {
   try {
     if (!ensureAdmin(req, res)) {

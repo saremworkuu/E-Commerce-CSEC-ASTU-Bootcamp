@@ -33,23 +33,23 @@ const orderSchema = new mongoose.Schema({
   shippingInfo: {
     fullName: { 
       type: String, 
-      required: true 
+      required: false 
     },
     phone: { 
       type: String, 
-      required: true 
+      required: false 
     },
     email: { 
       type: String, 
-      required: true 
+      required: false 
     },
     address: { 
       type: String, 
-      required: true 
+      required: false 
     },
     country: { 
       type: String, 
-      required: true 
+      required: false 
     }
   },
 
@@ -57,12 +57,12 @@ const orderSchema = new mongoose.Schema({
   paymentInfo: {
     cardType: { 
       type: String, 
-      enum: ['visa', 'mastercard', 'amex'], 
-      required: true 
+      enum: ['visa', 'mastercard', 'amex', 'chapa'], 
+      required: false 
     },
     cardHolder: { 
       type: String, 
-      required: true 
+      required: false 
     },
     // We do NOT store full card number or CVV in real apps (for security)
     lastFourDigits: { 

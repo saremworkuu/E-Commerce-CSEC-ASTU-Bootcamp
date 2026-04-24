@@ -33,6 +33,31 @@ const Cart: React.FC = () => {
       const first_name = names[0];
       const last_name = names.slice(1).join(' ') || 'Customer';
 
+      // 1. Create the Order in the database first
+      const token = localStorage.getItem('token');
+      await axios.post(apiUrl('/orders'), {
+        items: cart.map(item => ({
+          productId: item.productId?._id || item.productId?.id || item.productId,
+          quantity: item.quantity,
+          price: item.productId?.price || 0
+        })),
+        totalPrice: totalAmount,
+        shippingInfo: {
+          fullName: fullName,
+          email: user?.email,
+          phone: 'N/A', // Placeholder since we don't have a form yet
+          address: 'Online Order',
+          country: 'Ethiopia'
+        },
+        paymentInfo: {
+          cardType: 'chapa',
+          cardHolder: fullName
+        }
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // 2. Initialize Chapa Payment
       const res = await axios.post(apiUrl('/payment/initialize'), {
         amount: totalAmount.toFixed(2),
         email: user?.email,

@@ -104,138 +104,135 @@ const DashboardProductNew: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight dark:text-white">Add New Product</h1>
-          <p className="text-gray-500 dark:text-gray-400">Create a new product for your store.</p>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-neutral-900 rounded-2xl border border-gray-100 dark:border-neutral-800 p-6 shadow-sm">
-
-        {error && (
-          <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
-            {error}
+    <div className="max-w-2xl mx-auto py-8 px-4">
+      <div className="bg-white dark:bg-neutral-900 rounded-[2.5rem] border border-gray-100 dark:border-neutral-800 p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight dark:text-white">Add New Product</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Fill in the details below to create a product listing.</p>
           </div>
-        )}
-
-        {success && (
-          <div className="bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-400 text-emerald-700 dark:text-emerald-400 px-4 py-3 rounded-xl text-sm">
-            ✅ Product created successfully!
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Product Name <span className="text-red-500">*</span></Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="e.g. Premium Wireless Headphones"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="category">Category <span className="text-red-500">*</span></Label>
-            <Select value={formData.category} onValueChange={handleSelectChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Electronics">Electronics</SelectItem>
-                <SelectItem value="Accessories">Accessories</SelectItem>
-                <SelectItem value="Furniture">Furniture</SelectItem>
-                <SelectItem value="Apparel">Apparel</SelectItem>
-                <SelectItem value="Jewelry">Jewelry</SelectItem>
-                <SelectItem value="Home Goods">Home Goods</SelectItem>
-                <SelectItem value="Clothing">Clothing</SelectItem>
-                <SelectItem value="Clothing">Footwear</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <button onClick={() => navigate('/dashboard/products')} className="text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="price">Price ($) <span className="text-red-500">*</span></Label>
-            <Input
-              id="price"
-              type="number"
-              step="0.01"
-              value={formData.price}
-              onChange={handleChange}
-              placeholder="29.99"
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 px-6 py-4 rounded-2xl text-sm font-medium">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-6 py-4 rounded-2xl text-sm font-medium">
+              ✅ Product created successfully!
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-2.5">
+              <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1" htmlFor="name">Product Name</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="e.g. Leather Bag"
+                className="rounded-xl bg-gray-50/50 dark:bg-neutral-800/50 border-gray-100 dark:border-neutral-800 h-12"
+                required
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1" htmlFor="category">Category</Label>
+              <Select value={formData.category} onValueChange={handleSelectChange}>
+                <SelectTrigger className="rounded-xl bg-gray-50/50 dark:bg-neutral-800/50 border-gray-100 dark:border-neutral-800 h-12">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="Electronics">Electronics</SelectItem>
+                  <SelectItem value="Accessories">Accessories</SelectItem>
+                  <SelectItem value="Furniture">Furniture</SelectItem>
+                  <SelectItem value="Apparel">Apparel</SelectItem>
+                  <SelectItem value="Jewelry">Jewelry</SelectItem>
+                  <SelectItem value="Home Goods">Home Goods</SelectItem>
+                  <SelectItem value="Clothing">Clothing</SelectItem>
+                  <SelectItem value="Footwear">Footwear</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="stock">Initial Stock</Label>
-            <Input
-              id="stock"
-              type="number"
-              value={formData.stock}
-              onChange={handleChange}
-              placeholder="10"
-            />
-          </div>
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-2.5">
+              <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1" htmlFor="price">Price ($)</Label>
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                value={formData.price}
+                onChange={handleChange}
+                placeholder="0.00"
+                className="rounded-xl bg-gray-50/50 dark:bg-neutral-800/50 border-gray-100 dark:border-neutral-800 h-12"
+                required
+              />
+            </div>
 
-        <div className="space-y-4">
-          <Label htmlFor="image">Product Image</Label>
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <div className="flex-1 w-full">
+            <div className="space-y-2.5">
+              <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1" htmlFor="stock">Initial Stock</Label>
+              <Input
+                id="stock"
+                type="number"
+                value={formData.stock}
+                onChange={handleChange}
+                placeholder="10"
+                className="rounded-xl bg-gray-50/50 dark:bg-neutral-800/50 border-gray-100 dark:border-neutral-800 h-12"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2.5">
+              <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1" htmlFor="image">Product Image</Label>
               <Input
                 id="image"
                 value={formData.image}
                 onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
-              />
-              <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest">Paste a URL or upload a file</p>
-            </div>
-            <div className="flex-shrink-0">
-              <ImageUpload 
-                onUploadSuccess={(url) => setFormData(prev => ({ ...prev, image: url }))} 
+                placeholder="Enter Image URL (https://...)"
+                className="rounded-xl bg-gray-50/50 dark:bg-neutral-800/50 border-gray-100 dark:border-neutral-800 h-12"
               />
             </div>
+            
+            <ImageUpload 
+              variant="large"
+              onUploadSuccess={(url) => setFormData(prev => ({ ...prev, image: url }))} 
+            />
           </div>
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="description">Description <span className="text-red-500">*</span></Label>
-          <Textarea
-            id="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Describe the product features, specifications, etc..."
-              className="min-h-35"
-            required
-          />
-        </div>
+          <div className="space-y-2.5 pt-2">
+            <Label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1" htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Describe the product..."
+              className="min-h-32 rounded-xl bg-gray-50/50 dark:bg-neutral-800/50 border-gray-100 dark:border-neutral-800 p-4 resize-none"
+              required
+            />
+          </div>
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => navigate('/dashboard/products')}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-          
-          <Button 
-            type="submit" 
-            disabled={loading}
-            className="bg-black text-white dark:bg-white dark:text-black min-w-35"
-          >
-            {loading ? 'Saving...' : 'Save Product'}
-          </Button>
-        </div>
-      </form>
+          <div className="pt-6">
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl h-auto uppercase tracking-widest text-sm"
+            >
+              {loading ? 'Creating...' : 'Create Product'}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

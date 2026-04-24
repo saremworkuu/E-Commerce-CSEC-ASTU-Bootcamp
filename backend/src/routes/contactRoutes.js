@@ -10,24 +10,8 @@ const MAX_REQUESTS_PER_WINDOW = 5;
 
 const getClientIp = (req) => req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
 
+// Rate limit removed for testing/UX
 const contactRateLimit = (req, res, next) => {
-  const ip = getClientIp(req);
-  const now = Date.now();
-  const current = submissionBuckets.get(ip);
-
-  if (!current || now > current.resetAt) {
-    submissionBuckets.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return next();
-  }
-
-  if (current.count >= MAX_REQUESTS_PER_WINDOW) {
-    return res.status(429).json({
-      message: 'Too many contact submissions. Please try again later.',
-    });
-  }
-
-  current.count += 1;
-  submissionBuckets.set(ip, current);
   next();
 };
 
