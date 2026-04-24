@@ -32,7 +32,8 @@ const resolveProductId = (productId: any) => {
 
 const normalizeCart = (items: CartItem[] = []) =>
   items.map((item) => ({
-    productId: item.productId, // Keep as-is (might be object or ID)
+    ...item,
+    productId: item.productId,
     quantity: item.quantity,
   }));
 
@@ -67,6 +68,7 @@ const readLocalCart = (email?: string | null): CartItem[] => {
 
     return normalizeCart(
       parsed.map((item) => ({
+        ...item, // Preserve name, price, imageUrl if they exist
         productId: item.productId,
         quantity: Number(item.quantity) || 1,
       }))

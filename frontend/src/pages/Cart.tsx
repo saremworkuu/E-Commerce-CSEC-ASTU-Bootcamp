@@ -92,9 +92,9 @@ const Cart: React.FC = () => {
 
     return {
       ...item,
-      name: matchedDummy?.name || productData?.name || 'Product',
-      price: matchedDummy?.price || productData?.price || 0,
-      image: matchedDummy?.image || productData?.imageUrl || productData?.image || '',
+      name: matchedDummy?.name || productData?.name || (item as any).name || 'Product',
+      price: matchedDummy?.price || productData?.price || (item as any).price || 0,
+      image: matchedDummy?.image || productData?.imageUrl || productData?.image || (item as any).imageUrl || (item as any).image || '',
       id: String(productId),
     };
   });
