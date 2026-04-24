@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { motion } from 'motion/react';
+import { apiUrl } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Button } from '../components/ui/button';
 
 const ConfirmEmail = () => {
   const [searchParams] = useSearchParams();
@@ -7,6 +12,7 @@ const ConfirmEmail = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   useEffect(() => {
     const verifyEmail = async () => {
@@ -17,10 +23,7 @@ const ConfirmEmail = () => {
       }
 
       try {
-        const apiBase = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
-        const verificationEndpoint = apiBase.endsWith('/api') ? apiBase : `${apiBase}/api`;
-
-        const response = await fetch(`${verificationEndpoint}/auth/verify-email`, {
+        const response = await fetch(apiUrl('/auth/verify-email'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -33,14 +36,12 @@ const ConfirmEmail = () => {
         if (response.ok) {
           setStatus('success');
           setMessage(data.message || 'Email verified successfully!');
-          // Optionally, login the user automatically if backend sends token
-          if (data.token) {
-             localStorage.setItem('token', data.token);
-             if (data.user) {
-               localStorage.setItem('user', JSON.stringify(data.user));
-             }
-             // Small delay before redirecting to home/shop
-             setTimeout(() => navigate('/'), 2000);
+          
+          if (data.token && data.user) {
+             login(data.user.email, data.user.role, data.token);
+             
+             // Redirect to profile after a short delay
+             setTimeout(() => navigate('/profile'), 2500);
           }
         } else {
           setStatus('error');
@@ -56,34 +57,53 @@ const ConfirmEmail = () => {
   }, [token, navigate]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      <div className="p-8 bg-white shadow-lg rounded-xl max-w-md w-full text-center">
-        <h2 className="text-2xl font-bold mb-4">Email Verification</h2>
-        
+    <div className="min-h-[70vh] flex items-center justify-center px-4 py-12 bg-gray-50 dark:bg-black">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-md w-full bg-white dark:bg-neutral-900 rounded-[2.5rem] p-12 border border-gray-100 dark:border-neutral-800 shadow-2xl text-center"
+      >
         {status === 'loading' && (
           <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-            <p className="text-muted-foreground">Verifying your email address...</p>
+            <Loader2 className="w-16 h-16 text-black dark:text-white animate-spin mb-6" />
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">Verifying...</h1>
+            <p className="text-gray-500 dark:text-gray-400">Verifying your email address...</p>
           </div>
         )}
 
         {status === 'success' && (
-          <div className="text-green-600">
-            <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-            <p className="text-lg font-medium mb-4">{message}</p>
-            <p className="text-sm text-gray-500 mb-6">You will be redirected shortly...</p>
-            <Link to="/" className="text-primary hover:underline">Go to Home</Link>
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-500 rounded-full flex items-center justify-center mb-6">
+              <CheckCircle size={32} />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">Verified!</h1>
+            <p className="text-gray-500 dark:text-gray-400 mb-8">{message}</p>
+            <p className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6">Redirecting to your account...</p>
+            <Button 
+              onClick={() => navigate('/profile')}
+              className="w-full py-6 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl"
+            >
+              Go to Profile Now
+            </Button>
           </div>
         )}
 
         {status === 'error' && (
-          <div className="text-destructive">
-            <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            <p className="text-lg font-medium mb-4">{message}</p>
-            <Link to="/login" className="text-primary hover:underline">Go to Login</Link>
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mb-6">
+              <XCircle size={32} />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">Verification Failed</h1>
+            <p className="text-gray-500 dark:text-gray-400 mb-8">{message}</p>
+            <Button 
+              onClick={() => navigate('/login')}
+              className="w-full py-6 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl"
+            >
+              Back to Login
+            </Button>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 };

@@ -9,12 +9,12 @@ const About: React.FC = () => {
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://picsum.photos/seed/minimalist-design/1920/1080" 
-            alt="Minimalist Design Vision" 
-            className="w-full h-full object-cover opacity-40 dark:opacity-20"
+            src="https://i.pinimg.com/736x/3e/d8/cd/3ed8cdc7b3bf477f94ee399ea28547c8.jpg" 
+            alt="LuxeCart Vision" 
+            className="w-full h-full object-cover opacity-60 dark:opacity-40"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-black" />
+          <div className="absolute inset-0 bg-linear-to-b from-transparent to-white dark:to-black" />
         </div>
         
         <div className="relative z-10 text-center px-4">
@@ -61,9 +61,9 @@ const About: React.FC = () => {
             className="relative aspect-square rounded-[3rem] overflow-hidden shadow-2xl"
           >
             <img 
-              src="https://picsum.photos/seed/premium-texture/800/800" 
+              src="https://i.pinimg.com/1200x/a8/ea/13/a8ea1364ebbba07aff1d8aa32b144ba0.jpg" 
               alt="Quality Materials" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover scale-110 hover:scale-100 transition-transform duration-1000"
               referrerPolicy="no-referrer"
             />
           </motion.div>

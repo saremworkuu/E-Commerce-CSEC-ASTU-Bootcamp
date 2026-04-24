@@ -5,8 +5,8 @@ import { motion } from 'motion/react';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import { ShieldCheck, ArrowLeft, Eye, EyeOff, Moon, Sun } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { apiUrl } from '../lib/api';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -14,14 +14,13 @@ const AdminLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      const res = await axios.post(apiUrl('/auth/login'), { email, password });
       
       if (res.data.user.role === 'admin') {
         login(res.data.user.email, 'admin', res.data.token);
@@ -42,14 +41,6 @@ const AdminLogin: React.FC = () => {
         className="max-w-md w-full"
       >
         <div className="bg-white dark:bg-neutral-900 rounded-[2.5rem] p-10 border border-gray-100 dark:border-neutral-800 shadow-2xl relative overflow-hidden">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="absolute top-5 right-5 z-20 inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
-            aria-label="Toggle admin theme"
-          >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
 
           {/* Decorative background element */}
           <div className="absolute top-0 right-0 p-8 opacity-5">

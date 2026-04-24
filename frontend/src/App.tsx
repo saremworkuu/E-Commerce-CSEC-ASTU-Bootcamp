@@ -16,6 +16,9 @@ import Contact from './pages/Contact';
 import About from './pages/About';
 import Wishlist from './pages/Wishlist';
 import AdminLogin from './pages/AdminLogin';
+import ConfirmEmail from './pages/ConfirmEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardOverview from './pages/DashboardOverview';
@@ -23,6 +26,7 @@ import DashboardProducts from './pages/DashboardProducts';
 import DashboardProductNew from './pages/DashboardProductNew';
 import DashboardUsers from './pages/DashboardUsers';
 import DashboardOrders from './pages/DashboardOrders';
+import DashboardMessages from './pages/DashboardMessages';
 import { AnimatePresence, motion } from 'motion/react';
 import AiAssistant from './components/ai';
 
@@ -41,6 +45,9 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/profile" element={<PageWrapper><Profile /></PageWrapper>} />
         <Route path="/admin" element={<PageWrapper><AdminLogin /></PageWrapper>} />
         <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
+        <Route path="/confirm-email" element={<PageWrapper><ConfirmEmail /></PageWrapper>} />
+        <Route path="/forgot-password" element={<PageWrapper><ForgotPassword /></PageWrapper>} />
+        <Route path="/reset-password" element={<PageWrapper><ResetPassword /></PageWrapper>} />
         <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
         <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
         
@@ -58,6 +65,7 @@ const AnimatedRoutes: React.FC = () => {
           <Route path="products/new" element={<DashboardProductNew />} />
           <Route path="users" element={<DashboardUsers />} />
           <Route path="orders" element={<DashboardOrders />} />
+          <Route path="messages" element={<DashboardMessages />} />
         </Route>
       </Routes>
     </AnimatePresence>
@@ -86,7 +94,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors duration-300">
       {!isDashboard && !isAdminLogin && <Navbar />}
-      <main className="flex-grow">
+      <main className="grow">
         <AnimatedRoutes />
       </main>
       {!isDashboard && !isAccount && !isAdminLogin && <Footer />}

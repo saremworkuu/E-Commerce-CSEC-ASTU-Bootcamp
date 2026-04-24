@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { Product, products } from '../data/products';
 import { useAuth } from './AuthContext';
+import { apiUrl } from '../lib/api';
 
 interface WishlistContextType {
   wishlist: Product[];
@@ -63,7 +64,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     try {
-      const res = await axios.get('/api/wishlist', {
+      const res = await axios.get(apiUrl('/wishlist'), {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -108,7 +109,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       });
 
       await axios.post(
-        '/api/wishlist/add',
+        apiUrl('/wishlist/add'),
         { productId: product.id }, // Assume passing the int or string ID the backend accepts
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -139,7 +140,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       });
 
       await axios.delete(
-        `/api/wishlist/remove/${productId}`,
+        apiUrl(`/wishlist/remove/${productId}`),
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (err) {

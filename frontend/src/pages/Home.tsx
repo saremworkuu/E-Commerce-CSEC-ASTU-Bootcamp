@@ -4,18 +4,23 @@ import axios from 'axios';
 import { ArrowRight, ShoppingBag, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
+import { apiUrl } from '../lib/api';
 import { motion } from 'motion/react';
+import { products as initialProducts } from '../data/products';
 
 const Home: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/products');
+        const res = await axios.get(apiUrl('/products'));
         setProducts(res.data);
       } catch (err) {
         console.error('Failed to fetch home products:', err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchProducts();
@@ -26,11 +31,55 @@ const Home: React.FC = () => {
   // If we don't have enough featured, fallback to newest
   const displayFeatured = featuredProducts.length >= 3 ? featuredProducts : products.slice(0, 3);
 
-  const getProductId = (product: any) => product.id || product._id;
-  const getProductImage = (product: any) =>
-    product.image ||
-    product.imageUrl ||
-    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80';
+  const getProductId = (product: any) => product._id || product.id;
+  const getProductName = (product: any) =>
+    typeof product?.name === 'string' ? product.name : '';
+  const getProductTitleParts = (product: any) => {
+    const fullName = getProductName(product).trim();
+    const firstSpaceIndex = fullName.indexOf(' ');
+
+    if (firstSpaceIndex === -1) {
+      return { main: fullName, rest: '' };
+    }
+
+    return {
+      main: fullName.slice(0, firstSpaceIndex),
+      rest: fullName.slice(firstSpaceIndex + 1),
+    };
+  };
+
+  const getProductImage = (product: any) => {
+    const name = getProductName(product).toLowerCase();
+    if (name.includes('brown suede casual loafers')) {
+      return 'https://i.pinimg.com/736x/99/1b/0f/991b0fdeb6f941aa3f907a7252ae5234.jpg';
+    }
+    return product.image ||
+           product.imageUrl ||
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80';
+  };
+
+  const topSellerPriorityNames = [
+    'brown suede casual loafers',
+    'glossy shine lip gloss',
+  ];
+
+  const isPriorityTopSeller = (productName: string = '') => {
+    const normalizedName = productName.toLowerCase();
+    return topSellerPriorityNames.some(
+      (targetName) => normalizedName === targetName || normalizedName.includes(targetName)
+    );
+  };
+
+  const prioritizedTopSellers = topSellerPriorityNames
+    .map((name) => products.find((product) => getProductName(product).toLowerCase().includes(name)))
+    .filter(Boolean);
+
+  const topSellers = [
+    ...prioritizedTopSellers,
+    ...products.filter(
+      (product) => !isPriorityTopSeller(getProductName(product))
+    ),
+  ].slice(0, 2);
 
   return (
     <div className="space-y-16 pb-16">
@@ -81,9 +130,19 @@ const Home: React.FC = () => {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
-          {displayFeatured.map((product) => (
-            <ProductCard key={product.id || (product as any)._id} product={product} />
-          ))}
+          {loading ? (
+            [1, 2, 3].map((i) => (
+              <div key={i} className="space-y-4">
+                <div className="aspect-[4/5] bg-gray-100 dark:bg-neutral-800 rounded-3xl animate-pulse" />
+                <div className="h-4 bg-gray-100 dark:bg-neutral-800 rounded w-2/3 animate-pulse" />
+                <div className="h-4 bg-gray-100 dark:bg-neutral-800 rounded w-1/2 animate-pulse" />
+              </div>
+            ))
+          ) : (
+            displayFeatured.map((product) => (
+              <ProductCard key={product.id || (product as any)._id} product={product} />
+            ))
+          )}
         </div>
       </section>
 
@@ -95,7 +154,7 @@ const Home: React.FC = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1 }}
-            className="relative h-[400px] sm:h-[500px] md:h-[600px] rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
+            className="relative h-100 sm:h-125 md:h-150 rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
           >
             <img 
               src="https://images.unsplash.com/photo-1491933382434-500287f9b54b?auto=format&fit=crop&w=800&q=80" 
@@ -103,7 +162,7 @@ const Home: React.FC = () => {
               className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
               referrerPolicy="no-referrer"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 sm:p-12 md:p-16">
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 sm:p-12 md:p-16">
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-2 sm:mb-4 block">Innovation</span>
               <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6 tracking-tighter">Electronics</h3>
               <Link to="/shop?category=Electronics" className="inline-flex items-center text-white font-bold uppercase tracking-widest text-xs group">
@@ -117,7 +176,7 @@ const Home: React.FC = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1 }}
-              className="relative h-[300px] sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
+              className="relative h-75 sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
             >
               <img 
                 src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80" 
@@ -125,7 +184,7 @@ const Home: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
                 <h3 className="text-3xl font-bold text-white mb-4 tracking-tighter">Accessories</h3>
                 <Link to="/shop?category=Accessories" className="inline-flex items-center text-white font-bold uppercase tracking-widest text-xs group">
                   Explore <ArrowRight size={16} className="ml-3 group-hover:translate-x-2 transition-transform" />
@@ -137,7 +196,7 @@ const Home: React.FC = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.2 }}
-              className="relative h-[300px] sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
+              className="relative h-75 sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
             >
               <img 
                 src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80" 
@@ -145,7 +204,7 @@ const Home: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
                 <h3 className="text-3xl font-bold text-white mb-4 tracking-tighter">Furniture</h3>
                 <Link to="/shop?category=Furniture" className="inline-flex items-center text-white font-bold uppercase tracking-widest text-xs group">
                   Explore <ArrowRight size={16} className="ml-3 group-hover:translate-x-2 transition-transform" />
@@ -178,6 +237,7 @@ const Home: React.FC = () => {
             return (
               <Link 
                 to={`/product/${getProductId(product)}`}
+                state={{ product }}
                 key={getProductId(product)}
               >
                 <motion.div 
@@ -185,15 +245,17 @@ const Home: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-900 aspect-[3/4] cursor-pointer"
+                  className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-900 aspect-3/4 cursor-pointer"
                 >
                   <img 
                     src={getProductImage(product)} 
                     alt={product.name} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     referrerPolicy="no-referrer"
+                    loading="eager"
+                    fetchPriority="high"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
                     {hasDiscount && (
                       <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
                         -{discount}% OFF
@@ -231,7 +293,7 @@ const Home: React.FC = () => {
           </motion.div>
         </div>
         <div className="space-y-8 sm:space-y-12">
-          {products.slice(0, 2).map((product, index) => (
+          {topSellers.map((product, index) => (
             <div key={getProductId(product)} className={`bg-gray-50 dark:bg-white/5 rounded-[2rem] sm:rounded-[3rem] overflow-hidden flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
               <div className="p-8 sm:p-12 md:p-16 flex flex-col justify-center flex-1">
                 <motion.div
@@ -242,13 +304,18 @@ const Home: React.FC = () => {
                 >
                   <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-3 sm:mb-4 block">Rank #{index + 1}</span>
                   <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white mb-4 sm:mb-6 leading-none">
-                    {product.name.split(' ')[0]} <br /> <span className="text-gray-400 italic">{product.name.split(' ').slice(1).join(' ')}</span>
+                    {getProductTitleParts(product).main} <br /> <span className="text-gray-400 italic">{getProductTitleParts(product).rest}</span>
                   </h2>
                   <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-6 sm:mb-10 max-w-md leading-relaxed">
-                    {product.description}
+                    {getProductName(product).toLowerCase().includes('brown suede casual loafers') 
+                      ? "Step into effortless style with our premium Brown Suede Casual Loafers. Designed for comfort and durability, these versatile shoes feature slip-on convenience and hand-stitched detailing, perfect for elevating your everyday casual look." 
+                      : getProductName(product).toLowerCase().includes('glossy shine lip gloss')
+                      ? "Get that irresistible luminous finish with our Glossy Shine Lip Gloss. Enriched with hydrating oils, this non-sticky formula delivers long-lasting moisture and an ultra-glamorous, mirror-like shine to enhance your natural beauty."
+                      : product.description}
                   </p>
                   <Link 
                     to={`/product/${getProductId(product)}`}
+                    state={{ product }}
                     className="inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 bg-black text-white dark:bg-white dark:text-black font-bold rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors group text-sm sm:text-base"
                   >
                     View Product
@@ -256,20 +323,24 @@ const Home: React.FC = () => {
                   </Link>
                 </motion.div>
               </div>
-              <div className="relative h-[300px] sm:h-[400px] lg:h-auto overflow-hidden group flex-1">
-                <motion.img 
-                  initial={{ scale: 1.1 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.5 }}
-                  src={getProductImage(product)} 
-                  alt={product.name} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute top-8 right-8 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl">
-                  <span className="text-xs font-bold uppercase tracking-widest text-black">Top Seller</span>
-                </div>
+              <div className="relative h-75 sm:h-100 lg:h-auto overflow-hidden group flex-1">
+                <Link to={`/product/${getProductId(product)}`} state={{ product }} className="block w-full h-full">
+                  <motion.img 
+                    initial={{ scale: 1.1 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.5 }}
+                    src={getProductImage(product)} 
+                    alt={getProductName(product)} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    referrerPolicy="no-referrer"
+                    loading="eager"
+                    fetchPriority="high"
+                  />
+                  <div className="absolute top-8 right-8 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl">
+                    <span className="text-xs font-bold uppercase tracking-widest text-black">Top Seller</span>
+                  </div>
+                </Link>
               </div>
             </div>
           ))}

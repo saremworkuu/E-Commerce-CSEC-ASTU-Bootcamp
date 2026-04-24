@@ -18,14 +18,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const navigate = useNavigate();
   const [isAdding, setIsAdding] = React.useState(false);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      localStorage.setItem('pending_add_to_cart', String((product as any)._id || product.id));
+      localStorage.setItem('pending_add_redirect', window.location.pathname);
+      navigate('/login');
+      return;
+    }
     setIsAdding(true);
-    addToCart(String(product.id || (product as any)._id));
+    addToCart(String((product as any)._id || product.id));
     setTimeout(() => setIsAdding(false), 1500);
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -45,7 +54,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       className="group relative bg-white dark:bg-white/5 rounded-2xl overflow-hidden border border-gray-100 dark:border-white/10 hover:shadow-2xl transition-all duration-500"
     >
       {/* Image Container */}
-      <div className="aspect-[4/5] overflow-hidden relative">
+      <div 
+        className="aspect-4/5 overflow-hidden relative cursor-pointer bg-gray-100 dark:bg-neutral-800"
+        onClick={() => navigate(`/product/${(product as any)._id || product.id}`, { state: { product } })}
+      >
         <motion.img 
           src={product.image || (product as any).imageUrl} 
           alt={product.name}
@@ -53,15 +65,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
+          loading="lazy"
         />
         
         {/* Hover Actions Overlay */}
         <div className="absolute inset-0 bg-black/20 md:bg-black/40 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-500 flex items-center justify-center space-x-2 md:space-x-4 backdrop-blur-[1px] md:backdrop-blur-[2px]">
           <Link 
-            to={`/product/${product.id || (product as any)._id}`}
+            to={`/product/${(product as any)._id || product.id}`}
+            state={{ product }}
+            onClick={(e) => e.stopPropagation()}
             className="p-3 md:p-4 bg-white dark:bg-black rounded-full text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 shadow-xl"
           >
-            <Eye size={18} className="md:w-[22px] md:h-[22px]" />
+            <Eye size={18} className="md:w-5.5 md:h-5.5" />
           </Link>
           <motion.button 
             onClick={handleWishlistToggle}
@@ -70,7 +85,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               isFavorited ? 'bg-red-500 text-white border-red-500' : 'bg-white dark:bg-black text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black'
             }`}
           >
-            <Heart size={18} className="md:w-[22px] md:h-[22px]" fill={isFavorited ? "currentColor" : "none"} />
+            <Heart size={18} className="md:w-5.5 md:h-5.5" fill={isFavorited ? "currentColor" : "none"} />
           </motion.button>
           <motion.button 
             onClick={handleAddToCart}
@@ -87,7 +102,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                 >
-                  <ShoppingCart size={18} className="md:w-[22px] md:h-[22px] text-white" />
+                  <ShoppingCart size={18} className="md:w-5.5 md:h-5.5 text-white" />
                 </motion.div>
               ) : (
                 <motion.div
@@ -96,7 +111,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                 >
-                  <ShoppingCart size={18} className="md:w-[22px] md:h-[22px]" />
+                  <ShoppingCart size={18} className="md:w-5.5 md:h-5.5" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -112,7 +127,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {product.category}
           </span>
         </div>
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/product/${(product as any)._id || product.id}`} state={{ product }}>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight">
             {product.name}
           </h3>
@@ -124,7 +139,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <motion.div 
             initial={{ width: 0 }}
             whileHover={{ width: "1.5rem" }}
-            className="h-[1px] bg-black dark:bg-white transition-all"
+            className="h-px bg-black dark:bg-white transition-all"
           />
         </div>
       </div>

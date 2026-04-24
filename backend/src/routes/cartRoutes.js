@@ -32,7 +32,7 @@ router.post('/add', Protect, async (req, res) => {
     }
 
     const existing = cart.items.find(
-      item => Number(item.productId) === Number(productId)
+      item => String(item.productId) === String(productId)
     );
 
     if (existing) {
@@ -43,7 +43,9 @@ router.post('/add', Protect, async (req, res) => {
 
     await cart.save();
 
-    res.json(cart);
+    // Populate after save to send back full details
+    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name price imageUrl stock');
+    res.json(populatedCart);
 
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -62,7 +64,8 @@ router.delete('/remove/:productId', Protect, async (req, res) => {
 
     await cart.save();
 
-    res.json(cart);
+    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name price imageUrl stock');
+    res.json(populatedCart);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -3,9 +3,12 @@ import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { ChevronDown, Search } from 'lucide-react';
+import { apiUrl } from '../lib/api';
+import { products as initialProducts } from '../data/products';
 
 const Shop: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlSearch = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(urlSearch);
@@ -14,10 +17,12 @@ const Shop: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/products');
+        const res = await axios.get(apiUrl('/products'));
         setProducts(res.data);
       } catch (err) {
         console.error('Failed to fetch home products:', err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchProducts();
@@ -66,7 +71,7 @@ const Shop: React.FC = () => {
 
       {/* Filters & Search */}
       <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center space-y-4 md:space-y-0 mb-12 gap-6">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 flex-grow max-w-4xl">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 grow max-w-4xl">
           {/* Categories Dropdown */}
           <div className="relative w-full sm:w-64">
             <select 
@@ -83,7 +88,7 @@ const Shop: React.FC = () => {
           </div>
 
           {/* Search */}
-          <div className="relative w-full flex-grow">
+          <div className="relative w-full grow">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 
@@ -127,7 +132,17 @@ const Shop: React.FC = () => {
       </div>
 
       {/* Product Grid */}
-      {filteredProducts.length > 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <div key={i} className="space-y-4">
+              <div className="aspect-[4/5] bg-gray-100 dark:bg-neutral-800 rounded-3xl animate-pulse" />
+              <div className="h-4 bg-gray-100 dark:bg-neutral-800 rounded w-2/3 animate-pulse" />
+              <div className="h-4 bg-gray-100 dark:bg-neutral-800 rounded w-1/2 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      ) : filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredProducts.map(product => (
             <ProductCard key={product.id || (product as any)._id} product={product} />

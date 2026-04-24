@@ -1,22 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, ShoppingCart, Shield, Truck, RotateCcw, CreditCard } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
+import { apiUrl } from '../lib/api';
 
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { addToCart } = useCart();
-  const [product, setProduct] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
+
+  const initialProduct = (location.state as any)?.product ?? null;
+  const [product, setProduct] = useState<any>(initialProduct);
+  const [loading, setLoading] = useState(!initialProduct);
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    if (!isAuthenticated) {
+      localStorage.setItem('pending_add_to_cart', String(product._id || product.id));
+      localStorage.setItem('pending_add_redirect', window.location.pathname);
+      navigate('/login');
+      return;
+    }
+    addToCart(String(product._id || product.id));
+  };
+
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
+    if (initialProduct) {
+      setProduct(initialProduct);
+      setLoading(false);
+    }
+
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+        const res = await axios.get(apiUrl(`/products/${id}`));
         setProduct(res.data);
       } catch (err) {
         console.error('Failed to fetch product from API:', err);
@@ -24,8 +49,10 @@ const ProductDetails: React.FC = () => {
         setLoading(false);
       }
     };
-    fetchProduct();
-  }, [id]);
+    if (!initialProduct || String(initialProduct._id || initialProduct.id) !== String(id)) {
+      fetchProduct();
+    }
+  }, [id, initialProduct]);
 
   if (loading) {
     return <div className="max-w-7xl mx-auto px-4 py-24 text-center dark:text-white">Loading...</div>;
@@ -40,9 +67,28 @@ const ProductDetails: React.FC = () => {
     );
   }
 
+  const getProductImage = (p: any) => {
+    const name = (p?.name || '').toLowerCase();
+    if (name.includes('brown suede casual loafers')) {
+      return 'https://i.pinimg.com/736x/99/1b/0f/991b0fdeb6f941aa3f907a7252ae5234.jpg';
+    }
+    return p?.image || p?.imageUrl || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80';
+  };
+
+  const getProductDescription = (p: any) => {
+    const name = (p?.name || '').toLowerCase();
+    if (name.includes('brown suede casual loafers')) {
+      return "Step into effortless style with our premium Brown Suede Casual Loafers. Designed for comfort and durability, these versatile shoes feature slip-on convenience and hand-stitched detailing, perfect for elevating your everyday casual look.";
+    }
+    if (name.includes('glossy shine lip gloss')) {
+      return "Get that irresistible luminous finish with our Glossy Shine Lip Gloss. Enriched with hydrating oils, this non-sticky formula delivers long-lasting moisture and an ultra-glamorous, mirror-like shine to enhance your natural beauty.";
+    }
+    return p?.description;
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <button 
+      <button
         onClick={() => navigate(-1)}
         className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors mb-12"
       >
@@ -51,14 +97,14 @@ const ProductDetails: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
         {/* Image Gallery */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-800 aspect-square"
         >
-          <img 
-            src={product.image || product.imageUrl} 
-            alt={product.name} 
+          <img
+            src={getProductImage(product)}
+            alt={product.name}
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
@@ -83,18 +129,18 @@ const ProductDetails: React.FC = () => {
           </div>
 
           <div className="prose prose-sm text-gray-500 dark:text-gray-400 mb-10 leading-relaxed">
-            <p>{product.description}</p>
+            <p>{getProductDescription(product)}</p>
           </div>
 
           <div className="space-y-4 mb-12">
-            <Button 
-              onClick={() => addToCart(String(product.id || product._id))}
+            <Button
+              onClick={handleAddToCart}
               className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center space-x-3 h-auto"
             >
               <ShoppingCart size={20} />
               <span>Add to Cart</span>
             </Button>
-            <Button 
+            <Button
               variant="outline"
               onClick={() => navigate('/profile')}
               className="w-full py-7 border-2 border-black dark:border-white text-black dark:text-white font-bold rounded-2xl hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all flex items-center justify-center space-x-3 h-auto"

@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
+import axios from 'axios';
 import { 
   LayoutDashboard, 
   Package, 
   Users, 
   ShoppingBag, 
+  Mail,
   LogOut,
   ChevronRight,
   Menu,
@@ -15,6 +17,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'motion/react';
+import { apiUrl } from '../lib/api';
 
 const DashboardLayout: React.FC = () => {
   const { logout, user } = useAuth();
@@ -22,11 +25,32 @@ const DashboardLayout: React.FC = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
+  // Validate token against local backend on mount — clears stale Render tokens
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      localStorage.removeItem('auth_user');
+      window.location.href = '/admin';
+      return;
+    }
+    axios.get(apiUrl('/auth/me'), {
+      headers: { Authorization: `Bearer ${token}` }
+    }).catch((err) => {
+      const status = err.response?.status;
+      if (status === 401 || status === 403) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('auth_user');
+        window.location.href = '/admin';
+      }
+    });
+  }, []);
+
   const menuItems = [
     { icon: <LayoutDashboard size={20} />, label: 'Overview', path: '/dashboard' },
     { icon: <Package size={20} />, label: 'Products', path: '/dashboard/products' },
     { icon: <Users size={20} />, label: 'Users', path: '/dashboard/users' },
     { icon: <ShoppingBag size={20} />, label: 'Orders', path: '/dashboard/orders' },
+    { icon: <Mail size={20} />, label: 'Messages', path: '/dashboard/messages' },
   ];
 
   const SidebarContent = () => (
@@ -57,7 +81,7 @@ const DashboardLayout: React.FC = () => {
         </button>
       </div>
 
-      <nav className="flex-grow p-4 space-y-2 overflow-y-auto">
+      <nav className="grow p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -86,7 +110,7 @@ const DashboardLayout: React.FC = () => {
           <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-neutral-800 flex items-center justify-center text-xs font-bold">
             {user?.email?.[0].toUpperCase() || 'A'}
           </div>
-          <div className="flex-grow overflow-hidden">
+          <div className="grow overflow-hidden">
             <p className="text-xs font-bold truncate dark:text-white">{user?.email}</p>
             <p className="text-[10px] text-gray-500 uppercase tracking-widest">Administrator</p>
           </div>
@@ -118,14 +142,14 @@ const DashboardLayout: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsSidebarOpen(false)}
-              className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-60 bg-black/50 backdrop-blur-sm lg:hidden"
             />
             <motion.aside 
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-[70] w-72 bg-white dark:bg-neutral-900 shadow-2xl lg:hidden flex flex-col"
+              className="fixed inset-y-0 left-0 z-70 w-72 bg-white dark:bg-neutral-900 shadow-2xl lg:hidden flex flex-col"
             >
               <SidebarContent />
             </motion.aside>
@@ -134,7 +158,7 @@ const DashboardLayout: React.FC = () => {
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-grow flex flex-col min-w-0">
+      <div className="grow flex flex-col min-w-0">
         {/* Mobile Header */}
         <header className="lg:hidden h-16 bg-white dark:bg-neutral-900 border-b border-gray-200 dark:border-neutral-800 flex items-center justify-between px-4 sticky top-0 z-50">
           <Link to="/" className="flex items-center space-x-2">
@@ -159,7 +183,7 @@ const DashboardLayout: React.FC = () => {
           </div>
         </header>
 
-        <main className="flex-grow p-4 md:p-8">
+        <main className="grow p-4 md:p-8">
           <Outlet />
         </main>
       </div>

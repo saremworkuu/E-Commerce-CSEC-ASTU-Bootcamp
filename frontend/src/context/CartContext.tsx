@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import axios from 'axios';
 import { products } from '../data/products';
 import { useAuth } from './AuthContext';
+import { apiUrl } from '../lib/api';
 
 interface CartItem {
   productId: any; // backend may return populated object OR primitive id
@@ -22,26 +23,27 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const resolveProductId = (productId: any) => {
-  if (productId && typeof productId === 'object') {
-    return productId._id ?? productId.id ?? productId.productId ?? productId;
+  if (!productId) return null;
+  if (typeof productId === 'object') {
+    return String(productId._id ?? productId.id ?? productId.productId ?? productId);
   }
-
-  return productId;
+  return String(productId);
 };
 
 const normalizeCart = (items: CartItem[] = []) =>
   items.map((item) => ({
-    productId: resolveProductId(item.productId),
+    ...item,
+    productId: item.productId,
     quantity: item.quantity,
   }));
 
 const buildCheckoutCart = (items: CartItem[] = []) =>
   items.map((item) => {
-    const normalizedProductId = Number(resolveProductId(item.productId));
-    const product = products.find((entry) => Number(entry.id) === normalizedProductId);
+    const idStr = resolveProductId(item.productId);
+    const product = products.find((entry) => String(entry.id) === idStr);
 
     return {
-      productId: normalizedProductId,
+      productId: idStr,
       quantity: item.quantity,
       name: product?.name ?? item.productId?.name ?? 'Product',
       price: product?.price ?? item.productId?.price ?? 0,
@@ -66,6 +68,7 @@ const readLocalCart = (email?: string | null): CartItem[] => {
 
     return normalizeCart(
       parsed.map((item) => ({
+        ...item, // Preserve name, price, imageUrl if they exist
         productId: item.productId,
         quantity: Number(item.quantity) || 1,
       }))
@@ -106,7 +109,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      const res = await axios.get('/api/cart', {
+      const res = await axios.get(apiUrl('/cart'), {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -127,23 +130,23 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const token = getToken();
 
     if (!token) {
-      const normalizedProductId = Number(productId);
+      const idStr = String(productId);
 
       setCart((prev) => {
         const existing = prev.find(
-          (item) => Number(resolveProductId(item.productId)) === normalizedProductId
+          (item) => resolveProductId(item.productId) === idStr
         );
 
         let nextCart: CartItem[];
 
         if (existing) {
           nextCart = prev.map((item) =>
-            Number(resolveProductId(item.productId)) === normalizedProductId
+            resolveProductId(item.productId) === idStr
               ? { ...item, quantity: item.quantity + 1 }
               : item
           );
         } else {
-          nextCart = [...prev, { productId: normalizedProductId, quantity: 1 }];
+          nextCart = [...prev, { productId: idStr, quantity: 1 }];
         }
 
         persistLocalCart(user?.email, nextCart);
@@ -155,12 +158,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const res = await axios.post(
-        '/api/cart/add',
+        apiUrl('/cart/add'),
         { productId, quantity: 1 },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const nextCart = normalizeCart(res.data.items || []);
+      const nextCart = normalizeCart(res.data.items || res.data.cart?.items || res.data || []);
       setCart(nextCart);
       persistLocalCart(user?.email, nextCart);
     } catch (err) {
@@ -173,8 +176,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const token = getToken();
 
     if (!token) {
+      const idStr = String(productId);
       const nextCart = cart.filter(
-        (item) => Number(resolveProductId(item.productId)) !== Number(productId)
+        (item) => resolveProductId(item.productId) !== idStr
       );
       setCart(nextCart);
       persistLocalCart(user?.email, nextCart);
@@ -183,7 +187,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const res = await axios.delete(
-        `/api/cart/remove/${productId}`,
+        apiUrl(`/cart/remove/${productId}`),
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -198,10 +202,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ================= UPDATE QUANTITY =================
   const updateQuantity = async (productId: string, delta: number) => {
     const token = getToken();
+    const idStr = String(productId);
     if (!token) {
       const nextCart = cart
         .map((item) => {
-          if (Number(resolveProductId(item.productId)) !== Number(productId)) {
+          if (resolveProductId(item.productId) !== idStr) {
             return item;
           }
 
@@ -215,7 +220,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     const item = cart.find(i =>
-      Number(resolveProductId(i.productId)) === Number(productId)
+      resolveProductId(i.productId) === idStr
     );
 
     if (!item) return;
@@ -225,7 +230,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const res = await axios.post(
-        '/api/cart/add',
+        apiUrl('/cart/add'),
         { productId, quantity: delta },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -249,7 +254,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      await axios.delete('/api/cart/clear', {
+      await axios.delete(apiUrl('/cart/clear'), {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -264,7 +269,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const totalPrice = cart.reduce((sum, item) => {
-    const price = item.productId?.price || products.find((entry) => Number(entry.id) === Number(resolveProductId(item.productId)))?.price || 0;
+    const idStr = resolveProductId(item.productId);
+    const dummyProduct = products.find((entry) => String(entry.id) === idStr);
+    const dbProduct = item.productId && typeof item.productId === 'object' ? item.productId : null;
+    const price = dummyProduct?.price || dbProduct?.price || 0;
     return sum + price * item.quantity;
   }, 0);
 

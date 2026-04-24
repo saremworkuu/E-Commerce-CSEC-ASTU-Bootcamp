@@ -5,8 +5,18 @@ import crypto from 'crypto';
 import User from '../models/user.js';
 import { Protect } from '../middleware/auth.js';
 import sendEmail from '../utils/sendEmail.js';
+import { rateLimit } from 'express-rate-limit';
 
 const router = express.Router();
+
+// Rate limiter for password reset endpoints
+const resetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: { message: 'Too many password reset requests, please try again after 15 minutes' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // ==================== REGISTER ====================
 router.post('/register', async (req, res) => {
@@ -182,6 +192,100 @@ router.get('/me', Protect, async (req, res) => {
       role: user.role,
       createdAt: user.createdAt
     });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ==================== FORGOT PASSWORD ====================
+router.post('/forgot-password', resetLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return res.json({ message: 'If an account exists with that email, a reset link has been sent.' });
+    }
+
+    // Generate random token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    
+    // Hash and save token with expiration (20 minutes)
+    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.resetPasswordExpires = Date.now() + 20 * 60 * 1000;
+
+    await user.save();
+
+    // Reset URL
+    const frontendBaseUrl = process.env.FRONTEND_URL || req.get('origin') || 'http://localhost:3000';
+    const resetUrl = `${frontendBaseUrl.replace(/\/$/, '')}/reset-password?token=${resetToken}`;
+
+    const message = `
+      <div style="font-family: sans-serif; line-height: 1.6; color: #111;">
+        <h2>Password Reset Request</h2>
+        <p>You requested a password reset for your LuxeCart account. Click the button below to set a new password:</p>
+        <div style="margin: 30px 0;">
+          <a href="${resetUrl}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Reset Password</a>
+        </div>
+        <p>This link will expire in 20 minutes. If you did not request this, please ignore this email.</p>
+        <p>Best regards,<br>The LuxeCart Team</p>
+      </div>
+    `;
+
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Password Reset Request - LuxeCart',
+        message,
+      });
+      res.json({ message: 'If an account exists with that email, a reset link has been sent.' });
+    } catch (err) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+      console.error('Email error:', err);
+      res.status(500).json({ message: 'Error sending reset email' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ==================== RESET PASSWORD ====================
+router.post('/reset-password', resetLimiter, async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ message: 'Token and new password are required' });
+    }
+
+    // Hash the token from URL to compare with stored hashed token
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(password, salt);
+
+    // Invalidate reset token
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.json({ message: 'Password reset successful. You can now log in with your new password.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { apiUrl } from '../lib/api';
 
 interface CartItem {
   productId: string;
@@ -78,7 +79,7 @@ const Order: React.FC = () => {
       const token = localStorage.getItem('token'); // Assuming you store JWT
 
       const res = await axios.post(
-        '/api/orders', // Change to your backend URL
+        apiUrl('/orders'),
         orderData,
         {
           headers: {

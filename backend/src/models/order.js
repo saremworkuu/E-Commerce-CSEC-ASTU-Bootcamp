@@ -10,8 +10,7 @@ const orderSchema = new mongoose.Schema({
 
   items: [{
     productId: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'Product', 
+      type: String, 
       required: false 
     },
     quantity: { 
@@ -33,36 +32,36 @@ const orderSchema = new mongoose.Schema({
   shippingInfo: {
     fullName: { 
       type: String, 
-      required: true 
+      required: false 
     },
     phone: { 
       type: String, 
-      required: true 
+      required: false 
     },
     email: { 
       type: String, 
-      required: true 
+      required: false 
     },
     address: { 
       type: String, 
-      required: true 
+      required: false 
     },
     country: { 
       type: String, 
-      required: true 
+      required: false 
     }
   },
 
   // Payment Info (We store only for record - never store full card details in production!)
   paymentInfo: {
-    cardType: { 
+    paymentMethod: { 
       type: String, 
-      enum: ['visa', 'mastercard', 'amex'], 
-      required: true 
+      enum: ['card', 'chapa', 'paypal'], 
+      required: false 
     },
     cardHolder: { 
       type: String, 
-      required: true 
+      required: false 
     },
     // We do NOT store full card number or CVV in real apps (for security)
     lastFourDigits: { 

@@ -85,7 +85,7 @@ const HeroSlider: React.FC = () => {
   };
 
   return (
-    <section className="relative h-[70vh] min-h-[500px] w-full overflow-hidden bg-black">
+    <section className="relative h-[70vh] min-h-125 w-full overflow-hidden bg-black">
       <AnimatePresence initial={true} custom={direction} mode="popLayout">
         <motion.div
           key={currentIndex}
@@ -112,11 +112,13 @@ const HeroSlider: React.FC = () => {
                 alt={slides[currentIndex].title}
                 className="w-full h-full object-cover object-center"
                 referrerPolicy="no-referrer"
+                loading={currentIndex === 0 ? "eager" : "lazy"}
+                fetchPriority={currentIndex === 0 ? "high" : "auto"}
               />
             </motion.div>
             {/* Cinematic Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black/80" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50" />
+            <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/20 to-black/80" />
+            <div className="absolute inset-0 bg-linear-to-r from-black/50 via-transparent to-black/50" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
           </div>
 
@@ -201,7 +203,7 @@ const HeroSlider: React.FC = () => {
         className="absolute bottom-10 right-10 z-20 hidden lg:flex flex-col items-center"
       >
         <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-4 [writing-mode:vertical-rl]">Scroll to discover</span>
-        <div className="w-[1px] h-12 bg-gradient-to-b from-gray-500 to-transparent" />
+        <div className="w-px h-12 bg-linear-to-b from-gray-500 to-transparent" />
       </motion.div>
     </section>
   );

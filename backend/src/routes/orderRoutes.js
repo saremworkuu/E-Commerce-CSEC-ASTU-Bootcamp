@@ -62,33 +62,42 @@ const sendStatusEmail = async (email, orderId, newStatus, customerName) => {
 
 // Create new order
 router.post('/', Protect, async (req, res) => {
+  console.log('--- NEW ORDER ATTEMPT ---');
+  console.log('User ID:', req.user?.id);
+  console.log('Request Body:', JSON.stringify(req.body, null, 2));
+
   try {
     const { items, totalPrice, shippingInfo, paymentInfo } = req.body;
 
     if (!items || items.length === 0) {
+      console.log('Order failed: No items');
       return res.status(400).json({ message: 'Order must contain at least one item' });
     }
 
-    if (!shippingInfo || !shippingInfo.fullName || !shippingInfo.phone || !shippingInfo.email) {
-      return res.status(400).json({ message: 'Shipping information is required' });
+    if (!shippingInfo || !shippingInfo.fullName || !shippingInfo.email) {
+      console.log('Order failed: Missing shipping info', shippingInfo);
+      return res.status(400).json({ message: 'Shipping information is required (Full Name and Email)' });
     }
 
-    const lastFourDigits = paymentInfo?.cardNumber ? paymentInfo.cardNumber.slice(-4) : '';
+    const lastFourDigits = paymentInfo?.cardNumber ? String(paymentInfo.cardNumber).slice(-4) : '';
 
+    console.log('Creating Order model...');
     const order = new Order({
       userId: req.user.id,
       items,
       totalPrice,
       shippingInfo,
       paymentInfo: {
-        cardType: paymentInfo?.cardType || 'visa',
+        paymentMethod: paymentInfo?.paymentMethod || 'chapa',
         cardHolder: paymentInfo?.cardHolder || '',
         lastFourDigits,
       },
       status: 'pending'
     });
 
+    console.log('Saving order to MongoDB...');
     await order.save();
+    console.log('Order saved successfully! ID:', order._id);
     
     res.status(201).json({
       message: 'Order placed successfully',
@@ -97,7 +106,7 @@ router.post('/', Protect, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Order creation error:', error);
+    console.error('CRITICAL ORDER ERROR:', error);
     res.status(500).json({ 
       message: 'Failed to place order', 
       error: error.message 

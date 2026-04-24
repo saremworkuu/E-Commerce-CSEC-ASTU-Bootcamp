@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { User, Mail, Lock, LogOut, Settings, Package, Heart, CreditCard, Eye, EyeOff } from 'lucide-react';
+import { apiUrl } from '../lib/api';
 
 const Profile: React.FC = () => {
   const { user, login, logout, isAuthenticated } = useAuth();
@@ -17,20 +18,32 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const userEmail = typeof user?.email === 'string' ? user.email : '';
+  const atIndex = userEmail.indexOf('@');
+  const userDisplayName = atIndex > 0 ? userEmail.slice(0, atIndex) : 'Account';
 
   React.useEffect(() => {
-    if (!isAuthenticated) return;
+    const handlePendingCart = async () => {
+      if (!isAuthenticated) return;
 
-    const pendingProductId = localStorage.getItem('pending_add_to_cart');
-    if (!pendingProductId) return;
+      const pendingProductId = localStorage.getItem('pending_add_to_cart');
+      if (!pendingProductId) return;
 
-    const redirectTo = localStorage.getItem('pending_add_redirect') || '/cart';
+      const redirectTo = localStorage.getItem('pending_add_redirect') || '/cart';
 
-    localStorage.removeItem('pending_add_to_cart');
-    localStorage.removeItem('pending_add_redirect');
+      localStorage.removeItem('pending_add_to_cart');
+      localStorage.removeItem('pending_add_redirect');
 
-    addToCart(pendingProductId);
-    navigate(redirectTo);
+      try {
+        await addToCart(pendingProductId);
+      } catch (err) {
+        console.error('Failed to add pending item:', err);
+      }
+
+      navigate(redirectTo);
+    };
+
+    handlePendingCart();
   }, [isAuthenticated, addToCart, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -39,9 +52,9 @@ const Profile: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post('/api/auth/login', { email, password });
-      
-      login(res.data);
+      const res = await axios.post(apiUrl('/auth/login'), { email, password });
+
+      login(res.data.user.email, res.data.user.role, res.data.token);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid credentials');
     } finally {
@@ -52,7 +65,7 @@ const Profile: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 bg-gray-50 dark:bg-black">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-md w-full bg-white dark:bg-neutral-900 rounded-[2.5rem] p-12 border border-gray-100 dark:border-neutral-800 shadow-2xl"
@@ -76,8 +89,8 @@ const Profile: React.FC = () => {
               <label className="text-xs font-bold uppercase tracking-widest text-gray-400 ml-1">Email Address</label>
               <div className="relative group">
                 <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" size={18} />
-                <Input 
-                  type="email" 
+                <Input
+                  type="email"
                   placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -86,16 +99,22 @@ const Profile: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
                 <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Password</label>
-                <button type="button" className="text-xs font-bold text-gray-400 hover:text-black dark:hover:text-white transition-colors">Forgot?</button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-xs font-bold text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+                >
+                  Forgot?
+                </button>
               </div>
               <div className="relative group">
                 <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" size={18} />
-                <Input 
-                  type={showPassword ? "text" : "password"} 
+                <Input
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -112,8 +131,8 @@ const Profile: React.FC = () => {
               </div>
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={loading}
               className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-70"
             >
@@ -124,7 +143,7 @@ const Profile: React.FC = () => {
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Don&apos;t have an account?{' '}
-              <button 
+              <button
                 onClick={() => navigate('/register')}
                 className="font-bold text-black dark:text-white hover:underline"
               >
@@ -148,7 +167,7 @@ const Profile: React.FC = () => {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Sidebar */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="lg:col-span-4 space-y-8"
@@ -160,9 +179,9 @@ const Profile: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                  {user?.email?.split('@')[0] ?? 'Account'}
+                  {userDisplayName}
                 </h2>
-                <p className="text-gray-500 font-medium">{user?.email ?? 'No email available'}</p>
+                <p className="text-gray-500 font-medium">{userEmail || 'No email available'}</p>
                 <div className="mt-2 inline-flex items-center px-3 py-1 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-bold uppercase tracking-widest rounded-full">
                   {user?.role ?? 'User'} Account
                 </div>
@@ -176,7 +195,7 @@ const Profile: React.FC = () => {
                 { icon: <CreditCard size={18} />, label: 'Payments', path: '#' },
                 { icon: <Settings size={18} />, label: 'Account Settings', path: '#' },
               ].map((item, i) => (
-                <button 
+                <button
                   key={i}
                   onClick={() => item.path !== '#' && navigate(item.path)}
                   className="w-full flex items-center space-x-4 px-6 py-4 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-800 rounded-2xl transition-all group"
@@ -188,7 +207,7 @@ const Profile: React.FC = () => {
             </nav>
 
             <div className="mt-10 pt-10 border-t border-gray-100 dark:border-neutral-800">
-              <button 
+              <button
                 onClick={logout}
                 className="w-full flex items-center space-x-4 px-6 py-4 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all"
               >
@@ -200,7 +219,7 @@ const Profile: React.FC = () => {
         </motion.div>
 
         {/* Main Content */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -209,13 +228,13 @@ const Profile: React.FC = () => {
           <div className="bg-white dark:bg-neutral-900 rounded-[2.5rem] p-10 border border-gray-100 dark:border-neutral-800 shadow-xl overflow-hidden relative">
             <div className="absolute top-0 left-0 w-full h-1 bg-black dark:bg-white" />
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-8">Recent Orders</h3>
-            
+
             <div className="text-center py-20">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 dark:bg-neutral-800 rounded-2xl mb-4 text-gray-300">
                 <Package size={32} />
               </div>
               <p className="text-gray-400 font-medium">You haven&apos;t placed any orders yet.</p>
-              <Button 
+              <Button
                 onClick={() => navigate('/shop')}
                 className="mt-6 bg-black dark:bg-white text-white dark:text-black rounded-full px-8"
               >

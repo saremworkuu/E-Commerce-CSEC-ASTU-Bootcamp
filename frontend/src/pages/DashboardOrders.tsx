@@ -28,6 +28,7 @@ import {
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
+import { apiUrl } from '../lib/api';
 
 interface OrderData {
   _id: string;
@@ -46,7 +47,7 @@ const DashboardOrders: React.FC = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/orders/admin', {
+      const res = await axios.get(apiUrl('/orders/admin'), {
         headers: { Authorization: `Bearer ${token}` }
       });
       setOrders(res.data);
@@ -87,7 +88,7 @@ const DashboardOrders: React.FC = () => {
   const updateStatus = async (id: string, newStatus: OrderData['status']) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5000/api/orders/${id}/status`, 
+      await axios.put(apiUrl(`/orders/${id}/status`), 
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -107,7 +108,7 @@ const DashboardOrders: React.FC = () => {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-grow">
+        <div className="relative grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <Input 
             placeholder="Search orders by ID or customer name..." 

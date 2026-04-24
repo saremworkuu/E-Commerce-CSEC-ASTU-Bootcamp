@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Package, 
@@ -9,38 +9,77 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { motion } from 'motion/react';
+import axios from 'axios';
+import { apiUrl } from '../lib/api';
+
+interface DashboardStats {
+  totalUsers: number;
+  totalProducts: number;
+  totalOrders: number;
+  pendingOrders: number;
+  totalRevenue: number;
+}
 
 const DashboardOverview: React.FC = () => {
+  const [statsData, setStatsData] = useState<DashboardStats | null>(null);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const [statsRes, ordersRes] = await Promise.all([
+          axios.get(apiUrl('/admin/stats'), { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(apiUrl('/orders/admin'), { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        
+        setStatsData(statsRes.data);
+        setRecentOrders(ordersRes.data.slice(0, 5));
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const stats = [
     { 
       label: 'Total Users', 
-      value: '1,284', 
+      value: statsData?.totalUsers.toLocaleString() || '0', 
       icon: <Users className="text-blue-500" />, 
-      change: '+12%', 
+      change: '+4%', 
       isPositive: true 
     },
     { 
       label: 'Total Products', 
-      value: '48', 
+      value: statsData?.totalProducts.toString() || '0', 
       icon: <Package className="text-purple-500" />, 
-      change: '+4', 
+      change: '+2', 
       isPositive: true 
     },
     { 
       label: 'Total Orders', 
-      value: '856', 
+      value: statsData?.totalOrders.toString() || '0', 
       icon: <ShoppingBag className="text-orange-500" />, 
-      change: '+18%', 
+      change: '+12%', 
       isPositive: true 
     },
     { 
       label: 'Revenue', 
-      value: '$42,500', 
+      value: `$${statsData?.totalRevenue.toLocaleString() || '0.00'}`, 
       icon: <TrendingUp className="text-green-500" />, 
-      change: '-3%', 
-      isPositive: false 
+      change: '+8%', 
+      isPositive: true 
     },
   ];
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-[400px] dark:text-white">Loading dashboard...</div>;
+  }
 
   return (
     <div className="space-y-8">
@@ -85,7 +124,6 @@ const DashboardOverview: React.FC = () => {
         ))}
       </div>
 
-      {/* Recent Activity / Charts Placeholder */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-none shadow-sm dark:bg-neutral-900">
           <CardHeader>
@@ -93,54 +131,56 @@ const DashboardOverview: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((order) => (
-                <div key={order} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-neutral-800/50 rounded-xl">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center text-xs font-bold">
-                      JD
+              {recentOrders.length === 0 ? (
+                <p className="text-center py-10 text-gray-500">No orders yet.</p>
+              ) : (
+                recentOrders.map((order) => (
+                  <div key={order._id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-neutral-800/50 rounded-xl">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center text-xs font-bold uppercase">
+                        {(order.userId?.fullName || 'U').charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold dark:text-white">{order.userId?.fullName || 'Unknown'}</p>
+                        <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold dark:text-white">John Doe</p>
-                      <p className="text-xs text-gray-500">2 minutes ago</p>
+                    <div className="text-right">
+                      <p className="text-sm font-bold dark:text-white">${order.totalPrice.toFixed(2)}</p>
+                      <p className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                        order.status === 'pending' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'
+                      }`}>
+                        {order.status}
+                      </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold dark:text-white">$129.00</p>
-                    <p className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full font-bold uppercase">Paid</p>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-none shadow-sm dark:bg-neutral-900">
           <CardHeader>
-            <CardTitle className="text-lg font-bold">Low Stock Alerts</CardTitle>
+            <CardTitle className="text-lg font-bold">Store Insights</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                { name: 'Leather Messenger Bag', stock: 3 },
-                { name: 'Minimalist Watch', stock: 1 },
-                { name: 'Premium Headphones', stock: 5 },
-              ].map((item) => (
-                <div key={item.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-neutral-800/50 rounded-xl">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-lg bg-white dark:bg-neutral-800 flex items-center justify-center">
-                      <Package size={20} className="text-gray-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold dark:text-white">{item.name}</p>
-                      <p className="text-xs text-gray-500">Electronics / Accessories</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-red-500">{item.stock} left</p>
-                    <button className="text-[10px] font-bold uppercase tracking-widest hover:underline">Restock</button>
-                  </div>
-                </div>
-              ))}
+              <div className="p-6 bg-gradient-to-br from-gray-900 to-black dark:from-white dark:to-gray-200 rounded-[2rem] text-white dark:text-black">
+                <p className="text-sm font-bold uppercase tracking-widest opacity-70 mb-2">Pending Actions</p>
+                <h3 className="text-3xl font-bold mb-4">{statsData?.pendingOrders || 0} Orders</h3>
+                <p className="text-sm opacity-80 leading-relaxed">
+                  You have {statsData?.pendingOrders || 0} orders waiting to be processed. Check the orders tab to manage them.
+                </p>
+              </div>
+              
+              <div className="p-6 bg-gray-50 dark:bg-neutral-800/50 rounded-[2rem]">
+                <p className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">Product Status</p>
+                <h3 className="text-3xl font-bold dark:text-white">{statsData?.totalProducts || 0} Total</h3>
+                <p className="text-sm text-gray-500 mt-2">
+                  Your store currently lists {statsData?.totalProducts || 0} unique products across all categories.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

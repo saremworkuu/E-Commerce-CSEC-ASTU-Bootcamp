@@ -40,6 +40,7 @@ import {
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { apiUrl } from '../lib/api';
 
 const DashboardProducts: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -59,7 +60,7 @@ const DashboardProducts: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/products');
+      const res = await axios.get(apiUrl('/products'));
       setProducts(res.data);
     } catch (err) {
       console.error('Failed to fetch products', err);
@@ -78,7 +79,7 @@ const DashboardProducts: React.FC = () => {
   const handleDelete = async (id: string | number) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/products/${id}`, {
+        await axios.delete(apiUrl(`/products/${id}`), {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         setProducts(products.filter(p => (p._id || p.id) !== id));
@@ -111,12 +112,12 @@ const DashboardProducts: React.FC = () => {
     try {
       if (editingProduct) {
         const id = editingProduct._id || editingProduct.id;
-        const res = await axios.put(`http://localhost:5000/api/products/${id}`, payload, {
+        const res = await axios.put(apiUrl(`/products/${id}`), payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProducts(products.map(p => (p._id || p.id) === id ? res.data.product : p));
       } else {
-        const res = await axios.post('http://localhost:5000/api/products', payload, {
+        const res = await axios.post(apiUrl('/products'), payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProducts([res.data.product, ...products]);
@@ -166,7 +167,7 @@ const DashboardProducts: React.FC = () => {
         </div>
         
         <Button onClick={toggleForm} className="bg-black hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-black rounded-full px-6 font-medium shadow-sm">
-          <Plus size={16} className="mr-2 stroke-[3]" />
+          <Plus size={16} className="mr-2 stroke-3" />
           {showForm ? 'Close Form' : 'Add Product'}
         </Button>
       </div>
@@ -255,7 +256,7 @@ const DashboardProducts: React.FC = () => {
                 value={formData.description} 
                 onChange={e => setFormData({...formData, description: e.target.value})}
                 placeholder="Describe the product..." 
-                className="min-h-[100px]"
+                className="min-h-25"
                 required
               />
             </div>
@@ -272,7 +273,7 @@ const DashboardProducts: React.FC = () => {
       )}
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-grow">
+        <div className="relative grow">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <Input 
             placeholder="Search products..." 
@@ -291,7 +292,7 @@ const DashboardProducts: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-gray-200 dark:border-neutral-800 text-gray-500">
-              <TableHead className="w-[80px] font-medium font-sans">Image</TableHead>
+              <TableHead className="w-20 font-medium font-sans">Image</TableHead>
               <TableHead className="font-medium font-sans">Product</TableHead>
               <TableHead className="font-medium font-sans">Category</TableHead>
               <TableHead className="font-medium font-sans">Price</TableHead>
