@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 import { useAuth } from '../context/AuthContext';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '../components/ui/button';

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Mail, Search, Trash2, RefreshCcw } from 'lucide-react';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';

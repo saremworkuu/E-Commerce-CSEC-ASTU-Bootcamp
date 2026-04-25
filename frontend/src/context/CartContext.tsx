@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import axios from 'axios';
 import { products } from '../data/products';
 import { useAuth } from './AuthContext';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 import { toast } from 'react-toastify';
 
 
@@ -130,33 +130,27 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ================= ADD TO CART =================
   const addToCart = async (productId: string) => {
     const token = getToken();
+    const idStr = String(productId || '');
+
+    if (!idStr) {
+      toast.error('Unable to add item to cart');
+      return;
+    }
+
+    const alreadyInCart = cart.some(
+      (item) => resolveProductId(item.productId) === idStr
+    );
+
+    if (alreadyInCart) {
+      toast.info('Product already added to cart');
+      return;
+    }
 
     if (!token) {
-      const idStr = String(productId);
-
-      setCart((prev) => {
-        const existing = prev.find(
-          (item) => resolveProductId(item.productId) === idStr
-        );
-
-        let nextCart: CartItem[];
-
-        if (existing) {
-          nextCart = prev.map((item) =>
-            resolveProductId(item.productId) === idStr
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          );
-        } else {
-          nextCart = [...prev, { productId: idStr, quantity: 1 }];
-        }
-
-        persistLocalCart(user?.email, nextCart);
-        toast.success('Item added to cart');
-        return nextCart;
-      });
-
-
+      const nextCart = [...cart, { productId: idStr, quantity: 1 }];
+      setCart(nextCart);
+      persistLocalCart(user?.email, nextCart);
+      toast.success('Item added to cart');
       return;
     }
 
@@ -175,7 +169,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error('Add to cart error:', err);
       toast.error('Failed to add item to cart');
     }
-
   };
 
   // ================= REMOVE =================

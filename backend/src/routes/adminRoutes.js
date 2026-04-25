@@ -7,38 +7,22 @@ import { Protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.use(Protect);
-
+// Helper to ensure user is admin
 const ensureAdmin = (req, res) => {
   if (req.user.role !== 'admin') {
     res.status(403).json({ message: 'Access denied. Admin only.' });
     return false;
   }
-
   return true;
 };
 
-router.get('/users', async (req, res) => {
-  try {
-    if (!ensureAdmin(req, res)) return;
-    
-    const limit = parseInt(req.query.limit) || 0;
-    const users = await User.find({}, '-password')
-      .sort({ createdAt: -1 })
-      .limit(limit);
-    res.json(users);
+// Apply protection to all admin routes
+router.use(Protect);
 
-  } catch (error) {
-    console.error('Fetch users error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
+// GET Admin stats
 router.get('/stats', async (req, res) => {
   try {
-    if (!ensureAdmin(req, res)) {
-      return;
-    }
+    if (!ensureAdmin(req, res)) return;
 
     const [totalUsers, totalProducts, totalOrders, pendingOrders, revenueResult, totalMessages] = await Promise.all([
       User.countDocuments(),
@@ -52,8 +36,6 @@ router.get('/stats', async (req, res) => {
       Message.countDocuments()
     ]);
 
-
-
     res.json({
       totalUsers,
       totalProducts,
@@ -62,97 +44,29 @@ router.get('/stats', async (req, res) => {
       totalMessages,
       totalRevenue: revenueResult[0]?.revenue || 0
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-router.get('/messages', async (req, res) => {
+// GET all users
+router.get('/users', async (req, res) => {
   try {
-    if (!ensureAdmin(req, res)) {
-      return;
-    }
-
+    if (!ensureAdmin(req, res)) return;
+    
     const limit = parseInt(req.query.limit) || 0;
-    const messages = await Message.find()
+    const users = await User.find({}, '-password')
       .sort({ createdAt: -1 })
       .limit(limit);
-    res.json(messages);
-
+    res.json(users);
   } catch (error) {
-    console.error('Failed to fetch messages:', error);
+    console.error('Fetch users error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-router.get('/messages/:id', async (req, res) => {
-  try {
-    if (!ensureAdmin(req, res)) {
-      return;
-    }
-
-    const message = await Message.findById(req.params.id);
-    if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
-    }
-
-    res.json(message);
-  } catch (error) {
-    console.error('Failed to fetch message:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-router.patch('/messages/:id', async (req, res) => {
-  try {
-    if (!ensureAdmin(req, res)) {
-      return;
-    }
-
-    const allowedStatuses = ['unread', 'read', 'replied'];
-    const nextStatus = String(req.body.status || '').toLowerCase();
-
-    if (!allowedStatuses.includes(nextStatus)) {
-      return res.status(400).json({ message: 'Invalid status value.' });
-    }
-
-    const updated = await Message.findByIdAndUpdate(
-      req.params.id,
-      { status: nextStatus },
-      { new: true, runValidators: true }
-    );
-
-    if (!updated) {
-      return res.status(404).json({ message: 'Message not found' });
-    }
-
-    res.json(updated);
-  } catch (error) {
-    console.error('Failed to update message:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-router.delete('/messages/:id', async (req, res) => {
-  try {
-    if (!ensureAdmin(req, res)) {
-      return;
-    }
-
-    const deleted = await Message.findByIdAndDelete(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ message: 'Message not found' });
-    }
-
-    res.json({ message: 'Message deleted successfully' });
-  } catch (error) {
-    console.error('Failed to delete message:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
+// Update user (Admin)
 router.put('/users/:id', async (req, res) => {
   try {
     if (!ensureAdmin(req, res)) return;
@@ -178,6 +92,7 @@ router.put('/users/:id', async (req, res) => {
   }
 });
 
+// Toggle Suspend (Admin)
 router.patch('/users/:id/suspend', async (req, res) => {
   try {
     if (!ensureAdmin(req, res)) return;
@@ -186,11 +101,30 @@ router.patch('/users/:id/suspend', async (req, res) => {
 
     user.isSuspended = !user.isSuspended;
     await user.save();
-    res.json({ message: `User ${user.isSuspended ? 'suspended' : 'activated'}`, isSuspended: user.isSuspended });
+    res.json({ 
+      message: `User ${user.isSuspended ? 'suspended' : 'activated'}`, 
+      isSuspended: user.isSuspended 
+    });
   } catch (error) {
     console.error('Suspend user error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-export default router;
+// GET all messages
+router.get('/messages', async (req, res) => {
+  try {
+    if (!ensureAdmin(req, res)) return;
+
+    const limit = parseInt(req.query.limit) || 0;
+    const messages = await Message.find()
+      .sort({ createdAt: -1 })
+      .limit(limit);
+    res.json(messages);
+  } catch (error) {
+    console.error('Failed to fetch messages:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+export default router;

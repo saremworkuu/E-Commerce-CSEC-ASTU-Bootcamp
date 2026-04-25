@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { Product, products } from '../data/products';
 import { useAuth } from './AuthContext';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 
 interface WishlistContextType {
   wishlist: Product[];

@@ -12,7 +12,7 @@ import {
   ChevronRight, Calendar, Clock, CheckCircle2,
   AlertCircle
 } from 'lucide-react';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 import { toast } from 'react-toastify';
 
 type TabType = 'orders' | 'wishlist' | 'payments' | 'settings';

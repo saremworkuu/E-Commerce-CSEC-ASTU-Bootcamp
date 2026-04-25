@@ -5,7 +5,7 @@ import { Lock, CheckCircle, Loader2, Eye, EyeOff, AlertCircle } from 'lucide-rea
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();

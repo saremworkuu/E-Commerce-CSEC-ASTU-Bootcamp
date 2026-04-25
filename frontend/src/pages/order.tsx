@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 import { toast } from 'react-toastify';
 
 

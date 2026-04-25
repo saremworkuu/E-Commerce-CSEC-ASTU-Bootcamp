@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
 import axios from 'axios';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 import { 
   Search, 
   MoreHorizontal, 
@@ -59,7 +58,9 @@ const DashboardUsers: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      const mappedUsers = res.data.map((u: any) => ({
+      const usersData = Array.isArray(res.data) ? res.data : (res.data.users || []);
+      
+      const mappedUsers = usersData.map((u: any) => ({
         id: u._id,
         name: u.fullName || 'No Name',
         email: u.email,

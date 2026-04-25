@@ -10,8 +10,16 @@ const router = express.Router();
 // Get all products
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const limit = parseInt(req.query.limit) || 0;
+    const query = Product.find().sort({ createdAt: -1 });
+    
+    if (limit > 0) {
+      query.limit(limit);
+    }
+    
+    const products = await query;
     res.json(products);
+
   } catch (error) {
     console.error("Get products error:", error);
     res.status(500).json({ message: "Server error" });

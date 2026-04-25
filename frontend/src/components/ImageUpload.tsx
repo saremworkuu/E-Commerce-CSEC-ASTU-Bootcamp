@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { Upload, Check, AlertCircle, Loader2 } from 'lucide-react';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 
 interface ImageUploadProps {
   onUploadSuccess: (url: string) => void;

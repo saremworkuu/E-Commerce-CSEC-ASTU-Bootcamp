@@ -3,7 +3,7 @@ import { Users, Package, ShoppingBag, TrendingUp, ArrowUpRight, ArrowDownRight, 
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { motion } from 'motion/react';
 import axios from 'axios';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 import { Button } from '../components/ui/button';
 import { useNavigate } from 'react-router-dom';
 

@@ -110,6 +110,7 @@ router.post('/verify-email', async (req, res) => {
 });
 
 // ==================== LOGIN ====================
+
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;

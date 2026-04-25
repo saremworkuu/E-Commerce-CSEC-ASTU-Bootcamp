@@ -4,7 +4,8 @@ import axios from 'axios';
 import { ArrowRight, ShoppingBag, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import HeroSlider from '../components/HeroSlider';
-import { apiUrl } from '../lib/api';
+import { apiUrl, resolveImageUrl } from '../lib/apiService';
+
 import { motion } from 'motion/react';
 import { products as initialProducts } from '../data/products';
 
@@ -15,7 +16,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(apiUrl('/products'));
+        const res = await axios.get(apiUrl('/products?limit=24'));
         setProducts(res.data);
       } catch (err) {
         console.error('Failed to fetch home products:', err);
@@ -26,10 +27,33 @@ const Home: React.FC = () => {
     fetchProducts();
   }, []);
 
-  const featuredProducts = products.filter(p => p.featured).slice(0, 3);
+  // ========================================================================
+  // 🌟 FEATURED MASTERPIECES PRODUCTS 🌟
+  // Change these names to force specific products into the Featured section.
+  // Make sure the names match your actual product names in the database!
+  // ========================================================================
+  const featuredPriorityNames = [
+    'Classic Brown Street Sneakers',
+    'professional camera lens',
+    'ergonomic office chair',
+    'suit'
+  ];
 
-  // If we don't have enough featured, fallback to newest
-  const displayFeatured = featuredProducts.length >= 3 ? featuredProducts : products.slice(0, 3);
+  const prioritizedFeatured = featuredPriorityNames
+    .map((name) => products.find((product) => typeof product?.name === 'string' && product.name.toLowerCase().includes(name.toLowerCase())))
+    .filter(Boolean);
+
+  const featuredProducts = products.filter(p => p.featured);
+
+  // Combine prioritized products with regular featured products, removing duplicates
+  const displayFeatured = [
+    ...prioritizedFeatured,
+    ...featuredProducts.filter(p => !prioritizedFeatured.find(pf => (pf as any)._id === p._id)),
+    ...products.slice(-6).reverse() // fallback
+  ].slice(0, 3);
+
+
+
 
   const getProductId = (product: any) => product._id || product.id;
   const getProductName = (product: any) =>
@@ -48,14 +72,49 @@ const Home: React.FC = () => {
     };
   };
 
-  const getProductImage = (product: any) => {
+  // ========================================================================
+  // 🌟 FEATURED MASTERPIECES PICTURES 🌟
+  // Change the URLs below to update the images in the Featured Masterpieces section.
+  // ========================================================================
+  const getFeaturedImage = (product: any) => {
     const name = getProductName(product).toLowerCase();
+
+    // Featured Masterpieces overrides
+    if (name.includes('ergonomic office chair')) {
+      return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80';
+    }
+    if (name.includes('professional camera lens')) {
+      return 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80';
+    }
+    if (name.includes('classic brown street sneakers') || name.includes('suit')) {
+      return 'https://i.pinimg.com/736x/67/78/da/6778da93474832a08448a0a6bbe9a444.jpg';
+    }
+
+    return resolveImageUrl(product.image ||
+      product.imageUrl ||
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80');
+  };
+
+  // ========================================================================
+  // 🔥 EXCLUSIVE DEALS PICTURES 🔥
+  // Change the URLs below to update the images in the Exclusive Deals section.
+  // ========================================================================
+  const getExclusiveDealImage = (product: any) => {
+    const name = getProductName(product).toLowerCase();
+
+    // Exclusive Deals overrides
     if (name.includes('brown suede casual loafers')) {
       return 'https://i.pinimg.com/736x/99/1b/0f/991b0fdeb6f941aa3f907a7252ae5234.jpg';
     }
-    return product.image ||
-           product.imageUrl ||
-      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80';
+    // Add any other specific overrides for Exclusive Deals here
+    if (name.includes('glossy shine lip gloss')) {
+      // Optional: Add a specific URL for the lip gloss if you want later.
+      return resolveImageUrl(product.image || product.imageUrl);
+    }
+
+    return resolveImageUrl(product.image ||
+      product.imageUrl ||
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80');
   };
 
   const topSellerPriorityNames = [
@@ -95,7 +154,7 @@ const Home: React.FC = () => {
             { icon: <RotateCcw size={24} />, title: "Easy Returns", desc: "30-day hassle-free returns" },
             { icon: <ShieldCheck size={24} />, title: "Secure Payment", desc: "100% encrypted transactions" }
           ].map((feature, i) => (
-            <motion.div 
+            <motion.div
               key={i}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -140,8 +199,14 @@ const Home: React.FC = () => {
             ))
           ) : (
             displayFeatured.map((product) => (
-              <ProductCard key={product.id || (product as any)._id} product={product} />
+              <ProductCard
+                key={getProductId(product)}
+                product={{ ...product, image: getFeaturedImage(product) }}
+                priority={true}
+              />
             ))
+
+
           )}
         </div>
       </section>
@@ -149,16 +214,16 @@ const Home: React.FC = () => {
       {/* Categories - Cinematic Grid */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1 }}
             className="relative h-100 sm:h-125 md:h-150 rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
           >
-            <img 
-              src="https://images.unsplash.com/photo-1491933382434-500287f9b54b?auto=format&fit=crop&w=800&q=80" 
-              alt="Electronics" 
+            <img
+              src="https://images.unsplash.com/photo-1491933382434-500287f9b54b?auto=format&fit=crop&w=800&q=80"
+              alt="Electronics"
               className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
               referrerPolicy="no-referrer"
             />
@@ -171,16 +236,16 @@ const Home: React.FC = () => {
             </div>
           </motion.div>
           <div className="grid grid-rows-1 sm:grid-rows-2 gap-8 sm:gap-12">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1 }}
               className="relative h-75 sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80" 
-                alt="Accessories" 
+              <img
+                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80"
+                alt="Accessories"
                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
                 referrerPolicy="no-referrer"
               />
@@ -191,16 +256,16 @@ const Home: React.FC = () => {
                 </Link>
               </div>
             </motion.div>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.2 }}
               className="relative h-75 sm:h-auto rounded-[2rem] sm:rounded-[3rem] overflow-hidden group"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80" 
-                alt="Furniture" 
+              <img
+                src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80"
+                alt="Furniture"
                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
                 referrerPolicy="no-referrer"
               />
@@ -229,50 +294,42 @@ const Home: React.FC = () => {
           </motion.div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {products.slice(0, 4).map((product, i) => {
+          {/* Using reverse/slice to get 'older' products for home page as requested */}
+          {products.slice(-4).reverse().map((product, i) => {
+
             const hasDiscount = product.originalPrice && product.originalPrice > product.price;
             const discount = hasDiscount
               ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
               : 0;
             return (
-              <Link 
+              <Link
                 to={`/product/${getProductId(product)}`}
                 state={{ product }}
                 key={getProductId(product)}
               >
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
                   className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gray-100 dark:bg-neutral-900 aspect-3/4 cursor-pointer"
                 >
-                  <img 
-                    src={getProductImage(product)} 
-                    alt={product.name} 
+                  <img
+                    src={getExclusiveDealImage(product)}
+                    alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     referrerPolicy="no-referrer"
                     loading="eager"
                     fetchPriority="high"
                   />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
-                    {hasDiscount && (
-                      <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                        -{discount}% OFF
-                      </div>
-                    )}
-                    <h3 className="text-white font-bold text-lg mb-1">{product.name}</h3>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-white font-bold">${product.price.toFixed(2)}</span>
-                      {hasDiscount && (
-                        <span className="text-gray-300 text-sm line-through">${product.originalPrice.toFixed(2)}</span>
-                      )}
+                  {hasDiscount && (
+                    <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10">
+                      -{discount}% OFF
                     </div>
-                    <span className="mt-4 text-white text-xs font-bold uppercase tracking-widest group-hover:underline">
-                      View Deal
-                    </span>
-                  </div>
+                  )}
+                  {/* Text overlay removed as requested */}
                 </motion.div>
+
               </Link>
             );
           })}
@@ -307,13 +364,13 @@ const Home: React.FC = () => {
                     {getProductTitleParts(product).main} <br /> <span className="text-gray-400 italic">{getProductTitleParts(product).rest}</span>
                   </h2>
                   <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-6 sm:mb-10 max-w-md leading-relaxed">
-                    {getProductName(product).toLowerCase().includes('brown suede casual loafers') 
-                      ? "Step into effortless style with our premium Brown Suede Casual Loafers. Designed for comfort and durability, these versatile shoes feature slip-on convenience and hand-stitched detailing, perfect for elevating your everyday casual look." 
+                    {getProductName(product).toLowerCase().includes('brown suede casual loafers')
+                      ? "Step into effortless style with our premium Brown Suede Casual Loafers. Designed for comfort and durability, these versatile shoes feature slip-on convenience and hand-stitched detailing, perfect for elevating your everyday casual look."
                       : getProductName(product).toLowerCase().includes('glossy shine lip gloss')
-                      ? "Get that irresistible luminous finish with our Glossy Shine Lip Gloss. Enriched with hydrating oils, this non-sticky formula delivers long-lasting moisture and an ultra-glamorous, mirror-like shine to enhance your natural beauty."
-                      : product.description}
+                        ? "Get that irresistible luminous finish with our Glossy Shine Lip Gloss. Enriched with hydrating oils, this non-sticky formula delivers long-lasting moisture and an ultra-glamorous, mirror-like shine to enhance your natural beauty."
+                        : product.description}
                   </p>
-                  <Link 
+                  <Link
                     to={`/product/${getProductId(product)}`}
                     state={{ product }}
                     className="inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 bg-black text-white dark:bg-white dark:text-black font-bold rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors group text-sm sm:text-base"
@@ -325,13 +382,13 @@ const Home: React.FC = () => {
               </div>
               <div className="relative h-75 sm:h-100 lg:h-auto overflow-hidden group flex-1">
                 <Link to={`/product/${getProductId(product)}`} state={{ product }} className="block w-full h-full">
-                  <motion.img 
+                  <motion.img
                     initial={{ scale: 1.1 }}
                     whileInView={{ scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 1.5 }}
-                    src={getProductImage(product)} 
-                    alt={getProductName(product)} 
+                    src={getExclusiveDealImage(product)}
+                    alt={getProductName(product)}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     referrerPolicy="no-referrer"
                     loading="eager"

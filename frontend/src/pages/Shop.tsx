@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { ChevronDown, Search } from 'lucide-react';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 import { products as initialProducts } from '../data/products';
 
 const Shop: React.FC = () => {

@@ -17,7 +17,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'motion/react';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 
 const DashboardLayout: React.FC = () => {
   const { logout, user } = useAuth();

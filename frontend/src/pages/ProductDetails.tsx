@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, ShoppingCart, Shield, Truck, RotateCcw, CreditCard } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();

@@ -6,7 +6,7 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthContext';
 import { ShieldCheck, ArrowLeft, Eye, EyeOff } from 'lucide-react';
-import { apiUrl } from '../lib/api';
+import { apiUrl } from '../lib/apiService';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');

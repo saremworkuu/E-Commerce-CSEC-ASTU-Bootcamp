@@ -6,12 +6,17 @@ import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Product } from '../data/products';
+import { resolveImageUrl } from '../lib/apiService';
+
+
 
 interface ProductCardProps {
   product: Product;
+  priority?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, priority = false }) => {
+
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
@@ -59,13 +64,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         onClick={() => navigate(`/product/${(product as any)._id || product.id}`, { state: { product } })}
       >
         <motion.img 
-          src={product.image || (product as any).imageUrl} 
+          src={resolveImageUrl(product.image || (product as any).imageUrl)} 
           alt={product.name}
+
           whileHover={{ scale: 1.1 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
+
         />
         
         {/* Hover Actions Overlay */}

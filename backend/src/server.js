@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import "dotenv/config";
+import swaggerUI from 'swagger-ui-express';
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
@@ -14,6 +15,8 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import connectDB from './config/db.js';
 import dns from "node:dns";
 import path from 'path';
+import aichat from './routes/ai-chat.js';
+import swaggerDocument from './swagger.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +34,10 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
+// Swagger docs
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
+app.get('/api-docs.json', (req, res) => res.json(swaggerDocument));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -39,6 +46,8 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wishlist', wishlistRoutes);
+app.post('/api/chat', aichat);
+
 app.use('/api/contact', contactRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/upload', uploadRoutes);

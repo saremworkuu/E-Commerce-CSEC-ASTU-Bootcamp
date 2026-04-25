@@ -25,11 +25,15 @@ import DashboardOverview from './pages/DashboardOverview';
 import DashboardProducts from './pages/DashboardProducts';
 import DashboardProductNew from './pages/DashboardProductNew';
 import DashboardUsers from './pages/DashboardUsers';
+
+
 import DashboardOrders from './pages/DashboardOrders';
 import DashboardMessages from './pages/DashboardMessages';
 import DashboardUserEdit from './pages/DashboardUserEdit';
 
 import { AnimatePresence, motion } from 'motion/react';
+import AiAssistant from './components/ai';
+
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -116,6 +120,7 @@ export default function App() {
           <CartProvider>
             <Router>
               <AppContent />
+              <AiAssistant />
             </Router>
             <ToastContainer
               position="top-right"
