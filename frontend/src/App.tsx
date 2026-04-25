@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -100,6 +100,15 @@ const AppContent: React.FC = () => {
   const isDashboard = location.pathname.startsWith('/dashboard');
   const isAccount = location.pathname === '/login' || location.pathname === '/profile' || location.pathname === '/register';
   const isAdminLogin = location.pathname === '/admin';
+
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors duration-300">
