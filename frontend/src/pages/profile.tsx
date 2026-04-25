@@ -137,7 +137,7 @@ const Profile: React.FC = () => {
         {/* Left Half - Cinematic Image */}
         <div className="flex-1 relative overflow-hidden">
           <motion.img
-            src="https://i.pinimg.com/736x/1a/4c/e1/1a4ce16374315f272328b332f35ab946.jpg"
+            src="https://i.pinimg.com/1200x/f3/f5/46/f3f5466686e11b5a401e841525886ecd.jpg"
             alt="Luxury Brand Experience"
             className="absolute inset-0 w-full h-full object-cover object-center"
             referrerPolicy="no-referrer"

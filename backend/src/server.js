@@ -46,7 +46,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wishlist', wishlistRoutes);
-app.post('/api/chat', aichat);
+app.use('/api/chat', aichat);
 
 app.use('/api/contact', contactRoutes);
 app.use('/api/payment', paymentRoutes);

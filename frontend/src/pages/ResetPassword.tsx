@@ -53,12 +53,12 @@ const ResetPassword = () => {
 
   if (!token && !success) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center px-4">
-        <div className="text-center p-12 bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-2xl border border-red-100 dark:border-red-900/20 max-w-md">
-          <AlertCircle size={48} className="text-red-500 mx-auto mb-6" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Invalid Link</h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-8">This password reset link is invalid or has expired. Please request a new one.</p>
-          <Button onClick={() => navigate('/forgot-password')} className="w-full bg-black text-white dark:bg-white dark:text-black rounded-2xl py-6">
+      <div className="min-h-screen flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md text-center p-8 sm:p-12 bg-white dark:bg-neutral-900 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl border border-red-100 dark:border-red-900/20">
+          <AlertCircle size={40} className="text-red-500 mx-auto mb-6" />
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">Invalid Link</h1>
+          <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-8">This password reset link is invalid or has expired. Please request a new one.</p>
+          <Button onClick={() => navigate('/forgot-password')} className="w-full bg-black text-white dark:bg-white dark:text-black rounded-2xl py-4 sm:py-6 text-sm sm:text-base">
             Request New Link
           </Button>
         </div>
@@ -67,20 +67,20 @@ const ResetPassword = () => {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 bg-gray-50 dark:bg-black">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8 bg-gray-50 dark:bg-black">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-white dark:bg-neutral-900 rounded-[2.5rem] p-12 border border-gray-100 dark:border-neutral-800 shadow-2xl"
+        className="w-full max-w-md bg-white dark:bg-neutral-900 rounded-[2rem] sm:rounded-[2.5rem] p-8 sm:p-12 border border-gray-100 dark:border-neutral-800 shadow-2xl"
       >
         {!success ? (
           <>
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-black dark:bg-white rounded-2xl mb-6 shadow-lg">
-                <Lock size={32} className="text-white dark:text-black" />
+            <div className="text-center mb-8 sm:mb-10">
+              <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-black dark:bg-white rounded-2xl mb-4 sm:mb-6 shadow-lg">
+                <Lock size={28} className="text-white dark:text-black sm:size-32" />
               </div>
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">New Password</h1>
-              <p className="text-gray-500 dark:text-gray-400">Please choose a strong password to secure your account.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">New Password</h1>
+              <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Please choose a strong password to secure your account.</p>
             </div>
 
             {error && (
@@ -130,7 +130,7 @@ const ResetPassword = () => {
               <Button 
                 type="submit" 
                 disabled={loading}
-                className="w-full py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-70"
+                className="w-full py-5 sm:py-7 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-70 text-sm sm:text-base"
               >
                 {loading ? (
                   <div className="flex items-center justify-center gap-2">
@@ -152,7 +152,7 @@ const ResetPassword = () => {
             </p>
             <Button 
               onClick={() => navigate('/login')}
-              className="w-full py-6 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl"
+              className="w-full py-4 sm:py-6 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl text-sm sm:text-base"
             >
               Sign In Now
             </Button>

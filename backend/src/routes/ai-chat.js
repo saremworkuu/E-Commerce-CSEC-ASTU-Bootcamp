@@ -1,11 +1,11 @@
-
 // routes/ai-chat.js
+import express from 'express';
 import Groq from "groq-sdk";
 import "dotenv/config";
 import Product from "../models/product.js";
 import About from "../models/About.js";
 
-
+const router = express.Router();
 
 // Initialize Groq lazily to prevent crash if key is missing
 let groq;
@@ -149,4 +149,6 @@ When the user asks "what is the role of this website" or similar, base your answ
   }
 };
 
-export default aiChat;
+router.post('/', aiChat);
+
+export default router;

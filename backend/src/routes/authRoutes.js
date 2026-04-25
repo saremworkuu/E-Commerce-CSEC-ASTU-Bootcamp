@@ -50,7 +50,7 @@ router.post('/register', async (req, res) => {
     await user.save();
 
     // Send confirmation email
-    const frontendBaseUrl = process.env.FRONTEND_URL || req.get('origin') || 'http://localhost:3000';
+    const frontendBaseUrl = process.env.FRONTEND_URL || 'https://e-commerce-csec-astu-bootcamp-oz28k3wdb.vercel.app';
     const verificationUrl = `${frontendBaseUrl.replace(/\/$/, '')}/confirm-email?token=${verificationToken}`;
     try {
       await sendEmail({
@@ -222,18 +222,39 @@ router.post('/forgot-password', resetLimiter, async (req, res) => {
     await user.save();
 
     // Reset URL
-    const frontendBaseUrl = process.env.FRONTEND_URL || req.get('origin') || 'http://localhost:3000';
+    const frontendBaseUrl = process.env.FRONTEND_URL || 'https://e-commerce-csec-astu-bootcamp-oz28k3wdb.vercel.app';
     const resetUrl = `${frontendBaseUrl.replace(/\/$/, '')}/reset-password?token=${resetToken}`;
 
     const message = `
-      <div style="font-family: sans-serif; line-height: 1.6; color: #111;">
-        <h2>Password Reset Request</h2>
-        <p>You requested a password reset for your LuxeCart account. Click the button below to set a new password:</p>
-        <div style="margin: 30px 0;">
-          <a href="${resetUrl}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Reset Password</a>
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #111; max-width: 600px; margin: 0 auto;">
+        <div style="padding: 40px 20px; text-align: center;">
+          <h2 style="color: #000; font-size: 28px; margin-bottom: 20px; font-weight: 700;">Password Reset Request</h2>
+          <p style="color: #666; font-size: 16px; margin-bottom: 30px; line-height: 1.5;">You requested a password reset for your LuxeCart account. Click the button below to set a new password:</p>
+          
+          <!-- Mobile-optimized button -->
+          <div style="margin: 30px 0;">
+            <a href="${resetUrl}" 
+               style="display: inline-block; background-color: #000; color: #fff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; min-width: 200px;"
+               target="_blank"
+               rel="noopener noreferrer">
+              Reset Password
+            </a>
+          </div>
+          
+          <!-- Fallback link for email clients that don't support buttons -->
+          <div style="margin: 20px 0; padding: 15px; background-color: #f5f5f5; border-radius: 8px;">
+            <p style="color: #666; font-size: 14px; margin: 0;">If the button doesn't work, copy and paste this link into your browser:</p>
+            <a href="${resetUrl}" 
+               style="color: #000; font-size: 12px; word-break: break-all; text-decoration: underline;"
+               target="_blank"
+               rel="noopener noreferrer">
+              ${resetUrl}
+            </a>
+          </div>
+          
+          <p style="color: #999; font-size: 14px; margin-top: 30px;">This link will expire in 20 minutes. If you did not request this, please ignore this email.</p>
+          <p style="color: #999; font-size: 14px; margin-top: 10px;">Best regards,<br>The LuxeCart Team</p>
         </div>
-        <p>This link will expire in 20 minutes. If you did not request this, please ignore this email.</p>
-        <p>Best regards,<br>The LuxeCart Team</p>
       </div>
     `;
 
@@ -251,32 +272,43 @@ router.post('/forgot-password', resetLimiter, async (req, res) => {
       console.error('Email error:', err);
       res.status(500).json({ message: 'Error sending reset email' });
     }
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// ==================== RESET PASSWORD ====================
 router.post('/reset-password', resetLimiter, async (req, res) => {
   try {
     const { token, password } = req.body;
 
+    console.log('🔍 Reset Password Debug:');
+    console.log('Token received:', token ? '✅ Present' : '❌ Missing');
+    console.log('Password length:', password ? password.length : '❌ Missing');
+    console.log('Request timestamp:', new Date().toISOString());
+
     if (!token || !password) {
+      console.log('❌ Missing token or password');
       return res.status(400).json({ message: 'Token and new password are required' });
     }
 
     // Hash the token from URL to compare with stored hashed token
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    console.log('Token hashed for comparison');
 
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
       resetPasswordExpires: { $gt: Date.now() }
     });
 
+    console.log('User found:', user ? '✅' : '❌');
+    if (user) {
+      console.log('Token expires at:', new Date(user.resetPasswordExpires).toISOString());
+      console.log('Current time:', new Date().toISOString());
+      console.log('Token valid:', user.resetPasswordExpires > Date.now() ? '✅' : '❌');
+    }
+
     if (!user) {
+      console.log('❌ Invalid or expired reset token');
       return res.status(400).json({ message: 'Invalid or expired reset token' });
     }
 
+    console.log('✅ Token validated, updating password...');
+    
     // Hash new password
     const salt = await bcrypt.genSalt(10);
     user.passwordHash = await bcrypt.hash(password, salt);
@@ -286,10 +318,57 @@ router.post('/reset-password', resetLimiter, async (req, res) => {
     user.resetPasswordExpires = undefined;
 
     await user.save();
+    console.log('✅ Password updated successfully');
 
     res.json({ message: 'Password reset successful. You can now log in with your new password.' });
   } catch (error) {
+    console.error('❌ Reset password error:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required for testing' });
+    }
+
+    console.log('🧪 Testing email functionality...');
+    
+    const testMessage = `
+      <div style="font-family: sans-serif; line-height: 1.6; color: #111;">
+        <h2>🧪 Email Test - LuxeCart</h2>
+        <p>This is a test email to verify that the email system is working correctly.</p>
+        <div style="margin: 30px 0; padding: 20px; background-color: #f5f5f5; border-radius: 8px;">
+          <p><strong>Test Details:</strong></p>
+          <ul>
+            <li>Timestamp: ${new Date().toLocaleString()}</li>
+            <li>Environment: ${process.env.NODE_ENV || 'development'}</li>
+            <li>Email Service: ${process.env.EMAIL_SERVICE || 'Gmail'}</li>
+            <li>From: ${process.env.EMAIL_USER || 'Not configured'}</li>
+          </ul>
+        </div>
+        <p>If you receive this email, the email system is working properly! 🎉</p>
+        <p>Best regards,<br>The LuxeCart Team</p>
+      </div>
+    `;
+
+    await sendEmail({
+      email: email,
+      subject: '🧪 Email Test - LuxeCart System',
+      message: testMessage,
+    });
+
+    res.json({ 
+      message: 'Test email sent successfully! Please check your inbox (and spam folder).',
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Test email failed:', error);
+    res.status(500).json({ 
+      message: 'Test email failed',
+      error: error.message,
+      code: error.code || 'UNKNOWN'
+    });
   }
 });
 
