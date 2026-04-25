@@ -127,7 +127,7 @@ router.post('/login', async (req, res) => {
         message: 'Admin login successful',
         token,
         user: {
-          id: 'admin_static_id',
+          _id: 'admin_static_id',
           fullName: 'System Admin',
           email: 'saremworkuu@gmail.com',
           role: 'admin',
@@ -153,7 +153,7 @@ router.post('/login', async (req, res) => {
       message: 'Login successful',
       token,
       user: { 
-        id: user._id, 
+        _id: user._id, 
         fullName: user.fullName, 
         email: user.email, 
         role: user.role,
@@ -175,7 +175,7 @@ router.get('/me', Protect, async (req, res) => {
   try {
     if (req.user.role === 'admin' && req.user.id === 'admin_static_id') {
       return res.json({
-        id: 'admin_static_id',
+        _id: 'admin_static_id',
         fullName: 'System Admin',
         email: 'saremworkuu@gmail.com',
         role: 'admin',
@@ -188,7 +188,7 @@ router.get('/me', Protect, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     res.json({
-      id: user._id,
+      _id: user._id,
       fullName: user.fullName,
       email: user.email,
       role: user.role,

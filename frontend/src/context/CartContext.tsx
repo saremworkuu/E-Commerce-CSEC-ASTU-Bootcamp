@@ -14,7 +14,7 @@ interface CartItem {
 interface CartContextType {
   cart: CartItem[];
   addToCart: (productId: string) => void;
-  removeFromCart: (productId: string) => void;
+  removeFromCart: (productId: string, targetUserId?: string) => void;
   updateQuantity: (productId: string, delta: number) => void;
   clearCart: () => void;
   totalItems: number;
@@ -172,12 +172,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   // ================= REMOVE =================
-  const removeFromCart = async (productId: string) => {
+  const removeFromCart = async (productId: string, targetUserId?: string) => {
     const token = getToken();
     const idStr = String(productId);
     
     console.log('🗑️ Cart: Removing item:', productId);
     console.log('🗑️ Cart: Item ID string:', idStr);
+    console.log('🗑️ Cart: Target User ID:', targetUserId);
+    console.log('🗑️ Cart: Current user role:', user?.role);
 
     if (!token) {
       console.log('🗑️ Cart: No token, removing locally');
@@ -192,21 +194,45 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       console.log('🗑️ Cart: Making API call to remove item');
-      const res = await axios.delete(
-        apiUrl(`/cart/remove/${productId}`),
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      
+      // Build the URL with query parameters if targetUserId is provided (for admin)
+      let url = apiUrl(`/cart/remove/${productId}`);
+      if (targetUserId && user?.role === 'admin') {
+        url += `?userId=${targetUserId}`;
+      }
+      
+      console.log('🗑️ Cart: API URL:', url);
+      
+      const res = await axios.delete(url, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       console.log('🗑️ Cart: Remove response:', res.data);
+      
+      // If admin is removing from another user's cart, don't update local state
+      if (targetUserId && targetUserId !== user?._id) {
+        console.log('🗑️ Cart: Admin removed from user cart, not updating local state');
+        toast.info('Item removed from user cart');
+        return;
+      }
+      
       const nextCart = normalizeCart(res.data.items || []);
       setCart(nextCart);
       persistLocalCart(user?.email, nextCart);
       toast.info('Item removed from cart');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to remove item from cart');
+    } catch (err: any) {
+      console.error('🗑️ Cart: Remove error:', err);
+      console.error('🗑️ Cart: Error response:', err.response?.data);
+      
+      // Handle specific error cases
+      if (err.response?.status === 403) {
+        toast.error('Permission denied: You cannot remove items from this cart');
+      } else if (err.response?.status === 404) {
+        toast.error('Cart not found');
+      } else {
+        toast.error(err.response?.data?.message || 'Failed to remove item from cart');
+      }
     }
-
   };
 
   // ================= UPDATE QUANTITY =================

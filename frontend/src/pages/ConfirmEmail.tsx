@@ -38,7 +38,7 @@ const ConfirmEmail = () => {
           setMessage(data.message || 'Email verified successfully!');
           
           if (data.token && data.user) {
-             login(data.user.email, data.user.role, data.token);
+             login(data.user.email, data.user.role, data.token, data.user.fullName, data.user._id);
              
              // Redirect to profile after a short delay
              setTimeout(() => navigate('/profile'), 2500);

@@ -95,18 +95,38 @@ router.put('/users/:id', async (req, res) => {
 // Toggle Suspend (Admin)
 router.patch('/users/:id/suspend', async (req, res) => {
   try {
+    console.log('🔄 Backend: Suspend request received');
+    console.log('🔄 Backend: Request params:', req.params);
+    console.log('🔄 Backend: Request user:', req.user);
+    console.log('🔄 Backend: User ID to suspend:', req.params.id);
+    console.log('🔄 Backend: Admin user ID:', req.user.id);
+    console.log('🔄 Backend: Admin user role:', req.user.role);
+    
     if (!ensureAdmin(req, res)) return;
+    
+    console.log('🔄 Backend: Admin check passed, finding user');
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    if (!user) {
+      console.log('🔄 Backend: User not found with ID:', req.params.id);
+      return res.status(404).json({ message: 'User not found' });
+    }
 
+    console.log('🔄 Backend: User found:', user.email);
+    console.log('🔄 Backend: Current suspension status:', user.isSuspended);
+    
     user.isSuspended = !user.isSuspended;
+    console.log('🔄 Backend: New suspension status:', user.isSuspended);
+    
     await user.save();
+    console.log('🔄 Backend: User saved successfully');
+    
     res.json({ 
       message: `User ${user.isSuspended ? 'suspended' : 'activated'}`, 
       isSuspended: user.isSuspended 
     });
   } catch (error) {
-    console.error('Suspend user error:', error);
+    console.error('🔄 Backend: Suspend user error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

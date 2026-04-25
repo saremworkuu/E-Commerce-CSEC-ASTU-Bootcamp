@@ -107,7 +107,7 @@ const Profile: React.FC = () => {
     setLoading(true);
     try {
       const res = await axios.post(apiUrl('/auth/login'), { email, password });
-      login(res.data.user.email, res.data.user.role, res.data.token, res.data.user.fullName);
+      login(res.data.user.email, res.data.user.role, res.data.token, res.data.user.fullName, res.data.user._id);
       toast.success('Signed in successfully!');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Invalid credentials');
@@ -137,7 +137,7 @@ const Profile: React.FC = () => {
       const res = await axios.put(apiUrl('/users/profile'), profileForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      login(res.data.user.email, res.data.user.role, token!, res.data.user.fullName);
+      login(res.data.user.email, res.data.user.role, token!, res.data.user.fullName, res.data.user._id);
       toast.success('Profile updated successfully');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to update profile');

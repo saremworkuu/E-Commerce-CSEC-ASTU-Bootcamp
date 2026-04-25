@@ -62,12 +62,18 @@ const DashboardUsers: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
+      console.log('🔄 Frontend: Fetching users...');
       const token = localStorage.getItem('token');
+      console.log('🔄 Frontend: Token exists:', !!token);
+      
       const res = await axios.get(apiUrl('/admin/users'), {
         headers: { Authorization: `Bearer ${token}` }
       });
       
+      console.log('🔄 Frontend: Users API response:', res.data);
+      
       const usersData = Array.isArray(res.data) ? res.data : (res.data.users || []);
+      console.log('🔄 Frontend: Users data count:', usersData.length);
       
       const mappedUsers = usersData.map((u: any) => ({
         id: u._id,
@@ -78,11 +84,20 @@ const DashboardUsers: React.FC = () => {
         status: u.isSuspended ? 'suspended' : (u.isEmailVerified ? 'active' : 'unverified')
       }));
       
+      console.log('🔄 Frontend: Mapped users:', mappedUsers.map(u => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        status: u.status,
+        isSuspended: u.status === 'suspended'
+      })));
+      
       setUsers(mappedUsers);
       setTotalPages(Math.ceil(mappedUsers.length / itemsPerPage));
       setCurrentPage(1);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('🔄 Frontend: Error fetching users:', error);
+      console.error('🔄 Frontend: Error response:', error.response?.data);
       toast.error('Failed to load users');
     } finally {
       setLoading(false);
@@ -97,23 +112,49 @@ const DashboardUsers: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
+        console.log('🔄 Frontend: No token found');
         toast.error('Authentication required');
         return;
       }
       
-      console.log('🔄 Suspending user:', user.id, user.name);
+      console.log('🔄 Frontend: Suspending user');
+      console.log('🔄 Frontend: User ID:', user.id);
+      console.log('🔄 Frontend: User name:', user.name);
+      console.log('🔄 Frontend: User email:', user.email);
+      console.log('🔄 Frontend: Current status:', user.status);
+      console.log('🔄 Frontend: Token exists:', !!token);
       
-      const res = await axios.patch(apiUrl(`/admin/users/${user.id}/suspend`), {}, {
+      const apiUrlEndpoint = `/admin/users/${user.id}/suspend`;
+      console.log('🔄 Frontend: API endpoint:', apiUrlEndpoint);
+      console.log('🔄 Frontend: Full URL:', apiUrl(apiUrlEndpoint));
+      
+      const res = await axios.patch(apiUrl(apiUrlEndpoint), {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      console.log('✅ Suspend response:', res.data);
+      console.log('✅ Frontend: Suspend response:', res.data);
+      console.log('✅ Frontend: Response status:', res.status);
       toast.success(res.data.message);
+      
+      // Refresh the users list to show updated status
+      console.log('🔄 Frontend: Refreshing users list...');
       fetchUsers();
     } catch (error: any) {
-      console.error('❌ Suspend error:', error);
-      console.error('Error response:', error.response?.data);
-      toast.error(error.response?.data?.message || error.message || 'Action failed');
+      console.error('❌ Frontend: Suspend error:', error);
+      console.error('❌ Frontend: Error response:', error.response?.data);
+      console.error('❌ Frontend: Error status:', error.response?.status);
+      console.error('❌ Frontend: Error message:', error.message);
+      
+      // Handle specific error cases
+      if (error.response?.status === 403) {
+        toast.error('Permission denied: Admin access required');
+      } else if (error.response?.status === 404) {
+        toast.error('User not found');
+      } else if (error.response?.status === 500) {
+        toast.error('Server error: Please try again');
+      } else {
+        toast.error(error.response?.data?.message || error.message || 'Action failed');
+      }
     }
   };
 

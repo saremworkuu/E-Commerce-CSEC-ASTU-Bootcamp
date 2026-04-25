@@ -23,7 +23,7 @@ const AdminLogin: React.FC = () => {
       const res = await axios.post(apiUrl('/auth/login'), { email, password });
       
       if (res.data.user.role === 'admin') {
-        login(res.data.user.email, 'admin', res.data.token);
+        login(res.data.user.email, 'admin', res.data.token, res.data.user.fullName, res.data.user._id);
         navigate('/dashboard');
       } else {
         setError('Access Denied. You do not have admin permissions.');

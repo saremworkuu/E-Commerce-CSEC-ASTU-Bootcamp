@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 export type UserRole = 'admin' | 'user';
 
 interface User {
+  _id: string;
   email: string;
   role: UserRole;
   fullName?: string;
@@ -11,7 +12,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, role: UserRole, token?: string, fullName?: string) => void;
+  login: (email: string, role: UserRole, token?: string, fullName?: string, userId?: string) => void;
 
   logout: () => void;
   isAuthenticated: boolean;
@@ -42,8 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return null;
   });
 
-  const login = (email: string, role: UserRole, token?: string, fullName?: string) => {
-    const newUser = { email, role, fullName };
+  const login = (email: string, role: UserRole, token?: string, fullName?: string, userId?: string) => {
+    const newUser = { _id: userId || '', email, role, fullName };
     setUser(newUser);
     localStorage.setItem('auth_user', JSON.stringify(newUser));
     if (token) {
