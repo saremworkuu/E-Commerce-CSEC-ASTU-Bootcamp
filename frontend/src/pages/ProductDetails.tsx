@@ -28,6 +28,11 @@ const ProductDetails: React.FC = () => {
       return;
     }
     addToCart(String(product._id || product.id));
+    
+    // Redirect to checkout after adding to cart
+    setTimeout(() => {
+      navigate('/cart');
+    }, 500);
   };
 
 

@@ -45,6 +45,8 @@ const DashboardOrders: React.FC = () => {
   const [orders, setOrders] = useState<OrderData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<string>('all');
 
   const fetchOrders = async () => {
     try {
@@ -67,7 +69,27 @@ const DashboardOrders: React.FC = () => {
   const filteredOrders = orders.filter(o => {
     const customerName = (o.shippingInfo?.fullName || o.userId?.fullName || '').toLowerCase();
     const orderId = (o._id || '').toLowerCase();
-    return orderId.includes(searchTerm.toLowerCase()) || customerName.includes(searchTerm.toLowerCase());
+    const matchesSearch = orderId.includes(searchTerm.toLowerCase()) || customerName.includes(searchTerm.toLowerCase());
+    
+    // Status filter
+    const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
+    
+    // Date filter
+    const orderDate = new Date(o.createdAt);
+    const today = new Date();
+    let matchesDate = true;
+    
+    if (dateFilter === 'today') {
+      matchesDate = orderDate.toDateString() === today.toDateString();
+    } else if (dateFilter === 'week') {
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      matchesDate = orderDate >= weekAgo;
+    } else if (dateFilter === 'month') {
+      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      matchesDate = orderDate >= monthAgo;
+    }
+    
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   const getStatusBadge = (status: OrderData['status']) => {
@@ -111,8 +133,8 @@ const DashboardOrders: React.FC = () => {
         <p className="text-gray-500 dark:text-gray-400">View and manage customer orders and tracking status.</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative grow">
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <Input 
             placeholder="Search orders by ID or customer name..." 
@@ -121,10 +143,59 @@ const DashboardOrders: React.FC = () => {
             onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="bg-white dark:bg-neutral-900 border-none shadow-sm">
-          <Filter size={18} className="mr-2" />
-          Status
-        </Button>
+        <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="bg-white dark:bg-neutral-900 border-none shadow-sm">
+                <Filter size={18} className="mr-2" />
+                Status: {statusFilter === 'all' ? 'All' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="dark:bg-neutral-900 shadow-2xl border border-gray-200 dark:border-neutral-800 min-w-[150px] rounded-xl p-2">
+              <DropdownMenuItem onClick={() => setStatusFilter('all')} className="rounded-lg px-3 py-2 cursor-pointer">
+                All Status
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('pending')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Pending
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('processing')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Processing
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('shipped')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Shipped
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('delivered')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Delivered
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('cancelled')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Cancelled
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="bg-white dark:bg-neutral-900 border-none shadow-sm">
+                <Filter size={18} className="mr-2" />
+                Date: {dateFilter === 'all' ? 'All' : dateFilter.charAt(0).toUpperCase() + dateFilter.slice(1)}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="dark:bg-neutral-900 shadow-2xl border border-gray-200 dark:border-neutral-800 min-w-[150px] rounded-xl p-2">
+              <DropdownMenuItem onClick={() => setDateFilter('all')} className="rounded-lg px-3 py-2 cursor-pointer">
+                All Time
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateFilter('today')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Today
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateFilter('week')} className="rounded-lg px-3 py-2 cursor-pointer">
+                This Week
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateFilter('month')} className="rounded-lg px-3 py-2 cursor-pointer">
+                This Month
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-neutral-800">

@@ -58,10 +58,17 @@ const Profile: React.FC = () => {
       localStorage.removeItem('pending_add_redirect');
       try {
         await addToCart(pendingProductId);
+        // Force redirect to cart
+        setTimeout(() => {
+          navigate(redirectTo, { replace: true });
+        }, 100);
       } catch (err) {
         console.error('Failed to add pending item:', err);
+        // Still redirect even if add to cart fails
+        setTimeout(() => {
+          navigate(redirectTo, { replace: true });
+        }, 100);
       }
-      navigate(redirectTo);
     };
     handlePendingCart();
   }, [isAuthenticated, addToCart, navigate]);

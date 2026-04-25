@@ -34,7 +34,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, priority = false }) 
     }
     setIsAdding(true);
     addToCart(String((product as any)._id || product.id));
-    setTimeout(() => setIsAdding(false), 1500);
+    
+    // Redirect to checkout after adding to cart
+    setTimeout(() => {
+      setIsAdding(false);
+      navigate('/cart');
+    }, 1000);
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {

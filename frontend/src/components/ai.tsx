@@ -5,6 +5,8 @@ import { MessageCircle, X, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { apiUrl } from '../lib/apiService';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -21,34 +23,64 @@ const ChatAssistant: React.FC = () => {
   const chatRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const renderMessageContent = (content: string) =>
-    content.split(/(\/contact|\bcontact page\b)/gi).map((segment, index) => {
-      if (/^\/contact$/i.test(segment)) {
+  const renderMessageContent = (content: string) => {
+    // Custom component for rendering links
+    const LinkRenderer = ({ href, children }: { href?: string; children?: React.ReactNode }) => {
+      if (href?.startsWith('/')) {
         return (
           <Link
-            key={index}
-            to="/contact"
+            to={href}
             className="text-sky-500 underline underline-offset-2 hover:text-sky-600"
           >
-            /contact
+            {children}
           </Link>
         );
       }
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sky-500 underline underline-offset-2 hover:text-sky-600"
+        >
+          {children}
+        </a>
+      );
+    };
 
-      if (/^contact page$/i.test(segment)) {
-        return (
-          <Link
-            key={index}
-            to="/contact"
-            className="text-sky-500 underline underline-offset-2 hover:text-sky-600"
-          >
-            contact page
-          </Link>
-        );
-      }
-
-      return <span key={index}>{segment}</span>;
-    });
+    return (
+      <div className="prose prose-sm dark:prose-invert max-w-none">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            a: LinkRenderer,
+            h1: ({ children }) => <h1 className="text-lg font-bold mb-2 mt-3">{children}</h1>,
+            h2: ({ children }) => <h2 className="text-md font-semibold mb-2 mt-2">{children}</h2>,
+            h3: ({ children }) => <h3 className="text-sm font-medium mb-1 mt-2">{children}</h3>,
+            p: ({ children }) => <p className="mb-2">{children}</p>,
+            ul: ({ children }) => <ul className="list-disc list-inside mb-2 ml-2">{children}</ul>,
+            ol: ({ children }) => <ol className="list-decimal list-inside mb-2 ml-2">{children}</ol>,
+            li: ({ children }) => <li className="mb-1">{children}</li>,
+            code: ({ children, ...props }: any) => {
+                const isInline = !props.className?.includes('language-');
+                return isInline ? 
+                  <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm">{children}</code> :
+                  <code className="block bg-gray-100 dark:bg-gray-800 p-2 rounded text-sm mb-2 overflow-x-auto">{children}</code>;
+              },
+            blockquote: ({ children }) => (
+              <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic mb-2">
+                {children}
+              </blockquote>
+            ),
+            strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+            em: ({ children }) => <em className="italic">{children}</em>,
+          }}
+            >
+          {content}
+        </ReactMarkdown>
+      </div>
+    );
+  };
 
   // 🔥 Auto scroll
   useEffect(() => {

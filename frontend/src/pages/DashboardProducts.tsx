@@ -41,6 +41,8 @@ import { toast } from 'react-toastify';
 const DashboardProducts: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [featuredFilter, setFeaturedFilter] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -91,10 +93,20 @@ const DashboardProducts: React.FC = () => {
     }
   };
 
-  const filteredProducts = products.filter(p => 
-    p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          p.category?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Category filter
+    const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
+    
+    // Featured filter
+    const matchesFeatured = featuredFilter === 'all' || 
+                           (featuredFilter === 'featured' && p.featured) ||
+                           (featuredFilter === 'not-featured' && !p.featured);
+    
+    return matchesSearch && matchesCategory && matchesFeatured;
+  });
 
   const handleDelete = async (id: string | number) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
@@ -333,7 +345,7 @@ const DashboardProducts: React.FC = () => {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col lg:flex-row gap-4 mb-6">
         <div className="relative grow">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <Input 
@@ -342,6 +354,68 @@ const DashboardProducts: React.FC = () => {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
+        </div>
+        <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="bg-white dark:bg-neutral-900 border border-gray-100 dark:border-neutral-800 shadow-sm rounded-2xl h-12 px-4">
+                <Filter size={18} className="mr-2" />
+                Category: {categoryFilter === 'all' ? 'All' : categoryFilter}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="dark:bg-neutral-900 shadow-2xl border border-gray-200 dark:border-neutral-800 min-w-[150px] rounded-xl p-2">
+              <DropdownMenuItem onClick={() => setCategoryFilter('all')} className="rounded-lg px-3 py-2 cursor-pointer">
+                All Categories
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Electronics')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Electronics
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Accessories')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Accessories
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Furniture')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Furniture
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Apparel')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Apparel
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Jewelry')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Jewelry
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Home Goods')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Home Goods
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Clothing')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Clothing
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Footwear')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Footwear
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter('Other')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Other
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="bg-white dark:bg-neutral-900 border border-gray-100 dark:border-neutral-800 shadow-sm rounded-2xl h-12 px-4">
+                <Filter size={18} className="mr-2" />
+                Featured: {featuredFilter === 'all' ? 'All' : featuredFilter === 'featured' ? 'Featured' : 'Not Featured'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="dark:bg-neutral-900 shadow-2xl border border-gray-200 dark:border-neutral-800 min-w-[150px] rounded-xl p-2">
+              <DropdownMenuItem onClick={() => setFeaturedFilter('all')} className="rounded-lg px-3 py-2 cursor-pointer">
+                All Products
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFeaturedFilter('featured')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Featured Only
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFeaturedFilter('not-featured')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Not Featured
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 

@@ -50,7 +50,7 @@ router.post('/register', async (req, res) => {
     await user.save();
 
     // Send confirmation email
-    const frontendBaseUrl = process.env.FRONTEND_URL || 'https://e-commerce-csec-astu-bootcamp-oz28k3wdb.vercel.app';
+    const frontendBaseUrl = process.env.FRONTEND_URL || 'https://e-commerce-csec-astu-bootcamp.onrender.com/';
     const verificationUrl = `${frontendBaseUrl.replace(/\/$/, '')}/confirm-email?token=${verificationToken}`;
     try {
       await sendEmail({

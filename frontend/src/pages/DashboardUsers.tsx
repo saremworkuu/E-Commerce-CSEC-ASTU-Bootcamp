@@ -13,7 +13,8 @@ import {
   X,
   UserCheck,
   UserMinus,
-  RotateCcw
+  RotateCcw,
+  Filter
 } from 'lucide-react';
 import { 
   Table, 
@@ -48,6 +49,9 @@ interface UserData {
 const DashboardUsers: React.FC = () => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -85,14 +89,24 @@ const DashboardUsers: React.FC = () => {
   const handleSuspend = async (user: UserData) => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Authentication required');
+        return;
+      }
+      
+      console.log('🔄 Suspending user:', user.id, user.name);
+      
       const res = await axios.patch(apiUrl(`/admin/users/${user.id}/suspend`), {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
+      console.log('✅ Suspend response:', res.data);
       toast.success(res.data.message);
       fetchUsers();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Action failed');
+      console.error('❌ Suspend error:', error);
+      console.error('Error response:', error.response?.data);
+      toast.error(error.response?.data?.message || error.message || 'Action failed');
     }
   };
 
@@ -112,10 +126,33 @@ const DashboardUsers: React.FC = () => {
     }, 500);
   };
 
-  const filteredUsers = users.filter(u => 
-    u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          u.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Status filter
+    const matchesStatus = statusFilter === 'all' || u.status === statusFilter;
+    
+    // Role filter
+    const matchesRole = roleFilter === 'all' || u.role === roleFilter;
+    
+    // Date filter
+    const userDate = new Date(u.joinedDate);
+    const today = new Date();
+    let matchesDate = true;
+    
+    if (dateFilter === 'today') {
+      matchesDate = userDate.toDateString() === today.toDateString();
+    } else if (dateFilter === 'week') {
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      matchesDate = userDate >= weekAgo;
+    } else if (dateFilter === 'month') {
+      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      matchesDate = userDate >= monthAgo;
+    }
+    
+    return matchesSearch && matchesStatus && matchesRole && matchesDate;
+  });
 
   return (
     <div className="space-y-8">
@@ -126,7 +163,7 @@ const DashboardUsers: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative grow">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <Input 
@@ -135,6 +172,73 @@ const DashboardUsers: React.FC = () => {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
+        </div>
+        <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="bg-white dark:bg-neutral-900 border border-gray-100 dark:border-neutral-800 shadow-sm rounded-2xl h-12 px-4">
+                <Filter size={18} className="mr-2" />
+                Status: {statusFilter === 'all' ? 'All' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="dark:bg-neutral-900 shadow-2xl border border-gray-200 dark:border-neutral-800 min-w-[150px] rounded-xl p-2">
+              <DropdownMenuItem onClick={() => setStatusFilter('all')} className="rounded-lg px-3 py-2 cursor-pointer">
+                All Status
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('active')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Active
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('suspended')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Suspended
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('unverified')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Unverified
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="bg-white dark:bg-neutral-900 border border-gray-100 dark:border-neutral-800 shadow-sm rounded-2xl h-12 px-4">
+                <Filter size={18} className="mr-2" />
+                Role: {roleFilter === 'all' ? 'All' : roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="dark:bg-neutral-900 shadow-2xl border border-gray-200 dark:border-neutral-800 min-w-[150px] rounded-xl p-2">
+              <DropdownMenuItem onClick={() => setRoleFilter('all')} className="rounded-lg px-3 py-2 cursor-pointer">
+                All Roles
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setRoleFilter('admin')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Admin
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setRoleFilter('user')} className="rounded-lg px-3 py-2 cursor-pointer">
+                User
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="bg-white dark:bg-neutral-900 border border-gray-100 dark:border-neutral-800 shadow-sm rounded-2xl h-12 px-4">
+                <Filter size={18} className="mr-2" />
+                Date: {dateFilter === 'all' ? 'All' : dateFilter.charAt(0).toUpperCase() + dateFilter.slice(1)}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="dark:bg-neutral-900 shadow-2xl border border-gray-200 dark:border-neutral-800 min-w-[150px] rounded-xl p-2">
+              <DropdownMenuItem onClick={() => setDateFilter('all')} className="rounded-lg px-3 py-2 cursor-pointer">
+                All Time
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateFilter('today')} className="rounded-lg px-3 py-2 cursor-pointer">
+                Today
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateFilter('week')} className="rounded-lg px-3 py-2 cursor-pointer">
+                This Week
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateFilter('month')} className="rounded-lg px-3 py-2 cursor-pointer">
+                This Month
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
