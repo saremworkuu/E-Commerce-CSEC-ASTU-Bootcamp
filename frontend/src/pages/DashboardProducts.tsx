@@ -9,7 +9,9 @@ import {
   Filter,
   Upload,
   Image as ImageIcon,
-  RotateCcw
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { 
@@ -43,10 +45,13 @@ const DashboardProducts: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [featuredFilter, setFeaturedFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const itemsPerPage = 10;
 
   // Form state
   const [formData, setFormData] = useState({
@@ -62,6 +67,8 @@ const DashboardProducts: React.FC = () => {
     try {
       const res = await axios.get(apiUrl('/products'));
       setProducts(res.data);
+      setTotalPages(Math.ceil(res.data.length / itemsPerPage));
+      setCurrentPage(1);
     } catch (err) {
       console.error('Failed to fetch products', err);
     }
@@ -107,6 +114,12 @@ const DashboardProducts: React.FC = () => {
     
     return matchesSearch && matchesCategory && matchesFeatured;
   });
+
+  // Paginated products
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleDelete = async (id: string | number) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
@@ -432,7 +445,7 @@ const DashboardProducts: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProducts.map((product: any) => (
+            {paginatedProducts.map((product: any) => (
               <TableRow key={product._id || product.id} className="border-gray-50 dark:border-neutral-800 hover:bg-gray-50/50 dark:hover:bg-neutral-800/50 transition-colors">
                 <TableCell className="pl-8">
                   <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 dark:bg-neutral-800 border border-gray-100 dark:border-neutral-800">
@@ -489,6 +502,37 @@ const DashboardProducts: React.FC = () => {
             ))}
           </TableBody>
         </Table>
+      
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="flex items-center gap-1"
+          >
+            <ChevronLeft size={16} />
+            Previous
+          </Button>
+          
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            Page {currentPage} of {totalPages}
+          </span>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="flex items-center gap-1"
+          >
+            Next
+            <ChevronRight size={16} />
+          </Button>
+        </div>
+      )}
       </div>
     </div>
   );

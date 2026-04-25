@@ -7,7 +7,9 @@ import {
   Truck, 
   CheckCircle, 
   Clock,
-  Filter
+  Filter,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { 
   Table, 
@@ -44,9 +46,12 @@ interface OrderData {
 const DashboardOrders: React.FC = () => {
   const [orders, setOrders] = useState<OrderData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 10;
+  const [loading, setLoading] = useState(true);
 
   const fetchOrders = async () => {
     try {
@@ -55,6 +60,8 @@ const DashboardOrders: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setOrders(res.data);
+      setTotalPages(Math.ceil(res.data.length / itemsPerPage));
+      setCurrentPage(1);
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
@@ -91,6 +98,12 @@ const DashboardOrders: React.FC = () => {
     
     return matchesSearch && matchesStatus && matchesDate;
   });
+
+  // Paginated orders
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const getStatusBadge = (status: OrderData['status']) => {
     switch (status) {
@@ -215,12 +228,12 @@ const DashboardOrders: React.FC = () => {
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-10 dark:text-white">Loading orders...</TableCell>
               </TableRow>
-            ) : filteredOrders.length === 0 ? (
+            ) : paginatedOrders.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-10 text-gray-500">No orders found.</TableCell>
               </TableRow>
             ) : (
-              filteredOrders.map((order) => (
+              paginatedOrders.map((order) => (
                 <TableRow key={order._id} className="border-gray-100 dark:border-neutral-800">
                   <TableCell className="font-mono text-sm font-bold dark:text-white">
                     #{order._id.slice(-6).toUpperCase()}
@@ -272,6 +285,37 @@ const DashboardOrders: React.FC = () => {
             )}
           </TableBody>
         </Table>
+      
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="flex items-center gap-1"
+          >
+            <ChevronLeft size={16} />
+            Previous
+          </Button>
+          
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            Page {currentPage} of {totalPages}
+          </span>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="flex items-center gap-1"
+          >
+            Next
+            <ChevronRight size={16} />
+          </Button>
+        </div>
+      )}
       </div>
     </div>
   );

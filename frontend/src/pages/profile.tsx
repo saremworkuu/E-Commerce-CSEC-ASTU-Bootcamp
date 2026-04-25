@@ -54,18 +54,26 @@ const Profile: React.FC = () => {
       const pendingProductId = localStorage.getItem('pending_add_to_cart');
       if (!pendingProductId) return;
       const redirectTo = localStorage.getItem('pending_add_redirect') || '/cart';
+      
+      console.log('🛒 Profile: Handling pending cart redirect');
+      console.log('🛒 Pending Product ID:', pendingProductId);
+      console.log('🛒 Redirect URL:', redirectTo);
+      console.log('🛒 Current pathname:', window.location.pathname);
+      
       localStorage.removeItem('pending_add_to_cart');
       localStorage.removeItem('pending_add_redirect');
       try {
         await addToCart(pendingProductId);
         // Force redirect to cart
         setTimeout(() => {
+          console.log('🛒 Profile: Redirecting to:', redirectTo);
           navigate(redirectTo, { replace: true });
         }, 100);
       } catch (err) {
         console.error('Failed to add pending item:', err);
         // Still redirect even if add to cart fails
         setTimeout(() => {
+          console.log('🛒 Profile: Redirecting to cart (fallback):', redirectTo);
           navigate(redirectTo, { replace: true });
         }, 100);
       }
@@ -83,12 +91,12 @@ const Profile: React.FC = () => {
     setLoadingOrders(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(apiUrl('/orders'), {
+      const res = await axios.get(apiUrl('/admin/orders'), {
         headers: { Authorization: `Bearer ${token}` }
       });
       setOrders(res.data);
-    } catch (err) {
-      console.error('Failed to fetch orders:', err);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
     } finally {
       setLoadingOrders(false);
     }

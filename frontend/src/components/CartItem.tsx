@@ -16,12 +16,24 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
   const { updateQuantity, removeFromCart } = useCart();
 
   const resolveItemId = () => {
-    if (item.id) return String(item.id);
+    console.log('🗑️ CartItem: Resolving ID for item:', item);
+    
+    // First try the id field (set by Cart component)
+    if (item.id) {
+      console.log('🗑️ CartItem: Using item.id:', item.id);
+      return String(item.id);
+    }
+    
+    // Then try productId field
     if (item.productId) {
-      return typeof item.productId === 'object'
+      const productIdStr = typeof item.productId === 'object'
         ? String(item.productId._id || item.productId.id || item.productId)
         : String(item.productId);
+      console.log('🗑️ CartItem: Using productId:', productIdStr);
+      return productIdStr;
     }
+    
+    console.log('🗑️ CartItem: No ID found!');
     return '';
   };
 
@@ -51,7 +63,11 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">${item.price.toFixed(2)}</p>
           </div>
           <button
-            onClick={() => removeFromCart(itemId)}
+            onClick={() => {
+              console.log('🗑️ CartItem: Remove button clicked');
+              console.log('🗑️ CartItem: ItemId being passed:', itemId);
+              removeFromCart(itemId);
+            }}
             className="text-gray-400 hover:text-red-500 transition-colors"
           >
             <Trash2 size={18} />

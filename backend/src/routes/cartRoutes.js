@@ -54,19 +54,50 @@ router.post('/add', Protect, async (req, res) => {
 // ================= REMOVE ITEM =================
 router.delete('/remove/:productId', Protect, async (req, res) => {
   try {
+    console.log('🗑️ Cart: Remove request - ProductId:', req.params.productId);
+    console.log('🗑️ Cart: User ID:', req.user.id);
+    
     const cart = await Cart.findOne({ userId: req.user.id });
 
-    if (!cart) return res.status(404).json({ message: 'Cart not found' });
+    if (!cart) {
+      console.log(' Cart: Cart not found');
+      return res.status(404).json({ message: 'Cart not found' });
+    }
 
-    cart.items = cart.items.filter(
-      item => item.productId.toString() !== req.params.productId
-    );
+    const originalLength = cart.items.length;
+    console.log(' Cart: Items before filter:', originalLength);
+    console.log(' Cart: Current cart items:', cart.items.map(item => ({
+      productId: item.productId,
+      productIdType: typeof item.productId,
+      productIdString: item.productId.toString()
+    })));
+    
+    // More robust comparison - handle both string and ObjectId
+    cart.items = cart.items.filter(item => {
+      const itemProductIdStr = item.productId.toString();
+      const requestProductIdStr = req.params.productId.toString();
+      const shouldKeep = itemProductIdStr !== requestProductIdStr;
+      
+      console.log(' Cart: Comparing', {
+        itemProductId: itemProductIdStr,
+        requestProductId: requestProductIdStr,
+        shouldKeep: shouldKeep
+      });
+      
+      return shouldKeep;
+    });
+
+    const newLength = cart.items.length;
+    console.log(' Cart: Items after filter:', newLength);
+    console.log(' Cart: Item removed:', originalLength !== newLength);
 
     await cart.save();
 
     const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name price imageUrl stock');
+    console.log(' Cart: Returning updated cart');
     res.json(populatedCart);
   } catch (error) {
+    console.error('🗑️ Cart: Remove error:', error);
     res.status(500).json({ message: error.message });
   }
 });

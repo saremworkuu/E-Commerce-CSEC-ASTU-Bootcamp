@@ -14,7 +14,9 @@ import {
   UserCheck,
   UserMinus,
   RotateCcw,
-  Filter
+  Filter,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { 
   Table, 
@@ -53,6 +55,9 @@ const DashboardUsers: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 10;
   const navigate = useNavigate();
 
   const fetchUsers = async () => {
@@ -74,6 +79,8 @@ const DashboardUsers: React.FC = () => {
       }));
       
       setUsers(mappedUsers);
+      setTotalPages(Math.ceil(mappedUsers.length / itemsPerPage));
+      setCurrentPage(1);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Failed to load users');
@@ -153,6 +160,12 @@ const DashboardUsers: React.FC = () => {
     
     return matchesSearch && matchesStatus && matchesRole && matchesDate;
   });
+
+  // Paginated users
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="space-y-8">
@@ -263,12 +276,12 @@ const DashboardUsers: React.FC = () => {
                    </div>
                 </TableCell>
               </TableRow>
-            ) : filteredUsers.length === 0 ? (
+            ) : paginatedUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-20 text-gray-500">No users found.</TableCell>
               </TableRow>
             ) : (
-              filteredUsers.map((user) => (
+              paginatedUsers.map((user) => (
                 <TableRow key={user.id} className="border-gray-100 dark:border-neutral-800 group hover:bg-gray-50/50 dark:hover:bg-neutral-800/30 transition-colors">
                   <TableCell className="pl-8 py-5">
                     <div className="flex items-center space-x-4">
@@ -359,6 +372,37 @@ const DashboardUsers: React.FC = () => {
             )}
           </TableBody>
         </Table>
+      
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="flex items-center gap-1"
+          >
+            <ChevronLeft size={16} />
+            Previous
+          </Button>
+          
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            Page {currentPage} of {totalPages}
+          </span>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="flex items-center gap-1"
+          >
+            Next
+            <ChevronRight size={16} />
+          </Button>
+        </div>
+      )}
       </div>
     </div>
   );

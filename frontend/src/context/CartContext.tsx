@@ -174,9 +174,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ================= REMOVE =================
   const removeFromCart = async (productId: string) => {
     const token = getToken();
+    const idStr = String(productId);
+    
+    console.log('🗑️ Cart: Removing item:', productId);
+    console.log('🗑️ Cart: Item ID string:', idStr);
 
     if (!token) {
-      const idStr = String(productId);
+      console.log('🗑️ Cart: No token, removing locally');
       const nextCart = cart.filter(
         (item) => resolveProductId(item.productId) !== idStr
       );
@@ -184,15 +188,16 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       persistLocalCart(user?.email, nextCart);
       toast.info('Item removed from cart');
       return;
-
     }
 
     try {
+      console.log('🗑️ Cart: Making API call to remove item');
       const res = await axios.delete(
         apiUrl(`/cart/remove/${productId}`),
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      console.log('🗑️ Cart: Remove response:', res.data);
       const nextCart = normalizeCart(res.data.items || []);
       setCart(nextCart);
       persistLocalCart(user?.email, nextCart);

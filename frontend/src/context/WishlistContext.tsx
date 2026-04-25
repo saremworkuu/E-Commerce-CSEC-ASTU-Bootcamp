@@ -57,17 +57,23 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const refreshWishlist = async () => {
     const token = getToken();
     
+    console.log('❤️ Wishlist: Refreshing wishlist');
+    console.log('❤️ Wishlist: Has token:', !!token);
+    
     if (!token) {
       const localList = readLocalWishlist(user?.email);
+      console.log('❤️ Wishlist: Using local wishlist:', localList);
       setWishlist(localList);
       return;
     }
 
     try {
+      console.log('❤️ Wishlist: Fetching from backend');
       const res = await axios.get(apiUrl('/wishlist'), {
         headers: { Authorization: `Bearer ${token}` }
       });
       
+      console.log('❤️ Wishlist: Backend response:', res.data);
       const backendProducts = res.data || [];
       const nextList = backendProducts.map((p: any) => {
         const id = Number(resolveProductId(p));
@@ -75,10 +81,12 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return found || p;
       }).filter((item: any) => item && item.id);
       
+      console.log('❤️ Wishlist: Processed list:', nextList);
       setWishlist(nextList);
       persistLocalWishlist(user?.email, nextList);
     } catch (err) {
-      console.error('Wishlist load error:', err);
+      console.error('❤️ Wishlist: Load error:', err);
+      console.error('❤️ Wishlist: Error response:', err.response?.data);
     }
   };
 
@@ -88,6 +96,11 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addToWishlist = async (product: Product) => {
     const token = getToken();
+    const productId = Number(product.id || (product as any)._id);
+    
+    console.log('❤️ Wishlist: Adding product:', product);
+    console.log('❤️ Wishlist: Product ID:', productId);
+    console.log('❤️ Wishlist: Has token:', !!token);
 
     if (!token) {
        setWishlist((prev) => {
@@ -108,13 +121,16 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return nextList;
       });
 
-      await axios.post(
+      console.log('❤️ Wishlist: Making API call with productId:', productId);
+      const res = await axios.post(
         apiUrl('/wishlist/add'),
-        { productId: product.id }, // Assume passing the int or string ID the backend accepts
+        { productId: productId }, // Send as Number
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      console.log('❤️ Wishlist: API response:', res.data);
     } catch (err) {
-      console.error('Add to wishlist error:', err);
+      console.error('❤️ Wishlist: Add error:', err);
+      console.error('❤️ Wishlist: Error response:', err.response?.data);
       // Optional: rollback on fail
       refreshWishlist();
     }

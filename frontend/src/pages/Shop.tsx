@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import { ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '../components/ui/button';
 import { apiUrl } from '../lib/apiService';
 import { products as initialProducts } from '../data/products';
 
@@ -13,12 +14,17 @@ const Shop: React.FC = () => {
   const urlSearch = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(urlSearch);
   const [sortBy, setSortBy] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(apiUrl('/products'));
         setProducts(res.data);
+        setTotalPages(Math.ceil(res.data.length / itemsPerPage));
+        setCurrentPage(1);
       } catch (err) {
         console.error('Failed to fetch home products:', err);
       } finally {
@@ -61,6 +67,12 @@ const Shop: React.FC = () => {
 
     return result;
   }, [products, activeCategory, searchQuery, sortBy]);
+
+  // Paginated products
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -142,9 +154,9 @@ const Shop: React.FC = () => {
             </div>
           ))}
         </div>
-      ) : filteredProducts.length > 0 ? (
+      ) : paginatedProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredProducts.map(product => (
+          {paginatedProducts.map(product => (
             <ProductCard key={product.id || (product as any)._id} product={product} />
           ))}
         </div>
@@ -160,6 +172,37 @@ const Shop: React.FC = () => {
           >
             Clear all filters
           </button>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-8">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="flex items-center gap-1"
+          >
+            <ChevronLeft size={16} />
+            Previous
+          </Button>
+          
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            Page {currentPage} of {totalPages}
+          </span>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="flex items-center gap-1"
+          >
+            Next
+            <ChevronRight size={16} />
+          </Button>
         </div>
       )}
     </div>

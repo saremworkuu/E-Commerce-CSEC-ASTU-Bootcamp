@@ -20,19 +20,51 @@ const ProductDetails: React.FC = () => {
   const [loading, setLoading] = useState(!initialProduct);
 
   const handleAddToCart = () => {
+    console.log('🛒 ProductDetails: Add to cart clicked');
+    console.log('🛒 Product ID:', product._id || product.id);
+    console.log('🛒 Is authenticated:', isAuthenticated);
+    
     if (!product) return;
     if (!isAuthenticated) {
+      console.log('🛒 ProductDetails: Not authenticated, redirecting to login');
       localStorage.setItem('pending_add_to_cart', String(product._id || product.id));
       localStorage.setItem('pending_add_redirect', window.location.pathname);
       navigate('/login');
       return;
     }
+    
+    console.log('🛒 ProductDetails: Adding to cart...');
     addToCart(String(product._id || product.id));
     
     // Redirect to checkout after adding to cart
     setTimeout(() => {
+      console.log('🛒 ProductDetails: Redirecting to cart');
       navigate('/cart');
     }, 500);
+  };
+
+  const handleBuyNow = () => {
+    console.log('🛒 ProductDetails: Buy Now clicked');
+    console.log('🛒 Product ID:', product._id || product.id);
+    console.log('🛒 Is authenticated:', isAuthenticated);
+    
+    if (!product) return;
+    if (!isAuthenticated) {
+      console.log('🛒 ProductDetails: Not authenticated, redirecting to login');
+      localStorage.setItem('pending_add_to_cart', String(product._id || product.id));
+      localStorage.setItem('pending_add_redirect', '/cart'); // Direct to cart after login
+      navigate('/login');
+      return;
+    }
+    
+    console.log('🛒 ProductDetails: Adding to cart for Buy Now...');
+    addToCart(String(product._id || product.id));
+    
+    // Immediately redirect to cart for Buy Now
+    setTimeout(() => {
+      console.log('🛒 ProductDetails: Redirecting to cart (Buy Now)');
+      navigate('/cart');
+    }, 300);
   };
 
 
@@ -147,7 +179,7 @@ const ProductDetails: React.FC = () => {
             </Button>
             <Button
               variant="outline"
-              onClick={() => navigate('/profile')}
+              onClick={handleBuyNow}
               className="w-full py-7 border-2 border-black dark:border-white text-black dark:text-white font-bold rounded-2xl hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all flex items-center justify-center space-x-3 h-auto"
             >
               <CreditCard size={20} />
