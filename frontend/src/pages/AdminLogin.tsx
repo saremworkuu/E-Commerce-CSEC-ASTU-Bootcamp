@@ -19,16 +19,30 @@ const AdminLogin: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    console.log('🔍 Frontend Login Debug');
+    console.log('🔍 Email being sent:', email);
+    console.log('🔍 Password being sent:', password ? '***' : 'MISSING');
+    console.log('🔍 API URL:', apiUrl('/auth/login'));
+    
     try {
       const res = await axios.post(apiUrl('/auth/login'), { email, password });
       
+      console.log('🔍 Login response:', res.data);
+      console.log('🔍 User role:', res.data.user?.role);
+      
       if (res.data.user.role === 'admin') {
+        console.log('🔍 Admin login successful, redirecting...');
         login(res.data.user.email, 'admin', res.data.token, res.data.user.fullName, res.data.user._id);
         navigate('/dashboard');
       } else {
+        console.log('🔍 Not admin role:', res.data.user?.role);
         setError('Access Denied. You do not have admin permissions.');
       }
     } catch (err: any) {
+      console.error('🔍 Login error:', err);
+      console.error('🔍 Error response:', err.response?.data);
+      console.error('🔍 Error status:', err.response?.status);
       setError(err.response?.data?.message || 'Invalid admin credentials');
     }
   };

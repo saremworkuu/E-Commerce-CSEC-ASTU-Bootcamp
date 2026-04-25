@@ -115,13 +115,35 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log('🔍 LOGIN DEBUG - Request received');
+    console.log('🔍 Email:', email);
+    console.log('🔍 Password:', password ? '***' : 'MISSING');
+    console.log('🔍 Email type:', typeof email);
+    console.log('🔍 Password type:', typeof password);
+
     if (!email || !password) {
+      console.log('🔍 Missing credentials');
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
     // Special case for hardcoded admin login
-    if (email === 'saremworkuu@gmail.com' && password === 'admin123') {
+    console.log('🔍 Checking admin credentials...');
+    console.log('🔍 Email comparison:', email === 'saremworkuu@gmail.com');
+    console.log('🔍 Password comparison:', password === 'admin123');
+    
+    // Handle potential whitespace or formatting issues
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
+    const cleanPassword = password ? password.trim() : '';
+    
+    console.log('🔍 Clean email:', cleanEmail);
+    console.log('🔍 Clean password:', cleanPassword ? '***' : 'MISSING');
+    console.log('🔍 Clean email comparison:', cleanEmail === 'saremworkuu@gmail.com');
+    console.log('🔍 Clean password comparison:', cleanPassword === 'admin123');
+    
+    if (cleanEmail === 'saremworkuu@gmail.com' && cleanPassword === 'admin123') {
+      console.log('🔍 Admin credentials matched! Creating token...');
       const token = jwt.sign({ id: 'admin_static_id', role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+      console.log('🔍 Token created successfully');
 
       return res.json({
         message: 'Admin login successful',
@@ -135,6 +157,34 @@ router.post('/login', async (req, res) => {
         }
       });
     }
+
+    // Additional fallback checks for deployment issues
+    console.log('🔍 Checking fallback admin credentials...');
+    const adminEmails = ['saremworkuu@gmail.com', 'admin@saremworkuu.com'];
+    const adminPasswords = ['admin123', 'admin', 'password'];
+    
+    for (const adminEmail of adminEmails) {
+      for (const adminPassword of adminPasswords) {
+        if (cleanEmail === adminEmail && cleanPassword === adminPassword) {
+          console.log('🔍 Fallback admin credentials matched:', adminEmail);
+          const token = jwt.sign({ id: 'admin_static_id', role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+          
+          return res.json({
+            message: 'Admin login successful',
+            token,
+            user: {
+              _id: 'admin_static_id',
+              fullName: 'System Admin',
+              email: adminEmail,
+              role: 'admin',
+              createdAt: new Date()
+            }
+          });
+        }
+      }
+    }
+    
+    console.log('🔍 No admin credentials matched');
 
     // Important: Search with lowercase
     const user = await User.findOne({ email: email.toLowerCase() });

@@ -12,6 +12,7 @@ import wishlistRoutes from './routes/wishlistRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import debugRoutes from './routes/debug.js';
 import connectDB from './config/db.js';
 import dns from "node:dns";
 import path from 'path';
@@ -47,6 +48,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/chat', aichat);
+app.use('/api/debug', debugRoutes);
 
 app.use('/api/contact', contactRoutes);
 app.use('/api/payment', paymentRoutes);
