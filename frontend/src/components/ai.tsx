@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { MessageCircle, X, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import { apiUrl } from '../lib/apiService';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -99,7 +100,7 @@ const ChatAssistant: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch(apiUrl('/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: newMessages }),
