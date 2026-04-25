@@ -44,30 +44,47 @@ const DashboardUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const fetchUsers = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(apiUrl('/admin/users'), {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      // Map backend fields to frontend interface
-      const mappedUsers = res.data.map((u: any) => ({
-        id: u._id,
-        name: u.fullName || 'No Name',
-        email: u.email,
-        role: u.role || 'user',
-        joinedDate: new Date(u.createdAt).toLocaleDateString(),
-        status: u.isEmailConfirmed ? 'active' : 'inactive'
-      }));
-      
-      setUsers(mappedUsers);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    } finally {
-      setLoading(false);
+const fetchUsers = async () => {
+  try {
+    const token = localStorage.getItem('token');
+
+    const res = await axios.get(apiUrl('/admin/users'), {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    console.log("FULL RESPONSE:", res.data);
+
+    // 🔥 HANDLE ALL POSSIBLE BACKEND FORMATS
+    let usersData = [];
+
+    if (Array.isArray(res.data)) {
+      usersData = res.data;
+    } else if (Array.isArray(res.data.users)) {
+      usersData = res.data.users;
+    } else if (Array.isArray(res.data.data)) {
+      usersData = res.data.data;
+    } else {
+      console.error("Unexpected API format:", res.data);
+      return;
     }
-  };
+
+    const mappedUsers = usersData.map((u: any) => ({
+      id: u._id,
+      name: u.fullName || 'No Name',
+      email: u.email,
+      role: u.role || 'user',
+      joinedDate: new Date(u.createdAt).toLocaleDateString(),
+      status: u.isEmailVerified ? 'active' : 'inactive'
+    }));
+
+    setUsers(mappedUsers);
+
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchUsers();

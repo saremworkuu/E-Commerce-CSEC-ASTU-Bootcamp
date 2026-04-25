@@ -3,7 +3,7 @@ const rawApiBase = envApiBase || '/api';
 
 export const apiBase = rawApiBase.endsWith('/api') ? rawApiBase : `${rawApiBase}/api`;
 
-export const apiUrl = (path: string) => {
+export const apiUrl = (path) => {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   return `${apiBase}${normalizedPath}`;
 };

@@ -1,131 +1,228 @@
-'use client'; // if using Next.js, otherwise remove for CRA/Vite
 
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { MessageCircle, X, Send } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
 
-const AiAssistant: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const ChatAssistant: React.FC = () => {
+  const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { theme } = useTheme();
+
+  const chatRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto scroll to bottom
+  const renderMessageContent = (content: string) =>
+    content.split(/(\/contact|\bcontact page\b)/gi).map((segment, index) => {
+      if (/^\/contact$/i.test(segment)) {
+        return (
+          <Link
+            key={index}
+            to="/contact"
+            className="text-sky-500 underline underline-offset-2 hover:text-sky-600"
+          >
+            /contact
+          </Link>
+        );
+      }
+
+      if (/^contact page$/i.test(segment)) {
+        return (
+          <Link
+            key={index}
+            to="/contact"
+            className="text-sky-500 underline underline-offset-2 hover:text-sky-600"
+          >
+            contact page
+          </Link>
+        );
+      }
+
+      return <span key={index}>{segment}</span>;
+    });
+
+  // 🔥 Auto scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Welcome message
+  // 🔥 Welcome message
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (open && messages.length === 0) {
       setMessages([
         {
           role: 'assistant',
-          content: "Hi! 👋 I'm your AI shopping assistant. Ask me anything about our products, prices, shipping, or what this website is about!",
+          content:
+            "👋 Hi! I'm your AI shopping assistant. Ask me about products, prices, or this website!",
         },
       ]);
     }
-  }, [isOpen]);
+  }, [open]);
 
+  // 🔥 Close when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (chatRef.current && !chatRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () =>
+      document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  // 🔥 Send message (CONNECTED TO YOUR BACKEND)
   const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || loading) return;
 
-    const userMessage: Message = { role: 'user', content: input.trim() };
+    const userMessage: Message = {
+      role: 'user',
+      content: input.trim(),
+    };
+
     const newMessages = [...messages, userMessage];
+
     setMessages(newMessages);
     setInput('');
-    setIsLoading(true);
+    setLoading(true);
 
     try {
-      const response = await fetch('/api/ai-chat', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: newMessages,        // send full history
-          // You can add more context if needed
-        }),
+        body: JSON.stringify({ messages: newMessages }),
       });
 
-      if (!response.ok) throw new Error('Failed to get response');
+      const data = await res.json();
 
-      const data = await response.json();
-      const assistantMessage: Message = {
+      const aiMessage: Message = {
         role: 'assistant',
-        content: data.reply || "Sorry, I couldn't process that right now.",
+        content:
+          data.reply ||
+          "⚠️ I couldn't find anything. Try another product.",
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error(error);
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: '❌ Something went wrong. Please try again later.' },
+        {
+          role: 'assistant',
+          content:
+            '❌ Server error. Please try again or contact support.',
+        },
       ]);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
     <>
-      {/* Floating AI Bubble - Bottom Right on every page */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center w-16 h-16 transition-all hover:scale-110 active:scale-95"
-        title="AI Assistant"
+      {/* 🔵 Floating Button */}
+      <motion.button
+        onClick={() => setOpen((prev) => !prev)}
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        whileHover={{ scale: 1.15 }}
+        whileTap={{ scale: 0.9 }}
+        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-2xl transition-colors ${
+          theme === 'dark'
+            ? 'bg-white text-black shadow-black/20'
+            : 'bg-slate-900 text-white shadow-slate-900/20'
+        }`}
       >
-        <span className="text-4xl">🤖</span>
-      </button>
+        <span className={`absolute inset-0 rounded-full ${theme === 'dark' ? 'bg-white/10' : 'bg-slate-900/10'} animate-ping`} />
+        <MessageCircle size={22} className="relative z-10" />
+      </motion.button>
 
-      {/* Chat Modal */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg h-[85vh] md:h-[620px] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-            
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">🤖</span>
-                <div>
-                  <h2 className="font-semibold text-lg">AI Shopping Assistant</h2>
-                  <p className="text-xs opacity-90">Powered by Gemini • Knows our products</p>
-                </div>
+      {/* 🔵 Chat Window */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            ref={chatRef}
+            initial={{ opacity: 0, y: 80, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            transition={{ duration: 0.35 }}
+            className={`fixed bottom-20 right-6 w-95 h-130 rounded-3xl overflow-hidden shadow-2xl border backdrop-blur-xl flex flex-col z-50 ${
+              theme === 'dark'
+                ? 'bg-slate-950/95 border-white/10'
+                : 'bg-white/95 border-slate-200'
+            }`}
+          >
+            {/* 🔴 Header */}
+            <div className={`flex justify-between items-center px-5 py-4 ${
+              theme === 'dark'
+                ? 'bg-slate-900 text-white'
+                : 'bg-linear-to-r from-slate-900 to-black text-white'
+            }`}
+            >
+              <div>
+                <h2 className="text-sm font-semibold">
+                  LuxeCart Shopping Assistant
+                </h2>
+                <p className={`text-[11px] ${theme === 'dark' ? 'text-slate-300' : 'text-gray-300'}`}>
+                  Get response within a second
+                </p>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-2xl hover:bg-white/20 w-9 h-9 flex items-center justify-center rounded-xl transition"
-              >
-                ✕
+              <button onClick={() => setOpen(false)}>
+                <X size={18} className={theme === 'dark' ? 'text-white' : 'text-white'} />
               </button>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 p-6 overflow-y-auto bg-gray-50 space-y-5">
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            {/* 🟢 Messages */}
+            <div className={`flex-1 p-4 overflow-y-auto space-y-3 ${
+              theme === 'dark'
+                ? 'bg-linear-to-b from-slate-900 to-slate-950'
+                : 'bg-linear-to-b from-gray-50 to-white'
+            }`}>
+              {messages.map((msg, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`flex ${
+                    msg.role === 'user'
+                      ? 'justify-end'
+                      : 'justify-start'
+                  }`}
                 >
                   <div
-                    className={`max-w-[85%] px-5 py-3.5 rounded-3xl text-[15px] leading-relaxed shadow-sm ${
+                    className={`px-4 py-2 text-sm max-w-[75%] rounded-2xl shadow-sm ${
                       msg.role === 'user'
-                        ? 'bg-violet-600 text-white'
-                        : 'bg-white border border-gray-200 text-gray-800'
+                        ? theme === 'dark'
+                          ? 'bg-slate-100 text-slate-950 rounded-br-none shadow-slate-800/10'
+                          : 'bg-slate-900 text-white rounded-br-none shadow-slate-900/10'
+                        : theme === 'dark'
+                          ? 'bg-slate-800 text-slate-100 rounded-bl-none shadow-slate-900/10'
+                          : 'bg-white border text-gray-800 rounded-bl-none shadow-slate-200/50'
                     }`}
                   >
-                    {msg.content}
+                    {renderMessageContent(msg.content)}
                   </div>
-                </div>
+                </motion.div>
               ))}
 
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-white border border-gray-200 px-5 py-3 rounded-3xl flex items-center gap-2 text-sm">
-                    AI is thinking<span className="animate-pulse">...</span>
+              {/* 🔄 Typing */}
+              {loading && (
+                <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.1s]"></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
                   </div>
                 </div>
               )}
@@ -133,32 +230,39 @@ const AiAssistant: React.FC = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area */}
-            <div className="p-4 border-t bg-white">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                  placeholder="Ask about products or the website..."
-                  className="flex-1 border border-gray-300 focus:border-violet-500 rounded-3xl px-6 py-4 text-sm outline-none"
-                  disabled={isLoading}
-                />
-                <button
-                  onClick={sendMessage}
-                  disabled={isLoading || !input.trim()}
-                  className="bg-violet-600 hover:bg-violet-700 disabled:bg-gray-300 text-white px-8 rounded-3xl font-medium transition"
-                >
-                  Send
-                </button>
-              </div>
+            {/* 🔵 Input */}
+            <div className={`p-3 border-t flex items-center gap-2 ${
+              theme === 'dark' ? 'border-slate-700 bg-slate-950' : 'border-gray-200 bg-white'
+            }`}>
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') sendMessage();
+                }}
+                placeholder="Ask about products..."
+                className={`flex-1 px-4 py-2 border rounded-full text-sm focus:outline-none focus:ring-2 ${
+                  theme === 'dark'
+                    ? 'border-slate-700 bg-slate-900 text-white focus:ring-slate-400'
+                    : 'border-gray-300 bg-white text-slate-950 focus:ring-black'
+                }`}
+              />
+
+              <motion.button
+                onClick={sendMessage}
+                whileTap={{ scale: 0.9 }}
+                className={`p-2 rounded-full transition-colors ${
+                  theme === 'dark' ? 'bg-white text-slate-950' : 'bg-slate-900 text-white'
+                }`}
+              >
+                <Send size={16} />
+              </motion.button>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
 
-export default AiAssistant;
+export default ChatAssistant;

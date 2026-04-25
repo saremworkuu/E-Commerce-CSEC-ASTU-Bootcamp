@@ -83,13 +83,14 @@ const Cart: React.FC = () => {
 
   // Map raw cart items to fully hydrated product items
   const populatedCart = cart.map(item => {
-    // Extract ID safely from string or object
-    const productId = typeof item.productId === 'object' 
-      ? (item.productId._id || item.productId.id) 
+    // Extract ID safely from string or object, guarding against null values
+    const productId = item.productId && typeof item.productId === 'object'
+      ? String(item.productId._id || item.productId.id || item.productId)
       : item.productId;
-    
+    const idStr = String(productId ?? item.id ?? '');
+
     // 1. Try to find in local dummy products first
-    const matchedDummy = products.find(p => String(p.id) === String(productId));
+    const matchedDummy = products.find(p => String(p.id) === idStr);
     
     // 2. If it's a real database product, it might have data nested in the cart item
     const productData = item.productId && typeof item.productId === 'object' ? item.productId : null;
@@ -99,7 +100,7 @@ const Cart: React.FC = () => {
       name: matchedDummy?.name || productData?.name || (item as any).name || 'Product',
       price: matchedDummy?.price || productData?.price || (item as any).price || 0,
       image: matchedDummy?.image || productData?.imageUrl || productData?.image || (item as any).imageUrl || (item as any).image || '',
-      id: String(productId),
+      id: idStr,
     };
   });
 

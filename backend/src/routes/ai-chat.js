@@ -1,3 +1,4 @@
+
 // routes/ai-chat.js
 import Groq from "groq-sdk";
 import "dotenv/config";
@@ -26,7 +27,7 @@ const aiChat = async (req, res) => {
     if (!aboutDoc) {
       aboutDoc = {
         content:
-          "This is a modern e-commerce platform offering premium products with excellent service and fast delivery.",
+          "This is a modern e-commerce platform offering premium products with excellent service and fast delivery. and Also we deliver our products worldwide with free shipping on orders over $50. Our mission is to provide a seamless shopping experience with a wide range of high-quality products at competitive prices.",
       };
     }
 
@@ -72,8 +73,11 @@ ${relevantProducts
     // ==================== SYSTEM PROMPT ====================
     const systemPrompt = `You are a friendly, helpful, and enthusiastic AI shopping assistant.
 Use ONLY the provided context to answer accurately.
-Be concise, polite, and natural. Suggest relevant products when it makes sense.
-When the user asks "what is the role of this website" or similar, base your answer on the ABOUT THE WEBSITE section.`;
+please give short and concise answers. avoid long explanations.
+Never answer for general questions! if user ask just say that politely and don't explain about what they asked. Always suggest relevant products related to their asked question when it makes sense. Keep answers concise and engaging to avoid boring the user.
+Please don't answers for general questions! answer only for product related and about our website.even user asks about general questions say I'm shoping assistant for this site I can help you find products and tell you about what our website do
+Be concise, polite, and natural and short answer user may bored. Suggest relevant products when it makes sense.Please answer short answer don't make the text long please!!.
+When the user asks "what is the role of this website" or similar, base your answer on the ABOUT THE WEBSITE section. After every response, end with a short invitation to visit our Contact page at /contact for any questions or inquiries. Use the exact route /contact in the reply.`;
 
     // ==================== GROQ GENERATION ====================
     const completion = await groq.chat.completions.create({
