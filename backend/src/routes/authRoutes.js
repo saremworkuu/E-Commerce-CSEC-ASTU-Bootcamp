@@ -96,7 +96,8 @@ router.post('/verify-email', async (req, res) => {
     user.emailVerificationExpires = undefined;
     await user.save();
 
-    const authToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const jwtSecret = process.env.JWT_SECRET || 'luxecart-admin-secret-fallback-2024';
+    const authToken = jwt.sign({ id: user._id, role: user.role }, jwtSecret, { expiresIn: '7d' });
 
     res.json({
       message: 'Email verified successfully',
@@ -142,7 +143,14 @@ router.post('/login', async (req, res) => {
     
     if (cleanEmail === 'saremworkuu@gmail.com' && cleanPassword === 'admin123') {
       console.log('🔍 Admin credentials matched! Creating token...');
-      const token = jwt.sign({ id: 'admin_static_id', role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+      console.log('🔍 JWT_SECRET exists:', !!process.env.JWT_SECRET);
+      console.log('🔍 JWT_SECRET length:', process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0);
+      
+      // Fallback JWT secret for deployment issues
+      const jwtSecret = process.env.JWT_SECRET || 'luxecart-admin-secret-fallback-2024';
+      console.log('🔍 Using JWT secret:', jwtSecret ? jwtSecret.substring(0, 10) + '...' : 'MISSING');
+      
+      const token = jwt.sign({ id: 'admin_static_id', role: 'admin' }, jwtSecret, { expiresIn: '7d' });
       console.log('🔍 Token created successfully');
 
       return res.json({
@@ -167,7 +175,8 @@ router.post('/login', async (req, res) => {
       for (const adminPassword of adminPasswords) {
         if (cleanEmail === adminEmail && cleanPassword === adminPassword) {
           console.log('🔍 Fallback admin credentials matched:', adminEmail);
-          const token = jwt.sign({ id: 'admin_static_id', role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+          const jwtSecret = process.env.JWT_SECRET || 'luxecart-admin-secret-fallback-2024';
+          const token = jwt.sign({ id: 'admin_static_id', role: 'admin' }, jwtSecret, { expiresIn: '7d' });
           
           return res.json({
             message: 'Admin login successful',
@@ -197,7 +206,8 @@ router.post('/login', async (req, res) => {
     // ** Email Verification Block Removed **
     // The user can now log in without being blocked by unverified email.
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const jwtSecret = process.env.JWT_SECRET || 'luxecart-admin-secret-fallback-2024';
+    const token = jwt.sign({ id: user._id, role: user.role }, jwtSecret, { expiresIn: '7d' });
 
     res.json({ 
       message: 'Login successful',
