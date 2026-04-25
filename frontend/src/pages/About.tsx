@@ -1,8 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Shield, Zap, Globe, Heart } from 'lucide-react';
 
 const About: React.FC = () => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Cinematic image sequence - 4 images telling a story
+  const cinematicImages = [
+    {
+      src: "https://i.pinimg.com/736x/ad/ba/8b/adba8bb4f7893ef79b0f4ac2bd831bf1.jpg",
+      alt: "Raw Materials - The Foundation"
+    },
+    {
+      src: "https://i.pinimg.com/1200x/9d/b3/99/9db399b3494428f3a047788414e139dc.jpg", 
+      alt: "Artisanship - Hands at Work"
+    },
+    {
+      src: "https://i.pinimg.com/736x/5e/65/1b/5e651bf526f15aa39bad99da87024fd6.jpg",
+      alt: "Craftsmanship - Detail Shots"
+    },
+    {
+      src: "https://i.pinimg.com/736x/14/17/29/1417293471e7cff07896adb60993598d.jpg",
+      alt: "Culture & Identity - Hero Image"
+    }
+  ];
+
+  // Auto-advance through images with fast cinematic timing
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % cinematicImages.length);
+    }, 1500); // 1.5 seconds per image for fast cinematic pacing
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white dark:bg-black transition-colors duration-300">
       {/* Hero Section */}
@@ -60,12 +91,45 @@ const About: React.FC = () => {
             viewport={{ once: true }}
             className="relative aspect-square rounded-[3rem] overflow-hidden shadow-2xl"
           >
-            <img 
-              src="https://i.pinimg.com/1200x/a8/ea/13/a8ea1364ebbba07aff1d8aa32b144ba0.jpg" 
-              alt="Quality Materials" 
-              className="w-full h-full object-cover scale-110 hover:scale-100 transition-transform duration-1000"
-              referrerPolicy="no-referrer"
-            />
+            {/* Cinematic Image Sequence */}
+            <div className="relative w-full h-full">
+              {cinematicImages.map((image, index) => (
+                <motion.img
+                  key={index}
+                  src={image.src}
+                  alt={image.alt}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  initial={{ opacity: 0, scale: 1.1 }}
+                  animate={{
+                    opacity: currentImageIndex === index ? 1 : 0,
+                    scale: currentImageIndex === index ? 1 : 1.05,
+                  }}
+                  transition={{
+                    opacity: { duration: 0.8, ease: "easeInOut" },
+                    scale: { duration: 1.5, ease: "easeInOut" }
+                  }}
+                />
+              ))}
+              
+              {/* Subtle overlay for cinematic feel */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none" />
+              
+              {/* Progress indicators */}
+              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                {cinematicImages.map((_, index) => (
+                  <motion.div
+                    key={index}
+                    className="w-2 h-2 bg-white/60 rounded-full"
+                    animate={{
+                      width: currentImageIndex === index ? 24 : 8,
+                      backgroundColor: currentImageIndex === index ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)"
+                    }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                  />
+                ))}
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
