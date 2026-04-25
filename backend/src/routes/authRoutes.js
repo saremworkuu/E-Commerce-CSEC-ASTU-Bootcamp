@@ -120,7 +120,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Special case for hardcoded admin login
-    if (email === 'saremworluu@gmail.com' && password === 'admin123') {
+    if (email === 'saremworkuu@gmail.com' && password === 'admin123') {
       const token = jwt.sign({ id: 'admin_static_id', role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
       return res.json({
@@ -129,7 +129,7 @@ router.post('/login', async (req, res) => {
         user: {
           id: 'admin_static_id',
           fullName: 'System Admin',
-          email: 'admin@luxecart.com',
+          email: 'saremworkuu@gmail.com',
           role: 'admin',
           createdAt: new Date()
         }
@@ -177,7 +177,7 @@ router.get('/me', Protect, async (req, res) => {
       return res.json({
         id: 'admin_static_id',
         fullName: 'System Admin',
-        email: 'admin@luxecart.com',
+        email: 'saremworkuu@gmail.com',
         role: 'admin',
         createdAt: new Date()
       });

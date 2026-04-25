@@ -32,7 +32,7 @@ connectDB();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Swagger docs
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));

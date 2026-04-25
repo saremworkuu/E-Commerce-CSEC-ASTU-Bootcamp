@@ -13,9 +13,16 @@ export const resolveImageUrl = (url: string) => {
   if (!url) return '';
   if (url.startsWith('http')) return url;
   
-  // If it's a local upload, we need the backend host (5000)
-  // because the frontend (3000) doesn't have an /uploads folder.
-  const backendHost = 'http://localhost:5000';
+  // For uploaded images, use the same base as API calls
+  // This works in both development and production
   const normalizedUrl = url.startsWith('/') ? url : `/${url}`;
-  return `${backendHost}${normalizedUrl}`;
+  
+  // If the URL starts with /uploads, we need to use the backend base
+  if (normalizedUrl.startsWith('/uploads')) {
+    // Remove the /api part for static files
+    const apiBaseWithoutApi = apiBase.replace('/api', '');
+    return `${apiBaseWithoutApi}${normalizedUrl}`;
+  }
+  
+  return normalizedUrl;
 };

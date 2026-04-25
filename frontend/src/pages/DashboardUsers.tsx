@@ -97,8 +97,19 @@ const DashboardUsers: React.FC = () => {
   };
 
   const handleEmailUser = (email: string) => {
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}`;
-    window.open(gmailUrl, '_blank');
+    console.log('🔍 Email clicked:', email);
+    
+    // Simple direct approach - use mailto for maximum compatibility
+    const mailtoUrl = `mailto:${email}`;
+    
+    // Open in new window/tab
+    window.open(mailtoUrl, '_blank');
+    
+    // Also try Gmail as backup
+    setTimeout(() => {
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`;
+      window.open(gmailUrl, '_blank');
+    }, 500);
   };
 
   const filteredUsers = users.filter(u => 
@@ -162,7 +173,13 @@ const DashboardUsers: React.FC = () => {
                       </div>
                       <div>
                         <p className="font-bold dark:text-white text-base">{user.name}</p>
-                        <p className="text-xs text-gray-500 font-medium">{user.email}</p>
+                        <button
+                          onClick={() => handleEmailUser(user.email)}
+                          className="text-xs text-gray-500 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors underline decoration-0 hover:underline cursor-pointer"
+                          title={`Send email to ${user.email}`}
+                        >
+                          {user.email}
+                        </button>
                       </div>
                     </div>
                   </TableCell>
@@ -205,11 +222,14 @@ const DashboardUsers: React.FC = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="dark:bg-neutral-900 shadow-2xl border border-gray-200 dark:border-neutral-800 min-w-[180px] rounded-2xl p-2">
                         <DropdownMenuLabel className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-widest text-gray-400">User Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onSelect={() => handleEmailUser(user.email)} className="rounded-xl px-3 py-2.5 cursor-pointer">
+                        <DropdownMenuItem 
+                          className="rounded-xl px-3 py-2.5 cursor-pointer"
+                          onClick={() => handleEmailUser(user.email)}
+                        >
                           <Mail size={16} className="mr-3 text-gray-400" />
                           <span className="font-medium">Email User</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild className="rounded-xl px-3 py-2.5 cursor-pointer">
+                        <DropdownMenuItem className="rounded-xl px-3 py-2.5 cursor-pointer">
                           <Link to={`/dashboard/users/edit/${user.id}`} className="flex items-center w-full">
                             <Edit size={16} className="mr-3 text-gray-400" />
                             <span className="font-medium">Edit Details</span>
